@@ -113,6 +113,20 @@ Se ejecuta **por fases con checkpoints** (ver `docs/CLAUDE_CODE_PROMPT_Migracion
       XAI persistida (HU-31/32) y fallback cold-start por especialidad, contact-requests
       (aceptar → consulta `en_revision`, HU-18), relevant-cases; `MlController` proxy
       (camelCase, n8n solo en alto/critico, fire-and-forget). Mocks de dev en `tools/mocks/`.
-- [ ] Fase 6 — Frontend: base y diseño.
-- [ ] Fase 7 — Frontend: features por portal.
-- [ ] Fase 8 — Cierre + despliegue.
+- [x] **Fase 6 — Frontend: base y diseño:** scaffold Angular 21 (standalone, signals, control
+      flow), Tailwind v4 + spartan/ui replicando tema/tipografía (Geist) del legacy 1:1,
+      TanStack Query, capa de API (`ApiService` + clientes generados desde OpenAPI), UI
+      compartida (badges de estado, stat cards, diálogos, selects).
+- [x] **Fase 7 — Frontend: features por portal:** 7 páginas portal médico, 4 portal abogado,
+      5 portal admin, ruteo completo por rol (`/doctor` `/lawyer` `/admin`) verificado contra
+      el backend real (build + checks visuales).
+- [ ] **Fase 8 — Cierre + despliegue** (en curso):
+  - [x] `AuditAspect` (AOP → `audit_logs` con ip/user-agent) sobre login/logout, CRUD de
+        consultas/documentos/usuarios, contact-requests y perfil (incluye detección de
+        firma HU-34: `update` documento → `sign` si queda `firmado`).
+  - [x] Storage Cloudinary en producción (config condicional + `ProfileService.uploadAvatar`).
+  - [x] `.env.example` (backend y frontend).
+  - [ ] Smoke tests.
+  - [ ] Regenerar cliente OpenAPI (si cambian DTOs/endpoints).
+  - [ ] Despliegue: Angular → Vercel, Spring Boot → Railway, FastAPI ML → Railway, Postgres →
+        Railway; variables de entorno y CORS.
