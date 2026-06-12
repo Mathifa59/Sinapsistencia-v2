@@ -1,0 +1,25 @@
+# Legacy (solo referencia, no se versiona en el repo nuevo)
+/_legacy/
+
+# Dependencias
+node_modules/
+
+# Backend (Maven / Spring Boot)
+/backend/target/
+
+# Frontend (Angular)
+/frontend/dist/
+/frontend/.angular/
+
+# Entornos: ignora todos los .env excepto los ejemplos versionados
+.env
+.env.*
+!.env.example
+!**/.env.example
+
+# IDE / OS
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db

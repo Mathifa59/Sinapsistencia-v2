@@ -1,0 +1,26 @@
+# Postgres 16 + pgvector para desarrollo local de Sinapsistencia.
+# Cloudinary (storage), FastAPI (ML) y n8n son servicios externos: no necesitan contenedor aqui.
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: sinapsistencia-postgres
+    environment:
+      POSTGRES_DB: sinapsistencia
+      POSTGRES_USER: sinapsistencia
+      POSTGRES_PASSWORD: sinapsistencia
+    # Host 5433 -> contenedor 5432: evita choque con un PostgreSQL nativo en 5432.
+    ports:
+      - "5433:5432"
+    volumes:
+      - sinapsistencia_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sinapsistencia -d sinapsistencia"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    labels:
+      # Permite que spring-boot-docker-compose detecte este servicio (imagen pgvector, no "postgres").
+      org.springframework.boot.service-connection: postgres
+
+volumes:
+  sinapsistencia_pgdata:

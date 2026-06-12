@@ -1,0 +1,62 @@
+spring:
+  application:
+    name: sinapsistencia
+
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5433/sinapsistencia}
+    username: ${DB_USER:sinapsistencia}
+    password: ${DB_PASSWORD:sinapsistencia}
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: false
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+  # Auto-arranca el Postgres de docker-compose.yml (raíz del monorepo) al correr la app en dev.
+  docker:
+    compose:
+      enabled: true
+      file: ../docker-compose.yml
+      lifecycle-management: start-only
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when-authorized
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+
+# Configuracion propia de la aplicacion (consumida en fases posteriores).
+app:
+  jwt:
+    secret: ${JWT_SECRET:change-me-in-prod-use-a-long-random-base64-secret-value-please}
+    expiration: ${JWT_EXPIRATION:86400000} # 24h en ms
+    cookie-secure: ${JWT_COOKIE_SECURE:false} # true en prod (HTTPS)
+  ml:
+    service-url: ${ML_SERVICE_URL:http://localhost:8000}
+  n8n:
+    webhook-url: ${N8N_WEBHOOK_URL:http://localhost:5678}
+  cloudinary:
+    url: ${CLOUDINARY_URL:}
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:4200}
