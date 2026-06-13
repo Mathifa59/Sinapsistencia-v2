@@ -1,0 +1,18 @@
+C:\Users\Usuario\OneDrive\Escritorio\Sinapsistencia v.2\ml-service\.venv\Lib\site-packages\pydantic\_internal\_fields.py:132: UserWarning: Field "model_version" in RiskAssessmentResponse has conflict with protected namespace "model_".
+
+You may be able to resolve this warning by setting `model_config['protected_namespaces'] = ()`.
+  warnings.warn(
+C:\Users\Usuario\OneDrive\Escritorio\Sinapsistencia v.2\ml-service\.venv\Lib\site-packages\pydantic\_internal\_fields.py:132: UserWarning: Field "model_used" in LawyerRecommendation has conflict with protected namespace "model_".
+
+You may be able to resolve this warning by setting `model_config['protected_namespaces'] = ()`.
+  warnings.warn(
+C:\Users\Usuario\OneDrive\Escritorio\Sinapsistencia v.2\ml-service\.venv\Lib\site-packages\pydantic\_internal\_fields.py:132: UserWarning: Field "model_info" in RecommendationsResponse has conflict with protected namespace "model_".
+
+You may be able to resolve this warning by setting `model_config['protected_namespaces'] = ()`.
+  warnings.warn(
+INFO:     Started server process [31728]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     127.0.0.1:60384 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60390 - "GET /health HTTP/1.1" 200 OK
