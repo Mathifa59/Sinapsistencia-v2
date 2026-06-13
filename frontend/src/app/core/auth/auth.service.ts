@@ -18,6 +18,20 @@ interface LoginResponse {
   token: string;
 }
 
+/** Body de POST /api/auth/register — espeja RegisterRequest del backend. */
+export interface RegisterPayload {
+  name: string;
+  email: string;
+  password: string;
+  role: 'doctor' | 'lawyer';
+  cmp?: string;
+  specialty?: string;
+  hospital?: string;
+  cab?: string;
+  legalSpecialties?: string[];
+  medicalAreas?: string[];
+}
+
 /**
  * Reemplaza el auth.store de Zustand con signals. El JWT viaja en cookie
  * httpOnly (la maneja el navegador); aquí solo vive el estado del usuario.
@@ -54,6 +68,15 @@ export class AuthService {
       this._user.set(result.user);
       this._hydrated.set(true);
       return result.user;
+    } finally {
+      this._isLoading.set(false);
+    }
+  }
+
+  async register(payload: RegisterPayload): Promise<void> {
+    this._isLoading.set(true);
+    try {
+      await this.api.post<{ message: string }>('/api/auth/register', payload);
     } finally {
       this._isLoading.set(false);
     }

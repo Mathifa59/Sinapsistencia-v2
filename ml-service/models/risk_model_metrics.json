@@ -1,0 +1,9 @@
+{
+  "model_name": "risk_classifier",
+  "model_version": "rf-v1",
+  "precision_score": 0.6179,
+  "recall_score": 0.5973,
+  "f1_score": 0.6034,
+  "dataset_size": 6000,
+  "notes": "RandomForestClassifier (risk_level) + RandomForestRegressor (risk_score) sobre dataset sintetico."
+}

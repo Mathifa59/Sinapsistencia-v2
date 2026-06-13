@@ -15,7 +15,7 @@ preservando 1:1 el tema, el contrato de API, los enums en español y el ruteo po
 | Backend | Spring Boot 3.5 + Java 21 + Spring Data JPA + Spring Security 6 + Flyway |
 | Base de datos | PostgreSQL 16 + pgvector |
 | Storage | Cloudinary |
-| ML | FastAPI (repo aparte, sin cambios) — Spring lo consume como proxy |
+| ML | FastAPI (`ml-service/`) — Random Forest (riesgo) + TF-IDF/coseno (matching); Spring lo consume como proxy |
 | Automatización | n8n (webhook fire-and-forget para alertas de riesgo) |
 | Despliegue | Frontend → Vercel · Backend + ML → Railway |
 
@@ -25,6 +25,7 @@ preservando 1:1 el tema, el contrato de API, los enums en español y el ruteo po
 sinapsistencia-v2/
 ├── backend/            # Spring Boot 3.5 (Maven, Java 21) — DDD por módulo
 ├── frontend/           # Angular 21
+├── ml-service/         # FastAPI — Random Forest (riesgo) + TF-IDF/coseno (matching)
 ├── n8n/                # workflow JSON de alertas (referencia, sin cambios)
 ├── docs/               # blueprint + prompt de migración
 ├── _legacy/            # Next.js + Supabase (SOLO LECTURA, referencia)
@@ -78,6 +79,18 @@ cd frontend
 npm install
 npm start
 ```
+
+### 4. Servicio ML (http://localhost:8000)
+
+```bash
+cd ml-service
+python -m venv .venv && .venv/Scripts/activate   # Windows
+pip install -r requirements.txt
+cd training && python generate_risk_dataset.py && python train_risk_model.py && cd ..
+uvicorn app.main:app --reload --port 8000
+```
+
+Ver [ml-service/README.md](ml-service/README.md) — Random Forest (riesgo) + TF-IDF/coseno (matching).
 
 ## Usuarios demo
 

@@ -3,9 +3,12 @@
   "configurations": [
     {
       "name": "frontend",
-      "runtimeExecutable": "npm",
+      "runtimeExecutable": "C:\\Users\\Usuario\\AppData\\Roaming\\fnm\\node-versions\\v22.22.3\\installation\\npm.cmd",
       "runtimeArgs": ["start", "--prefix", "frontend"],
-      "port": 4200
+      "port": 4200,
+      "env": {
+        "PATH": "C:\\Users\\Usuario\\AppData\\Roaming\\fnm\\node-versions\\v22.22.3\\installation;${env:PATH}"
+      }
     }
   ]
 }

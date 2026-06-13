@@ -16,7 +16,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import pe.sinapsistencia.audit.infrastructure.Auditable;
 import pe.sinapsistencia.auth.security.AuthenticatedUser;
-import pe.sinapsistencia.matching.application.MatchingService;
+import pe.sinapsistencia.matching.application.ContactRequestService;
+import pe.sinapsistencia.matching.application.MatchingDirectoryService;
+import pe.sinapsistencia.matching.application.RecommendationService;
+import pe.sinapsistencia.matching.application.RelevantCasesService;
 import pe.sinapsistencia.matching.web.dto.ContactRequestResponse;
 import pe.sinapsistencia.matching.web.dto.DoctorCardDto;
 import pe.sinapsistencia.matching.web.dto.LawyerCardDto;
@@ -37,15 +40,24 @@ public class MatchingController {
 	public record GenerateRecommendationsBody(String caseId) {
 	}
 
-	private final MatchingService matchingService;
+	private final MatchingDirectoryService directoryService;
+	private final RecommendationService recommendationService;
+	private final ContactRequestService contactRequestService;
+	private final RelevantCasesService relevantCasesService;
 
-	public MatchingController(MatchingService matchingService) {
-		this.matchingService = matchingService;
+	public MatchingController(MatchingDirectoryService directoryService,
+			RecommendationService recommendationService,
+			ContactRequestService contactRequestService,
+			RelevantCasesService relevantCasesService) {
+		this.directoryService = directoryService;
+		this.recommendationService = recommendationService;
+		this.contactRequestService = contactRequestService;
+		this.relevantCasesService = relevantCasesService;
 	}
 
 	@GetMapping("/doctors")
 	public ApiResponse<List<DoctorCardDto>> doctors() {
-		return ApiResponse.ok(matchingService.listDoctors());
+		return ApiResponse.ok(directoryService.listDoctors());
 	}
 
 	/** Sin doctorId → directorio de abogados; con doctorId → recomendaciones ML (legacy). */
@@ -54,9 +66,9 @@ public class MatchingController {
 			@AuthenticationPrincipal AuthenticatedUser user,
 			@RequestParam(required = false) String doctorId) {
 		if (doctorId != null && !doctorId.isBlank()) {
-			return ApiResponse.ok(matchingService.recommendations(user, doctorId));
+			return ApiResponse.ok(recommendationService.recommendations(user, doctorId));
 		}
-		return ApiResponse.ok(matchingService.listLawyers());
+		return ApiResponse.ok(directoryService.listLawyers());
 	}
 
 	/** Genera recomendaciones (opcionalmente para una consulta) y las persiste con factores XAI (HU-31/32). */
@@ -66,7 +78,7 @@ public class MatchingController {
 			@RequestBody(required = false) GenerateRecommendationsBody body) {
 		String caseId = body == null ? null : body.caseId();
 		return ResponseEntity.status(HttpStatus.CREATED)
-				.body(ApiResponse.ok(matchingService.generateAndPersist(user, caseId)));
+				.body(ApiResponse.ok(recommendationService.generateAndPersist(user, caseId)));
 	}
 
 	@GetMapping("/contact-requests")
@@ -75,7 +87,7 @@ public class MatchingController {
 			@RequestParam(required = false) String lawyerId,
 			@RequestParam(required = false) String doctorId,
 			@RequestParam(required = false) String status) {
-		return ApiResponse.ok(matchingService.listContactRequests(user, lawyerId, doctorId, status));
+		return ApiResponse.ok(contactRequestService.listContactRequests(user, lawyerId, doctorId, status));
 	}
 
 	@PostMapping("/contact-requests")
@@ -84,7 +96,7 @@ public class MatchingController {
 			@AuthenticationPrincipal AuthenticatedUser user,
 			@RequestBody CreateContactRequestBody body) {
 		return ResponseEntity.status(HttpStatus.CREATED)
-				.body(ApiResponse.ok(matchingService.createContactRequest(
+				.body(ApiResponse.ok(contactRequestService.createContactRequest(
 						user, body.toLawyerId(), body.message(), body.caseId())));
 	}
 
@@ -93,7 +105,7 @@ public class MatchingController {
 	public ApiResponse<ContactRequestResponse> respondContactRequest(
 			@AuthenticationPrincipal AuthenticatedUser user,
 			@RequestBody RespondContactRequestBody body) {
-		return ApiResponse.ok(matchingService.respondContactRequest(
+		return ApiResponse.ok(contactRequestService.respondContactRequest(
 				user, body.requestId(), body.status(), body.responseMessage()));
 	}
 
@@ -101,6 +113,6 @@ public class MatchingController {
 	public ApiResponse<Map<String, Object>> relevantCases(
 			@AuthenticationPrincipal AuthenticatedUser user,
 			@RequestParam(required = false) String lawyerId) {
-		return ApiResponse.ok(matchingService.relevantCases(user, lawyerId));
+		return ApiResponse.ok(relevantCasesService.relevantCases(user, lawyerId));
 	}
 }
