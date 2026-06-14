@@ -16,3 +16,17 @@ INFO:     Application startup complete.
 INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
 INFO:     127.0.0.1:60384 - "GET /health HTTP/1.1" 200 OK
 INFO:     127.0.0.1:60390 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60791 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60792 - "GET /api/v1/model/info HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60815 - "POST /api/v1/recommendations HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60830 - "POST /api/v1/recommendations HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60958 - "POST /api/v1/recommendations HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61044 - "POST /api/v1/recommendations HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61059 - "POST /api/v1/recommendations HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61085 - "POST /api/v1/risk-assessment HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61471 - "GET /api/v1/model/info HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61472 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61490 - "POST /api/v1/recommendations HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61502 - "POST /api/v1/risk-assessment HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61520 - "POST /api/v1/recommendations HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61585 - "POST /api/v1/recommendations HTTP/1.1" 200 OK
