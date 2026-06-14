@@ -186,7 +186,7 @@ const FACTOR_LABELS: Record<string, string> = {
 
               <div class="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
                 <span>Riesgo base de la especialidad: {{ Math.round(r.specialtyRiskBaseline * 100) }}%</span>
-                <span>Modelo v{{ r.modelVersion }}</span>
+                <span>Modelo {{ r.modelVersion }}</span>
               </div>
             </div>
 
