@@ -1,0 +1,766 @@
+Business Intelligence Solutions Adoption Model for Peruvians SMEs 
+based on UTAUT2 
+Luis Javier Ortiz Leigh1 a, Axel Gutierrez Huaman1 b and Jymmy Stuwart Dextre Alarcon1 c 
+1School of Systems and Computer Engineering, Peruvian University of Applied Sciences, 2390 Primavera Avenue, Lima, 
+Peru 
+U202010390@upc.edu.pe, U202010337@upc.edu.pe, PCISJDEX@upc.edu.pe  
+Keywords: Adoption, Business Intelligence, SMEs, UTAUT2, Intention to Use. 
+Abstract: Small and medium-sized enterprises (SMEs) face significant challenges to grow and make strategic decisions 
+due to their small size and limited resources. This study proposes a model to identify the factors that influence 
+the adoption of Business Intelligen ce (BI) solutions in Peruvian SMEs, based on the Unified Theory of 
+Acceptance and Use of Technology (UTAUT2). The study methodology is divided into four phases. The first 
+phase consists of analyzing existing technology adoption models to identify critical components that affect 
+BI adoption. In the second phase, the proposed model is developed and survey questions are designed that 
+will measure relevant factors for statistical validation. The third phase involves data collection through 
+surveys targeting SME s in Peru, followed by analysis to identify significant patterns. The fourth and final 
+phase validates the model using the Partial Least Squares Structural Equation Modeling (PLS-SEM) technique, 
+evaluating the robustness and accuracy of the proposed model. The validation results show that the proposed 
+factors Performance Expectation (PE), Price/Value Ratio (PV) and Competitive Pressure (CP) are the most 
+influential in the intention to use BI solutions by Peruvian SMEs. 
+1 INTRODUCTION 
+Small and medium-sized enterprises (SMEs) face 
+a significant problem with respect to their 
+subsistence: only 30 \% of them manage to survive 
+after 2 years and the main reason is liquidity (Rubio, 
+2020). The causes vary from operating policies, 
+which do not guarantee survival in the market, often 
+leading companies to bankruptcy (Roever, 2016), 
+internal factors (business understanding, resources, 
+budget, solvency level, liquidity, etc.) and external 
+factors (political, social, environmental, etc.) 
+(Vukšić, Bach & Popovič, 2013), trust in one's own 
+experience when making decisions, ruling out the 
+possibility of opting to improve this process through 
+the incursion of technology (Bhatiasevi & Naglis, 
+2020) and underestimation of technology, limiting its 
+use to adm inistrative tasks instead of using it for 
+complex business operations (Caseiro & Coelho, 
+2018).  
+ 
+a  https://orcid.org/0009-0009-5334-4257 
+b  https://orcid.org/0009-0009-4740-9253 
+c  https://orcid.org/0000-0002-1686-0510 
+In their study on the intention to use Business 
+Intelligence in SMEs in Libya using UTAUT2 and 
+TAM, Alsibhawi, Yahaya & Mohamed (2023) 
+reveals that the effective adoption of this technology 
+depends on factors such as business resources and 
+capabilities. In  another study, Kašparová (2023) 
+shows a technology model based on UTAUT2 for BI 
+adoption by adding the habit factor within the 
+constructs of the presented model, which was found 
+to be the most influential according to the results. On 
+the other hand, Zheng  & Khalid (2022) conducted a 
+research on ERP and BI adoption in SMEs in 
+Malaysia using UTAUT and TOE, highlighting that 
+ERPBI plays an important role in organizational 
+performance and business continuity, so it is 
+necessary to adopt it among SMEs. In addit ion, 
+Kwarteng, Ntsiful, Diego & Novák (2023) show a 
+technology model for digitalization adoption in SMEs 
+in Czech Republic and Slovakia, which highlights the 
+competitive pressure factor being the most significant 
+predictor of BI adoption intention in Czech  and 
+
+Slovak SMEs. Fang, Azmi, Yahya, Sarkan, Sjarif \& 
+Chuprat (2018) shows their study of mobile BI 
+adoption based on UTAUT, with adaptation of 
+TAMMS. The result of the study was that it is 
+important for users the ease of use and whether it is 
+useful to have the information at the reach of a mobile 
+device.  However, all these authors have developed 
+studies on the adoption of BI solutions in different 
+countries in Asia and Europe, having that in Peru has 
+not developed a study that evaluates the intention to 
+use this same technology, so this paper is to show the 
+proposed model that illustrates the main potential 
+factors to be influential for the adoption of BI 
+solutions, based on the UTAUT2 model  (Venkatesh, 
+Thong, & Xu, 2012) . This study will focus on 
+understanding the factors that influence the intention 
+and acceptance of Peruvian SMEs towards the 
+implementation of BI solutions, therefore we will 
+perform (1) Tool selection, (2) Model design, (3) 
+Data collection and analysis and (4) Validation. 
+The organization of the article is as follows: in 
+Section 2, we will talk about the work related to the 
+proposed solution; in Section 3, about the proposed 
+model, highlighting all the phases of its development; 
+in Section 4, about the validation of the proposed 
+model; in Section 5, about the results of the study and 
+finally Section 6, with the conclusions of the study, as 
+well as the possible future work. 
+2 RELATED WORKS 
+The field of Business Intelligence (BI) adoption 
+has gained relevance in response to the growing 
+demand for data for business decision making. In this 
+context, previous research is highlighted and will be 
+presented as related work in this study. These works, 
+conducted in different countries, share similar models 
+while incorporating their own constructs, thus 
+offering a global and contextualized view of the 
+challenges and strategies in the implementation of BI 
+and other technologies at the international level. 
+Rouhani, Ashrafi, Ravasan & Afshari (2018) 
+conducted an empirical research on the factors 
+influencing BI adoption in the banking and finance 
+industry. This research is particularly relevant 
+because of the few previous attempts to identify the 
+factors affec ting the adoption of BI systems. Given 
+the rapid proliferation of data in organizations and the 
+critical importance of managerial decision making, it 
+is critical to determine the most appropriate factors 
+for BI adoption, as this significantly influences th e 
+decision to implement BI. In addition, a conceptual 
+model based on the TOE framework was proposed 
+and validated using survey data and the PLS 
+technique. The research concluded that the most 
+influential factors in IT implementation stages are 
+grouped into five categories: individual, 
+organizational, technological, task -related, and 
+environmental characteristics. 
+Zheng & Khalid (2022) goes into the adoption of 
+ERP-BI systems, which should consider 
+technological, organizational, and environmental 
+(TOE) factors to ensure its continuity and 
+sustainability. Since the study aims to close the 
+current gaps in ERP -BI adopt ion through a TOE -
+focused perspective and presents a conceptual 
+framework that describes the dimensions of this 
+theory and its factors. Thus, the article contributes to 
+the understanding of how companies can successfully 
+adopt ERP-BI systems in a constantl y changing and 
+competitive business environment, since according to 
+several authors it has been shown that the integration 
+of ERP and BI systems enhances business decision 
+making capabilities. What refers to our study, what is 
+different is that it is only based on measuring the 
+intention to use BI solutions, using UTAUT2. 
+Bany Mohammad, Al -Okaily, Al -Majali & 
+Masa’deh (2022) examined the relationship between 
+business intelligence capabilities and the 
+performance of SMEs in Jordan, under the TOE 
+framework, taking into account the moderating role 
+of competitive intelligence. The results showed that 
+BI capabilities have a significant influence on 
+business performance and that competitive 
+intelligence positively enhances this relationship. 
+This indicates that SMEs should focus on developing 
+their BI capabilities to improve their competitiveness 
+in the marketplace. However, although this study 
+focused on measuring BI usage intention in Jordanian 
+SMEs, the study we propose is based on the UTAUT2 
+model, which includes more specific constructs 
+related to software usage and acceptance. 
+Ahmad, Miskon, Alabdan, & Tlili (2021) a BI 
+system adoption model based on the TOE framework 
+was investigated in the textile industry, extending the 
+original model with an additional dimension 
+(Individual) in addition to the three traditional 
+dimensions (t echnological, organizational, and 
+environmental). Preliminary findings from the 
+interviews were used to validate the suitability of the 
+proposed model. The research model was then 
+validated through a questionnaire survey and 
+DEMATEL techniques. Analysis of  the results 
+indicated that user traits, technological maturity, 
+sustainability, leadership commitment and support, 
+and compatibility were the most significant factors. 
+The determinants of the causal group were shown to 
+have greater influence throughout the model 
+compared to those of the effect group, such as 
+interpersonal communications and satisfaction with 
+existing systems. In relation to our study, we 
+highlight the use of the TOE framework to measure 
+BI usage intention in the textile industry, highlighting 
+the flexibility of the model to be applied in different 
+industries.  
+Hmoud, Al-Adwan, Horani, Yaseen & Al Zoubi 
+(2023) made a study based on the Technology -
+Organization-Environment model, which provides a 
+comprehensive framework for understanding 
+technology adoption processes. By applying the TOE 
+model specifically to the c ontext of BI adoption in 
+Educational Institutions, this study extends the 
+theoretical understanding by incorporating 
+organizational and environmental factors unique to 
+Jordanian HEIs. One of the main contributions of this 
+study is its focus on BI adoption by Educational 
+Institutions in Jordan, filling an important gap in the 
+literature by identifying and analyzing the factors that 
+influence this adoption. The findings show that 
+organizational characteristics, such as top 
+management support, information cult ure, 
+complexity, and vendor selection, have a positive 
+impact on BI adoption in these institutions. This study 
+is significant in that it uses the context of Jordanian 
+educational institutions to demonstrate that it is 
+possible to measure the intention to u se any 
+technology. We use the UTAUT2 model, which is 
+more oriented to measure acceptance with constructs 
+specific to software use. 
+3 PROPOSED MODEL 
+The following are the parts of this study: first, the 
+selection of tools was carried out, then the proposed 
+model was designed, followed by data collection and 
+analysis, and finally, the validation of the results. 
+ 
+ 
+Figure 1: Proposed Metholodogy. 
+ 
+3.1 Phase 1: Tool Selection 
+The goal of this phase is to be able to adequately 
+determine the tools that best fit the proposal proposed 
+in this study to be used and applied. To this end, we 
+first conducted a systematic review of the literature 
+and then benchmarked the models used in the articles 
+reviewed. Regarding the review, this allowed us to 
+define the criteria to be taken into account for the 
+evaluation and comparison of the selected models: 
+▪ Focus: This aspect refers to the main focus or 
+central issue addressed by each model.  
+▪ Key factors: These are the main factors or 
+constructs that each model considers as 
+determinants of technology adoption. 
+▪ Main Application: Indicates in which areas or 
+contexts each technology adoption model is 
+commonly applied. 
+▪ Integration of Social Factors: This aspect refers 
+to the consideration of social factors and social 
+influences on technology adoption within each 
+model. 
+ 
+Once the articles were compiled, a benchmarking 
+of the models used in the studies was carried out, 
+highlighting the model approach, the key factors 
+used, the main application of the model used and 
+finally the integration of social factors, which is 
+shown in the following table: 
+ 
+Table 1: Comparative table of adoption models 
+according to comparison criteria 
+ 
+Phase 1: Tool 
+Selection
+• Benchmarking of 
+existing models
+Phase 2: 
+Model design
+• Model construction, survey 
+design for validation and 
+definition of statistical 
+metrics for outcome 
+evaluation.
+Phase 3: Data 
+collection and 
+analysis
+• Application of the 
+validation survey of 
+the proposed model 
+factors.
+Phase 4: 
+Model 
+validation
+• Modeling of the data 
+collected for the 
+validation of the 
+proposed model.
+
+From the benchmarking, the UTAUT2 model was 
+chosen, as it provides more value and its approach fits 
+our study. Also, Quicano (2019) demonstrates that the 
+UTAUT2 model provides superior explanatory 
+power compared to other technology acceptance 
+models. By incorporating additional factors such as 
+hedonic motivation, price value, and habit, UTAUT2 
+more accurately captures the complexities of user 
+acceptance and usage behavior, outperforming its 
+predecessors in predictive capability.  In addition, an 
+additional construct from a peer -reviewed arti cle is 
+incorporated, which contributes significantly to the 
+result of this article. 
+3.2 Model Design 
+The objective of this phase is to design the proposed 
+model based on the selected tools. To this end, the 
+model was first built, the survey design was defined 
+and the metrics for the validity of the model were 
+defined. First, the constructs of the model we re 
+analyzed, as well as the external construct identified 
+during phase 1. From this, the proposed model was 
+designed, which contemplates some constructs of the 
+UTAUT2 model, adding the identified external 
+construct. 
+ 
+Figure 2: Proposed Model. 
+ 
+The proposed model has the following factors: 
+• Performance Expectancy: Performance 
+expectancy refers to the individual’s 
+perception of whether using a particular 
+technology will  improve his or her job or 
+personal performance. 
+• Effort Expectancy: Effort expectancy refers 
+to the  individual’s perception of the 
+perceived ease or  difficulty of using a 
+particular technology. 
+• Social Influence: Social influence refers to 
+the individual’s perception of the perceived 
+social pressure to use a particular 
+technology. 
+• Facilitating Conditions: Facilitating 
+conditions refer to additional resources that 
+can help make the adoption of a technology 
+easier and more successful. 
+• Hedonic Motivation: Hedonic motivation 
+refers to  the degree to which a person 
+perceives that using a particular technology 
+will provide pleasure, fun, or entertainment. 
+• Price/Value Ratio: Price/value ratio refers to 
+an individual’s perception of whether the 
+cost of acquiring and using a technology is 
+justified by the  benefits and value it 
+provides. 
+• Habit: Habit refers to the degree to which an 
+individual has a habit or routine of using a 
+particular technology. 
+• Competitive pressure: refers to the forces 
+and challenges organizations face to remain 
+competitive in a dynamic and changing 
+environment. 
+For the validation of the model, a questionnaire with 
+questions that are directly related to each construct 
+will be carried out. Below is the table with the 
+questions for each construct: 
+Table 2: Questionnaire for the validation of the 
+model. 
+Construct ID Question 
+Performance 
+Expectancy 
+(Venkatesh, 
+Thong, & Xu, 
+2012) 
+ED1 Digitization would be useful 
+in my work. 
+ED2 Using digitized processes 
+allows me and the company 
+to perform tasks efficiently 
+and quickly. 
+ED3 The use of digitized 
+processes and services 
+increases productivity 
+ED5 Digitalization impacts 
+profits and performance in 
+the company 
+ED6 My good digital skills 
+increase my chances of 
+getting a raise 
+
+Effort 
+Expectancy 
+(Venkatesh, 
+Thong, & Xu, 
+2012) 
+EE1 My interaction with the 
+digitized work environment 
+would be clear and 
+understandable 
+EE2 It would be easy for me to 
+acquire digital skills to work 
+in the digitized work 
+environment 
+EE3 You would find a digitized 
+work environment easy to 
+use 
+EE4 Learning how to operate 
+processes in a digitized way 
+is easy for me 
+Facilitating 
+conditions 
+(Venkatesh, 
+Thong, & Xu, 
+2012) 
+CF1 The company has the 
+resources to use more 
+digitized processes and 
+services. 
+CF2 The company has the 
+necessary knowledge to use 
+more digitized processes and 
+services 
+CF3 Modern digitalization 
+techniques are not 
+compatible with other 
+digitized processes and 
+services in the company 
+CF4 A specific person (or group) 
+is available to help if 
+difficulties arise with 
+digitalization in the 
+company. 
+Social 
+Influence 
+(Venkatesh, 
+Thong, & Xu, 
+2012) 
+IS1 The people who are 
+important to me think that I 
+should use digitization tools 
+in my work. 
+IS2 My work environment 
+(colleagues, bosses, etc.) 
+thinks I should use 
+digitization tools. 
+Motivation 
+(Venkatesh, 
+Thong, & Xu, 
+2012) 
+ME1 Using digitizing tools is fun 
+ME2 Using digitization tools is 
+nice 
+Price/Value 
+Ratio 
+(Venkatesh, 
+Thong, & Xu, 
+2012) 
+PV1 Digitization tools are good 
+value for money. 
+SS2 Digitization tools offer good 
+value for money. 
+Habit 
+(Venkatesh, 
+Thong, & Xu, 
+2012) 
+HA1 Using digitization tools has 
+become a habit for me. 
+HA2 I feel like I'm in the habit of 
+using digitizing tools. 
+Competitive 
+pressure 
+(Kwarteng et. 
+al., 2023) 
+CP1 My company plans to invest 
+more in digitalization in the 
+future. 
+CP2 Business partners who are 
+important to the company 
+think that the company 
+should be more digitized. 
+Behavorial 
+intentention 
+(Venkatesh, 
+Thong, & Xu, 
+2012) 
+IU1 My company intends to 
+digitize its business 
+processes to a greater extent. 
+IU2 My company predicts that it 
+will introduce more 
+digitalization in the near 
+future. 
+IU3 My company plans to invest 
+in more digitalization in the 
+future. 
+ 
+This survey includes questions related to each 
+construct, so that respondents can give their opinion 
+and find out which one has the greatest influence on 
+their ability to adopt BI solutions. The answers are 
+based on a Likert scale, so as not to limit them to only 
+“yes” or “no”. This will be developed in a Microsoft 
+Forms questionnaire, since it will be via mail that the 
+selected SMEs will be able to complete the survey. 
+As for the validation metrics, we have Cronbach's 
+alpha, which is the degree of reliability that reflects a 
+given content domain of what is measured (George & 
+Mallery, 1995 ). This value must pass 0.7 to have 
+acceptable reliability. For hypothesis testing, we have 
+the following metrics: Convergent Validity, which 
+must be greater than 0.70 to be acceptable; 
+Discriminant Validity (X2) which must be less than 
+0.05 and Average Var iance Extracted (AVE) which 
+must be greater than or equal to 0.50 [18]. For the fit  
+of the measurement model, we have the normalized 
+Chi-square (CMIN/DF) which should be 1<X2/df<5; 
+Goodness of fit (GFI) which should be greater than 
+0.9; Comparative Fit (CFI) greater than 0.9 and Root 
+mean square error of approximation (RMSEA) < 0.08 
+(Gutarra, 2012). 
+3.3 Data collection and analysis 
+For this phase, the goal is to define the sample to 
+which the survey of phase 2 will be applied, and then, 
+once applied, to collect the data and analyze them 
+before the validation of the proposed model. 
+For the selection of companies for the sample, the 
+government's open databases will be searched in 
+order to collect the largest number of candidate 
+companies, and by means of a simple sampling, the 
+sample to be taken to apply the survey will be defined. 
+These companies will be validated with respect to 
+their business segment, since they must belong to the 
+SME segment. Then, once the survey has been 
+applied to the selected sample, the data from the 
+responses will be collected and cleaned, in order to 
+have a clean data set ready to be processed.  
+Finally, a descriptive analysis of the results of the 
+survey will be made, with the objective of rescuing 
+insights from the SMEs, to be taken into account 
+when drawing conclusions regarding the model 
+calibrated after the modeling. 
+3.4 Phase 4: Model validation 
+The objective of this phase is to validate the proposed 
+model based on the surveys applied to the selected 
+companies. For this purpose, the variables will be 
+modeled using the PLS -SEM method (Structural 
+Equation Modeling).  
+The use of the PLS-SEM method is based on its 
+ability to handle complex models, even with small 
+samples and data that do not meet normality 
+assumptions. It is less restrictive than other 
+techniques, such as Covariance -Based Structural 
+Equation Modeling (CB -SEM), and is particularly 
+useful for exploratory and predictive research. Hair et 
+al. (2019) mentions that PLS-SEM is a flexible and 
+powerful tool that allows for the simultaneous 
+evaluation of multiple relationships between latent 
+variables in contexts where ot her techniques might 
+fail. 
+Once all the survey results are available, structural 
+equation modeling is performed to analyze the 
+relationships of the variables (the constructs) and to 
+see which are the most influential factors for the 
+intention to use. PLS -SEM is a statistical techniq ue 
+used to analyze the relationships between latent 
+(unobservable) variables in a model.  
+With this, we would finally have the model 
+adjusted to the context of Peruvian SMEs, showing 
+the survey questions with their respective weights, 
+which will reveal the construct that most influences 
+SMEs in their intention to adopt BI solutions. In 
+addition, it can be discussed whether the UTAUT2 
+model is the most efficient to use in the context of 
+Peruvian SMEs or not, being able to recommend 
+other constructs to enrich such theory and thus 
+improve the literature of this type of study. 
+4 V ALIDATION 
+For the validation of the proposed model, the 
+following phases were carried out: (1) survey design, 
+(2) selection of participating companies, (3) sending 
+the survey, (4) data collection and analysis, and (5) 
+evaluation of the model. 
+For the survey design, questions related to each 
+construct of the model were asked using a Likert scale 
+(from 1 to 5) (see table 2). For the selection of 
+participating companies, a total of 130 companies in 
+the SME sector from all regions of Peru were 
+selected. On the other hand, to send the survey, it is 
+in a Windows Forms form, which is sent by e-mail to 
+the selected companies. Once all the responses are 
+received, they are collected and loaded into the IBM 
+SPSS Statistics software, in order to group them so 
+that they can be loaded into the SmartPLS modeling 
+software.  
+Finally, once the information has been uploaded 
+to the modeling software, hypothesis testing is 
+performed with the constructs of the model. The 
+model will be validated with statistical metrics. 
+All 130 SMEs responded to the survey. It was sent 
+to the managers of each company to get an overview 
+of their views on the adoption of BI in their 
+businesses. The survey was available for one week 
+after the emails were sent. After the survey deadline, 
+the data was collected, initially exported to an Excel 
+format, then loaded into SPSS to be formatted 
+properly before being uploaded without issues to 
+SmartPLS. Since all the questions were mandatory, 
+there were no unanswered questions. 
+5 RESULTS 
+After processing the survey data and adjusting the 
+model to acceptable thresholds for the metrics, we 
+have that the final observable variables of the model 
+(which would be the valid hypotheses of the influence 
+of intention to use BI solutions) are: Perform ance 
+Expectation (PE), Price /Value Ratio (PV) and 
+Competitive Pressure (CP). 
+Table 3: Hypothesis test results. 
+ 
+Hypothesis Estimate S.E C.R. P-
+Value 
+Results 
+H1 (PE-> BI) 0,343 0.083 3.996 0.001 Pass 
+H6 (PV->BI) 0,462 0.088 4.126 0.001 Pass 
+H8 (PC->BI) 1,045 0.079 12.874 0.001 Pass 
+ 
+The factors pass based on their strong and statistically 
+significant metrics. For each hypothesis, the high 
+Critical Ratios (C.R.) and low P -Values (all below 
+0.05) indicate robust relationships between the 
+variables. The path coefficients (Estimates) show  
+positive and substantial effects, with perceived cost 
+(PC) having the strongest influence, as reflected by its 
+high estimate (1.045). These metrics confirm that 
+performance expectancy (PE), price/value ratio (PV), 
+and competitive pressure  (CP) significant ly affect 
+behavioral intention (BI), validating the hypotheses 
+and demonstrating that the relationships are not due 
+to chance. 
+Table 4: Model fit indices. 
+ 
+Model fit indices                Final SEM 
+Índex Threshold Index Fulfillment 
+Normalized 
+Chi-square >1 y <5 2,96 Pass 
+ GFI >0,9 0,92 Pass 
+ CFI >0,9 0,96 Pass 
+RMSEA <0,08 0,078 Pass 
+ 
+Such variables have factor loadings greater than 0.7 
+(acceptable level), as well as their variances are 
+greater than 0.5. With this, it can be concluded that 
+the model already has a conforming and validated 
+structure. 
+6 CONCLUSIONS 
+The present study allowed us to explore the factors 
+influencing the intention to use Business Intelligence 
+(BI) solutions in small and medium-sized enterprises 
+(SMEs) in Peru, based on a survey. Information was 
+collected from 130 SMEs across Peru to valida te the 
+UTAUT2 model. 
+Through detailed analysis, three main constructs 
+were identified that exert significant influence on this 
+intention: Performance Expectancy (PE), Price/Value 
+Ratio (PV), and Competitive Pressure (CP). Thus, it 
+is found that in the UTAUT2 model, only PE and PV 
+are valid in the analyzed context, as well as CP. 
+However, while Performance Expectancy  is 
+recognized as a critical factor for SMEs across 
+various countries, including the Czech Republic 
+(Kašparová, 2023), additional factors such as PV and 
+CP may gain prominence depending on the specific 
+market in which these SMEs operate. This suggests 
+that while PE remains universally important, the 
+impact of other constructs can vary significantly 
+based on the unique characteristics of different 
+geographical and cultural contexts.  
+Together, these findings provided valuable 
+insights for both SMEs considering the adoption of 
+BI solutions and for the providers of these 
+technologies. For SMEs, it is crucial to assess how BI 
+solutions can integrate and enhance their operations 
+effectively. For providers, understanding these 
+motivations can help develop more effective 
+marketing and sales strategies, aligning their 
+offerings with the specific needs and concerns of 
+SMEs.  
+Future studies could further explore how other 
+factors, such as staff training and technical support, 
+influence the adoption of BI solutions or other 
+essential solutions for the optimization and growth of 
+SMEs. Specifically, it would be valuable to conduct  
+an analysis focused on the retail sector, given its 
+dynamism and high competitiveness, to better 
+understand how SMEs in this industry perceive and 
+utilize BI technologies. 
+It is important to note that the findings of this 
+study are based on the context of Peruvian SMEs. 
+Due to differences in economic, social, and 
+technological contexts between countries, the results 
+may not be generalizable to SMEs in other regions. 
+The specific conditions of each market can influence 
+the identified technology acceptance factors. 
+ACKNOWLEDGMENTS 
+We would like to express our most sincere gratitude 
+to the School of Systems and Computer Engineering 
+of the Peruvian University of Applied Sciences for 
+providing us with the necessary tools and 
+environment for the development of this research. To 
+our advisors, for their invaluable guidance, patience 
+and support throughout this project. Finally, to the 
+other individuals who were involved in the 
+development of the proj ect, for their constant 
+encouragement, understanding and unconditional 
+support, without who m this achievement would not 
+have been possible. 
+REFERENCES 
+Rubio, P. (2020, July 6). In Latin America, only 45% of 
+SMEs survive the first two years. Diario La República. 
+Retrieved from https://bit.ly/3yRniCc  
+Roever, S. (2016). Street vendors and legal reform in india, 
+south africa, and peru informal trade meets informal 
+governance. Cityscape, 18, 27-46. 
+Vukšić, V. B., Bach, M. P., & Popovič , A. (2013). 
+Supporting performance management with business 
+process management and business intelligence: A case 
+analysis of integration and orchestration. International 
+Journal of Information Management, 33(4), 613–619. 
+Bhatiasevi, V., & Naglis, M. (2020). Elucidating the 
+determinants of business intelligence adoption and 
+organizational performance. Information development, 
+36(1), 78-9. 
+Caseiro, N., & Coelho, A. (2018). Business intelligence and 
+competitiveness: the mediating role of entrepreneurial 
+orientation. Competitiveness Review: An International 
+Business Journal, 28(2), 213-226. 
+Alsibhawi, I. A. A., Yahaya, J. B., & Mohamed, H. B. 
+(2023). Business Intelligence Adoption for Small and 
+Medium Enterprises: Conceptual Framework. Applied 
+Sciences, 13(7), 4121. 
+Kašparová, P. (2023). Intention to use business intelligence 
+tools in decision making processes: applying a UTAUT 
+2 model. Central European Journal of Operations 
+Research, 31(3), 991-1008. 
+Zheng, J., & Khalid, H. (2022). The Adoption of Enterprise 
+Resource Planning and Business Intelligence Systems 
+in Small and Medium Enterprises: A Conceptual 
+Framework. Mathematical Problems in Engineering , 
+2022. 
+Kwarteng, M. A., Ntsiful, A., Diego, L. F. P., & Novák, P. 
+(2023). Extending UTAUT with competitive pressure 
+for SMEs digitalization adoption in two European 
+nations: a multi -group analysis. Aslib Journal of 
+Information Management. 
+Fang, L. Y., Azmi, N. F. M., Yahya, Y., Sarkan, H., Sjarif, 
+N. N. A., & Chuprat, S. (2018). Mobile business 
+intelligence acceptance model for organisational 
+decision making. Bulletin of Electrical Engineering and 
+Informatics, 7(4), 650-656. 
+Rouhani, S., Ashrafi, A., Ravasan, A. Z., & Afshari, S. 
+(2018). Business intelligence systems adoption model: 
+an empirical investigation. Journal of Organizational 
+and End User Computing (JOEUC), 30(2), 43-70. 
+Zheng, J., & Khalid, H. (2022). The adoption of enterprise 
+resource planning and business intelligence systems in 
+small and medium enterprises: a conceptual framework. 
+Mathematical Problems in Engineering, 2022. 
+Bany Mohammad, A., Al -Okaily, M., Al -Majali, M., & 
+Masa’deh, R. E. (2022). Business intelligence and 
+analytics (BIA) usage in the banking industry sector: an 
+application of the TOE framework. Journal of Open 
+Innovation: Technology, Market, and Complexity, 8(4), 
+189. 
+Ahmad, S., Miskon, S., Alabdan, R., & Tlili, I. (2021). 
+Statistical assessment of business intelligence system 
+adoption model for sustainable textile and apparel 
+industry. IEEE Access, 9, 106560-106574. 
+Hmoud, H., Al-Adwan, A. S., Horani, O., Yaseen, H., & Al 
+Zoubi, J. Z. (2023). Factors influencing business 
+intelligence adoption by higher education institutions. 
+Journal of Open Innovation: Technology,  Market, and 
+Complexity, 9(3), 100111. 
+Venkatesh, V., Thong, J., & Xu, X. (2012). Consumer 
+acceptance and Use of information technology: 
+extending the unified theory of acceptance and Use of 
+technology. MIS Quarterly. 
+Hair, J. F., Hult, G. T. M., Ringle, C. M., & Sarstedt, M. 
+(2019). A primer on Partial Least Squares Structural 
+Equation Modeling (PLS-SEM). Sage publications. 
+George, D., & Mallery, P. (1995). SPSS/PC+ step by step: 
+A simple guide and reference. USA: Wadsworth 
+Publishing Company. 
+Gutarra Castañeda, M. (2012). Análisis de la aceptación de 
+la normativa de tecnologías en las instituciones públicas 
+del Estado peruano. 
+Quicaño, C. (2019). UTAUT2 adaptado para medir la 
+intención del comportamiento en la aceptación 
+tecnológica del servicio de internet de alta velocidad en 
+cadenas hoteleras peruanas caso de estudio: Casa 
+Andina. 

@@ -105,12 +105,6 @@ Ver [ml-service/README.md](ml-service/README.md) — Random Forest (riesgo) + TF
 Ver `backend/.env.example` y `frontend/.env.example`. En producción se configuran en Railway
 (backend/ML) y Vercel (frontend).
 
-## Flujos de usuario
-
-Ver [docs/FLUJOS_USUARIO.md](docs/FLUJOS_USUARIO.md) — mapeo exhaustivo de todos los
-procesos que puede realizar cada rol (Médico, Abogado, Administrador), incluyendo los
-flujos cruzados entre roles (médico→abogado, alertas a n8n, auditoría centralizada, etc.).
-
 ## Estado de la migración
 
 Se ejecuta **por fases con checkpoints** (ver `docs/CLAUDE_CODE_PROMPT_Migracion_Sinapsistencia.md`).
@@ -145,47 +139,7 @@ Se ejecuta **por fases con checkpoints** (ver `docs/CLAUDE_CODE_PROMPT_Migracion
         firma HU-34: `update` documento → `sign` si queda `firmado`).
   - [x] Storage Cloudinary en producción (config condicional + `ProfileService.uploadAvatar`).
   - [x] `.env.example` (backend y frontend).
-  - [x] Smoke tests E2E manuales (ver "Verificación end-to-end" abajo).
+  - [ ] Smoke tests.
   - [ ] Regenerar cliente OpenAPI (si cambian DTOs/endpoints).
   - [ ] Despliegue: Angular → Vercel, Spring Boot → Railway, FastAPI ML → Railway, Postgres →
         Railway; variables de entorno y CORS.
-
-## Verificación end-to-end
-
-> Última verificación manual: 2026-06-19, con los 3 servicios corriendo localmente
-> (Postgres vía Docker, Backend Spring Boot en :8080, ml-service FastAPI en :8000,
-> Frontend Angular en :4200) y navegador controlado para simular usuarios reales.
-
-**Arranque de servicios**
-- [x] Backend Spring Boot: arranca limpio (`Started SinapsistenciaApplication`), Flyway
-      valida el schema, Hikari conecta a Postgres, Tomcat sirve en `:8080`.
-- [x] ml-service FastAPI: arranca limpio en `:8000`, modelo Random Forest (`rf-v1`) cargado.
-- [x] `GET /api/ml/health` — el backend hace proxy correctamente al ml-service (`200 OK`,
-      `status: "online"`).
-
-**Flujos probados en navegador (cuentas demo, los 3 roles)**
-- [x] Login médico, abogado y administrador (con email/password y con los botones de
-      "Acceso rápido (demo)").
-- [x] Evaluación de riesgo médico-legal (HU-29/30): formulario → `POST /api/ml/risk` →
-      score, nivel de riesgo, desglose de factores XAI y recomendaciones, todo renderizado.
-- [x] Recomendaciones de abogados para un médico (HU-31/32): `GET /api/matching/lawyers?doctorId=`
-      con score de compatibilidad y razones explicadas.
-- [x] Creación de solicitud de contacto médico → abogado (`POST /api/matching/contact-requests`).
-- [x] Respuesta del abogado a una solicitud, tanto **aceptar** como **rechazar**
-      (`PATCH /api/matching/contact-requests`) — el dashboard legal actualiza sus contadores
-      y "Casos en seguimiento" correctamente en ambos casos.
-- [x] Casos relevantes para el abogado (`GET /api/matching/relevant-cases`) — devuelve las
-      áreas médicas del perfil del abogado correctamente.
-
-**Bugs encontrados y corregidos en esta verificación** (commit `a38b5be`)
-- `lawyers.component.ts` enviaba el `id` de `LawyerProfile` como `toLawyerId` al crear una
-  solicitud de contacto, pero el backend resuelve ese campo contra `User.id`
-  (`ProfileRepository.findById`). Causaba `404 Abogado no encontrado` al pedir contacto con
-  cualquier abogado. Fix: usar `lawyer.userId` en `sendContactRequest()` y `hasActiveRequest()`.
-- `risk.component.ts` mostraba `"Modelo vrf-v1"` (prefijo `v` duplicado, ya que
-  `modelVersion` del ml-service ya incluye la `v`: `"rf-v1"`). Fix: quitar el prefijo hardcodeado.
-
-**Pendiente de verificar**
-- [ ] Panel de Administrador (usuarios, métricas, auditoría).
-- [ ] Documentos clínicos: subida, versionado y firma (hash SHA-256).
-- [ ] Despliegue real en Vercel/Railway (la verificación de arriba es 100% local).

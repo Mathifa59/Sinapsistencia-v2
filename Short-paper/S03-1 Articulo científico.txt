@@ -1,0 +1,679 @@
+Taller de Proyecto I
+2025-02
+SEMANA 4
+ARTÍCULO CIENTÍFICO
+• Artículo Científico
+• Fuente de Publicación Indexada
+• Estructura de un Artículo Científico
+• Estado del Arte
+Temario semana
+Logro de la sesión
+Al finalizar la sesión, el estudiante, será capaz de:
+Conocer que es un artículo científico, sus tipos y los tipos de fuentes para su publicación 
+(revistas y congresos), y reconocer las partes fundamentales de un artículo científico. 
+y  redactará su tema de tesis y de su artículo a través  de la revisión de la literatura 
+especializada, siguiendo una metodología aprendida.
+Artículo Científico
+1. Artículo Científico
+Definiciones
+• Es un texto de extensión breve que tiene como propósito esencial “comunicar los 
+resultados de investigaciones, ideas y debates de una manera clara, concisa y 
+fidedigna”.
+(UNESCO, Guía para la Redacción de Artículos Científicos destinados a la 
+Publicación, Paris, 1983)
+• Un artículo científico es un informe escrito y publicado que describe resultados de 
+investigación originales.
+(Day, 1998)
+1. Artículo Científico
+Definición de Artículo Original
+• Un texto pertenece a la categoría de “publicaciones originales” cuando contribuye 
+a ampliar considerablemente el conocimiento o la comprensión de un problema y 
+está redactado de tal manera que un investigador competente pueda repetir los 
+experimentos, observaciones, los cálculos o razonamientos teóricos del autor y 
+juzgar sus conclusiones y la precisión de su trabajo.
+(UNESCO, Guía para la Redacción de Artículos Científicos destinados a la 
+Publicación, Paris, 1983)
+• Una publicación científica primaria aceptable debe ser la primera divulgación que 
+contenga suficiente información para que los pares (1) puedan evaluar las 
+observaciones, (2) puedan repetir los experimentos y (3) puedan evaluar los procesos 
+intelectuales; además, debe ser susceptible a la percepción sensorial, esencialmente 
+permanente, estar disponible para la comunidad científica sin restricciones y ser 
+revisada regularmente por uno o más de los principales servicios secundarios 
+reconocidos.
+(Gaste & Day, 2022)
+1. Artículo Científico
+Características del artículo original:
+1. Novedad:
+• Reporta hallazgos, métodos o aplicaciones no publicados previamente.
+• Ejemplo: Un estudio que prueba la eficacia de un nuevo material compuesto en la 
+construcción de puentes.
+2. Rigor metodológico:
+• Describe detalladamente el diseño experimental, herramientas y procedimientos, 
+permitiendo la replicabilidad.
+• Ejemplo: Uso de ensayos de fatiga bajo normas ASTM en ingeniería mecánica.
+3. Sigue una estructura
+Ejemplo IMRD
+• Introducción: Contexto, objetivos y justificación.
+• Metodología: Pasos para obtener los datos.
+• Resultados: Hallazgos sin interpretación.
+• Discusión: Análisis e implicaciones de los resultados.
+4. Revisión por pares:
+• Es evaluado por expertos en el campo antes de su publicación para garantizar calidad y 
+originalidad.
+5. Contribución al campo:
+• Responde a una pregunta de investigación no abordada o mejora soluciones existentes.
+• Ejemplo: Un algoritmo de machine learning que optimiza el consumo energético en redes 
+5G.
+1. Artículo Científico
+Tipos:
+Editorial
+Es un artículo redactado por el editor de la revista. 
+En general trata de forma genérica de uno de los tópicos de publicación de la revista, o su 
+tendencia, o sobre las publicaciones en la revista, y casi siempre se invita a publicar.
+In memory
+Es un artículo que resume la labor realizada por un científico, por lo general fallecido, 
+mostrando sus  logros y aportes al área. Es en general un artículo de homenaje. 
+Comunicación corta (short communication)
+Es un artículo muy sucinto, que se centra en un aporte, no incluye estado del arte ni 
+introducción. Por lo general presenta ideas innovadoras y/o avances recientes por desarrollarse. 
+También puede incluir comentarios sobre un paper publicado. En algunos casos también se 
+refiere a paper de congresos.
+Carta al editor
+Es un artículo muy sucinto que: discute, o critica, o comunica resultados semejante de un 
+artículo publicado, u opina sobre la política editorial. 
+Estado del Arte (Literature Review)
+Es un artículo que presenta el estado del arte sobre un tema, en general presentan amplia 
+literatura, y un análisis sucinto de los mismos. Esto artículos en su título ene general incluye una 
+de las siguientes palabras: Review, State of Art, Taxonomy, 
+Aporte (original paper)
+Es un artículo que contribuye al estado del arte, esto es, describe nuevas formas para resolver un 
+problema.
+1. Artículo Científico
+Editorial
+
+1. Artículo Científico
+Comunicación corta (short communication)
+
+1. Artículo Científico
+Estado del Arte (Literature Review)
+
+Estándares:
+• Original (similaridad)
+• Fidedigno
+• Repetible
+• Sucinto
+• Respeta formato
+• Lenguaje objetivo y correcto
+• Sostenible (referencias, lógica)
+1. Artículo Científico
+1. Artículo Científico
+Este curso se centra en artículos de aporte (original)
+2. Fuentes de publicación indexada
+Indexación
+1. ¿Qué es la indexación?
+La indexación es el proceso mediante el cual revistas y congresos son incluidos en 
+bases de datos académicas reconocidas. Estas bases verifican estándares de calidad 
+como:
+• Rigor en la revisión por pares.
+• Originalidad y contribución científica.
+• Periodicidad y estabilidad editorial.
+2. Fuentes de publicación indexada
+Bancos de Revistas
+Base de Datos Descripción Ejemplos en Ingeniería
+Scopus
+Cubre más de 25,000 revistas 
+técnicas y científicas. Clasifica 
+revistas por cuartiles (Q1-Q4).
+Applied Energy (Q1), IEEE 
+Transactions on Industrial 
+Informatics (Q1).
+Web of Science 
+(WoS)
+Incluye revistas del Science Citation
+Index (SCI) y Emerging Sources
+Citation Index (ESCI) NO considere.
+Nature Materials (Q1), Journal
+of Cleaner Production (Q1).
+PubMed
+Especializada en ciencias 
+biomédicas, pero incluye ingeniería 
+médica y biotecnología.
+Biomaterials (Q1), IEEE 
+Transactions on Biomedical
+Engineering (Q1).
+IEEE Xplore
+Plataforma líder en ingeniería 
+eléctrica, computación y 
+tecnologías afines.
+IEEE Transactions on Power
+Systems (Q1), IEEE Access (Q2).
+Engineering Village
+Base de datos especializada en 
+ingeniería civil, mecánica y 
+materiales.
+Cement and Concrete 
+Research (Q1), Composite 
+Structures (Q1).
+2. Fuentes de publicación indexada
+Bancos de Revistas
+
+2. Fuentes de publicación indexada
+Bancos de Congresos
+Base de Datos Descripción Ejemplos en Ingeniería
+Scopus Indexa actas de congresos técnicos 
+y científicos.
+IEEE International Conference on
+Robotics and Automation (ICRA).
+Web of Science
+Incluye conferencias en 
+el Conference Proceedings
+Citation Index (CPCI).
+ASME International Mechanical
+Engineering Congress (IMECE).
+IEEE Xplore Publica actas de congresos 
+organizados por IEEE.
+IEEE Global Communications
+Conference (GLOBECOM).
+ACM Digital Library Especializada en computación y 
+tecnologías de la información.
+ACM SIGKDD Conference on
+Knowledge Discovery and Data Mining
+(KDD).
+2. Fuentes de publicación indexada
+Diferencias de publicaciones en revista y congresos
+
+2. Fuentes de publicación indexada
+Diferencias de publicaciones en revista y congresos
+
+2. Fuentes de publicación indexada
+Diferencias de publicaciones en revista y congresos
+
+3. Estructura de un artículo científico
+En revistas indexada de alto impacto (cuartil Q1 o Q2): 
+
+3. Estructura de un artículo científico
+En revistas indexada de alto impacto (cuartil Q1 o Q2): 
+
+Título
+Autor y Afiliación
+Abstract (resumen)
+Key words (descriptores)
+Contenido
+Estructura
+Acknowledge (agradecimiento)
+Otras informaciones
+References (referencias)
+Estructura
+Editorial
+Volumen/serie (año) pag -pag
+Nombre de la revista
+Información de la 
+Revista
+3. Estructura de un artículo científico
+Los artículos en revistas de alto impacto (Q1/Q2 en Scopus o WoS siguen una estructura rigurosa y 
+estandarizada para garantizar claridad, rigor científico y relevancia. La estructura de un artículo depende 
+de la Editorial, sin embargo, una estructura típica es:
+1. Título
+2. Autores y Afiliaciones
+3. Resumen (Abstract)
+4. Palabras Clave
+5. Introducción
+6. Revisión de literatura
+7. Aporte
+8. Materiales y Métodos
+9. Resultados
+10. Discusión
+11. Conclusiones
+12. Agradecimientos
+13. Referencias
+3. Estructura de un artículo científico
+1. Título
+2. Autores y Afiliaciones
+3. Resumen (Abstract)
+4. Palabras Clave
+5. Introducción
+6. Revisión de literatura
+7. Aporte
+8. Materiales y Métodos
+9. Resultados
+10. Discusión
+11. Conclusiones
+12. Agradecimientos
+13. Referencias
+Propósito: Reflejar el contenido de manera precisa
+y atractiva.
+Características:
+- Breve (10-15 palabras).
+- Incluye palabras clave relevantes para búsquedas
+académicas (problema, aporte, técnica, contexto).
+Ejemplo: Maximizing Survival in Pediatric 
+Congenital Cardiac Surgery Using Machine 
+Learning, Explainability, and Simulation 
+Techniques
+
+3. Estructura de un artículo científico
+1. Título
+2. Autores y Afiliaciones
+3. Resumen (Abstract)
+4. Palabras Clave
+5. Introducción
+6. Revisión de literatura
+7. Aporte
+8. Materiales y Métodos
+9. Resultados
+10. Discusión
+11. Conclusiones
+12. Agradecimientos
+13. Referencias
+Propósito: Identificar los autores y las instituciones
+donde laboran.
+Características:
+• Lista completa de autores con sus instituciones y
+correos institucionales.
+• Indicación del autor correspondiente (con
+asterisco o nota al pie).
+Ejemplo:
+
+3. Estructura de un artículo científico
+1. Título
+2. Autores y Afiliaciones
+3. Resumen (Abstract)
+4. Palabras Clave
+5. Introducción
+6. Revisión de literatura
+7. Aporte
+8. Materiales y Métodos
+9. Resultados
+10. Discusión
+11. Conclusiones
+12. Agradecimientos
+13. Referencias
+Propósito: Explicar brevemente de que trata el
+artículo, a través de un breve recuento de los puntos
+principales del artículo, incluyendo el objetivo,
+métodos, resultados y conclusiones.
+Estructura:
+• Contexto y relevancia del tema (1-2 frases).
+• Objetivo/Propósito: que se desea resolver,
+responder o probar.
+• Aporte: Breve descripción del aporte.
+• Métodos: Breve descripción del diseño
+experimental.
+• Resultados: Hallazgos principales (con datos
+cuantitativos si es posible).
+• Conclusiones: Implicaciones y contribución al
+campo.
+Extensión: 150-250 palabras.
+
+3. Estructura de un artículo científico
+1. Título
+2. Autores y Afiliaciones
+3. Resumen (Abstract)
+4. Palabras Clave
+5. Introducción
+6. Revisión de literatura
+7. Aporte
+8. Materiales y Métodos
+9. Resultados
+10. Discusión
+11. Conclusiones
+12. Agradecimientos
+13. Referencias
+Propósito: Facilitar la indexación y búsqueda del
+artículo.
+Recomendaciones:
+• 4-6 palabras clave, separadas por comas.
+• Usar términos estandarizados.
+Ejemplo:
+
+3. Estructura de un artículo científico
+1. Título
+2. Autores y Afiliaciones
+3. Resumen (Abstract)
+4. Palabras Clave
+5. Introducción
+6. Revisión de literatura
+7. Aporte
+8. Materiales y Métodos
+9. Resultados
+10. Discusión
+11. Conclusiones
+12. Agradecimientos
+13. Referencias
+Propósito: Introducir y contextualizar la
+investigación realizada y justificar su originalidad.
+Estructura:
+• Contexto e importancia del problema
+• Problema e importancia
+• Breve síntesis crítica de estudios previos,
+destacando vacíos y limitaciones.
+• Motivación (justificación) del aporte.
+• Objetivo/Propósito: que pretende hacer,
+responder (pregunta de investigación) o probar
+(hipótesis de investigación).
+• Contribución: Novedad y valor agregado del
+trabajo.
+• Organización del artículo: breve mención de las
+partes del artículo
+
+3. Estructura de un artículo científico
+1. Título
+2. Autores y Afiliaciones
+3. Resumen (Abstract)
+4. Palabras Clave
+5. Introducción
+6. Revisión de literatura
+7. Aporte
+8. Materiales y Métodos
+9. Resultados
+10. Discusión
+11. Conclusiones
+12. Agradecimientos
+13. Referencias
+Propósito: Dar a conocer brevemente los esfuerzos
+de la literatura para resolver el problema de estudio,
+resaltando las dificultades, limitaciones o vacíos.
+Estructura variada, puede ser:
+• Síntesis de aportes/técnicas
+• Tablas de síntesis de aportes/técnicas
+• Tablas comparativas de aportes/técnicas
+• Tabla de caracterización de aportes/técnicas
+Además, debe incluir una conclusión de lo revisado
+
+3. Estructura de un artículo científico
+1. Título
+2. Autores y Afiliaciones
+3. Resumen (Abstract)
+4. Palabras Clave
+5. Introducción
+6. Revisión de literatura
+7. Aporte
+8. Materiales y Métodos
+9. Resultados
+10. Discusión
+11. Conclusiones
+12. Agradecimientos
+13. Referencias
+Propósito: Dar a conocer el valor añadido que la
+investigación proporciona a la resolución del
+problema, al tema o campo de estudio.
+Tipos de aporte:
+• Modelo, marco de trabajo
+• Teoría
+• Conceptos
+• Métodos
+• Artefacto, prototipo
+• Evidencias
+Ejemplo:
+Suponga un artículo sobre la predicción de los
+resultados de una elección presidencial
+Aporte: Modelo de predicción de los resultados de
+una elección presidencial basado en aprendizaje
+automático y simulación
+
+3. Estructura de un artículo científico
+1. Título
+2. Autores y Afiliaciones
+3. Resumen (Abstract)
+4. Palabras Clave
+5. Introducción
+6. Revisión de literatura
+7. Aporte
+8. Materiales y Métodos
+9. Resultados
+10. Discusión
+11. Conclusiones
+12. Agradecimientos
+13. Referencias
+Propósito: Permitir la replicabilidad del estudio a
+través de la descripción de los materiales y métodos
+usados.
+Subsecciones:
+• Diseño experimental: Tipo de estudio (ej:
+experimental, simulación, revisión sistemática).
+• Materiales/Herramientas: Equipos, software,
+bases de datos.
+• Procedimientos: Pasos detallados (ej:
+protocolos, algoritmos).
+• Análisis estadístico: Pruebas utilizadas (ej:
+ANOV A,regresión).
+Ejemplo en ingeniería:
+Las simulaciones se realizaron en MATLAB
+R2023a, utilizando el algoritmo de optimización de
+enjambre de partículas (PSO) con 1000 iteraciones
+y una población de 50 partículas…
+
+3. Estructura de un artículo científico
+1. Título
+2. Autores y Afiliaciones
+3. Resumen (Abstract)
+4. Palabras Clave
+5. Introducción
+6. Revisión de literatura
+7. Aporte
+8. Materiales y Métodos
+9. Resultados
+10. Discusión
+11. Conclusiones
+12. Agradecimientos
+13. Referencias
+Propósito: Presentar hallazgos sin interpretación.
+Formato:
+• Texto: Descripción narrativa de los datos.
+• Visualizaciones: Tablas, gráficos, diagramas
+(con leyendas claras).
+Ejemplo:
+
+3. Estructura de un artículo científico
+1. Título
+2. Autores y Afiliaciones
+3. Resumen (Abstract)
+4. Palabras Clave
+5. Introducción
+6. Revisión de literatura
+7. Aporte
+8. Materiales y Métodos
+9. Resultados
+10. Discusión
+11. Conclusiones
+12. Agradecimientos
+13. Referencias
+Propósito: Interpretar resultados, vincularlos con la
+literatura existente y reflexionarlos con sus
+implicaciones.
+Consideraciones:
+• Explicación de cómo los resultados responden a
+la pregunta de investigación.
+• Comparación con estudios previos (ej: "Nuestros
+hallazgos coinciden con Zhang et al. (2022) en
+X, pero difieren en Y debido a...").
+• Limitaciones del estudio.
+• Implicaciones prácticas o teóricas.
+
+3. Estructura de un artículo científico
+1. Título
+2. Autores y Afiliaciones
+3. Resumen (Abstract)
+4. Palabras Clave
+5. Introducción
+6. Revisión de literatura
+7. Aporte
+8. Materiales y Métodos
+9. Resultados
+10. Discusión
+11. Conclusiones
+12. Agradecimientos
+13. Referencias
+Propósito: Resaltar contribuciones y sugerir futuras
+investigaciones.
+Estructura:
+• Resumen de hallazgos clave.
+• Relevancia para el campo.
+• Recomendaciones para trabajos futuros.
+
+3. Estructura de un artículo científico
+1. Título
+2. Autores y Afiliaciones
+3. Resumen (Abstract)
+4. Palabras Clave
+5. Introducción
+6. Revisión de literatura
+7. Aporte
+8. Materiales y Métodos
+9. Resultados
+10. Discusión
+11. Conclusiones
+12. Agradecimientos
+13. Referencias
+Propósito: Reconocer financiamiento,
+colaboradores técnicos o instituciones que han
+apoyado a la investigación.
+Ejemplo:
+Este trabajo fue financiado por el Fondo Nacional
+de Ciencia y Tecnología (Proyecto XYZ-2025).
+Agradecemos al Laboratorio Nacional de
+Computación Científica por el procesamiento de los
+modelos.
+
+3. Estructura de un artículo científico
+1. Título
+2. Autores y Afiliaciones
+3. Resumen (Abstract)
+4. Palabras Clave
+5. Introducción
+6. Revisión de literatura
+7. Aporte
+8. Materiales y Métodos
+9. Resultados
+10. Discusión
+11. Conclusiones
+12. Agradecimientos
+13. Referencias
+Propósito: Dar crédito a fuentes citadas y permitir
+profundización.
+Formato: Depende de la revista (APA, IEEE,
+Vancouver,etc.).
+Recomendaciones:
+• Priorizar fuentes recientes (últimos 5 años) y de
+alto impacto.
+• Incluir al menos 20-30 referencias para artículos
+en revistas.
+
+3. Estructura de un artículo científico
+14. Otras partes (depende de la revista):
+
+3. Estructura de un artículo científico
+La estructura del artículo depende de la revista 
+
+Revisión de la literatura
+Definición
+1. Estado del arte- Definición
+El estado del arte es todo el conocimiento desarrollado para
+resolver el problema de estudio
+Considerar:
+• El problema es definido independiente de la organización.
+• Todoel conocimiento, desde el origen del problema hasta
+hoy.
+• Todo el conocimiento que se encuentra en las referencias
+bibliográficas (artículos de revistas, artículos de congresos,
+tesis, reportes técnicos, handbook, libro blanco -documento
+oficial publicado generalmente por gobiernos, organismos
+internacionales o instituciones académicas).
+1. Estado del Arte- Definición
+El estado del arte en general es muy abundante
+
+1. Estado del Arte - Definición
+Es decir el estado del arte para un problema es dado por: los
+modelos, métodos, algoritmos, framework, aplicativos,
+herramientas, prototipos, estándares, regulaciones, buenas
+prácticas, procedimientos, taxonomías, casos de estudios,
+sistemas, etc. que han sido desarrollado para el problema de
+estudio, desde sus orígenes hasta la actualidad, y que
+encuentran en las diversas fuentes bibliográficas.
+→ El estado del arte en general es muy abundante
+1. Estado del Arte - Definición
+Considerando que el estado del arte es muy abundante, para
+la investigación es suficiente que este se centre en el aporte
+(propuesta) y ello es suficiente.
+¿Cuál es su aporte?
+Un modelo, un método, un algoritmo, una herramienta, un
+prototipo, un sistema, una arquitectura, un marco de trabajo,
+un constructo.
+→ Concentre sus estudios del estado del arte en el aporte.
+Finalidad
+2. Estado del Arte - Finalidad
+La finalidad del estudio del estado del arte es conocer todo
+el conocimiento que existe sobre el problema de estudio de
+manera que permita:
+• Conocer los aportes y sus componentes
+→ Permite bosquejar un aporte
+• Identificar los vacíos, falencias, limitaciones
+→ Permite identificar la novedad para el Aporte
+• Identificar los mejores aportes
+→ Reproducir, mejorar, innovar (aporte)
+• Conocer los procesos de validación
+→ Permite diseñar la validación de la tesis.
+• Identificar el mejor conocimiento para:
+→ Aplicar/Adaptar/Mejorar/Innovar
+2. Estado del Arte - Finalidad
+El estudio del estado del arte permite comprender los aportes, sus
+componentes, su novedad, las técnicas que usa y su forma de validar .Por lo
+tanto, el estado del arte es la base para hacer un aporte.
+
+Método
+3. Revisión literatura- Método
+Cuando se realiza la revisión de literatura de forma sistemática, se
+requiere seguir un método que garantice calidad, exhaustividad y 
+pertinencia.
+En general los métodos, siguen los pasos:
+• Planificación
+• Desarrollo Usual en los artículos de
+revisión sistemática de la
+literatura
+• Resultados
+• Análisis
+• Discusión
+• Logro
+Requisitos para la tesis/artículo
+4. Revisión Literatura– Requisito para la 
+tesis/artículo
+La revisión literatura en una tesis de pregrado requiere:
+• Ser basada en artículos de revistas indexadas en Scopus/WoS
+• Los artículos deben ser de un periodo de 3 a 5 años con
+artículos publicado en el año de la investigación.
+• No requiere ser sistemática.
+• Los artículos deben ser de aporte (original) y competir conlo
+que desea desarrollar.
+• Al menos 30 artículos por tesis.
+Esquema de desarrollo
+5. Revisión Literatura– Esquema de Desarrollo
+El desarrollo del estado del arte seguirá el siguiente esquema:
+1. Búsqueda y selección de Artículos
+2. Estudios de artículos (lectura de artículos)
+3. Resumen/síntesis de artículos
+4. Redacción del Capitulo III– Estado del arte
+5. Redacción del Artículo– Revisión de literatura
+Referencias
+Scopus: https://scopus.com
+Web of Science: https://access.clarivate.com/
+Scimago: https://scimagojr.com
+IEEE Xplore: https://ieeexplore.ieee.org/
+ACM: https://dl.acm.org/
+IGI Global: https://www.igi-global.com/
+Springer: https://www.springer.com/
+Science Direct: https://www.sciencedirect.com/
+Emerald: https://www.emerald.com/insight/
+Taylor & Francis: https://taylorandfrancis.com/
+MDPI: https://www.mdpi.com/
+Referencias
+UNESCO (1983). Guía para la Redacción de Artículos Científicos destinados a la 
+Publicación, Paris, 
+https://unesdoc.unesco.org/ark:/48223/pf0000055778_spa?posInSet=1&queryId=774
+1715e-7831-43a2-a36e-fca493269099
+Robert A. Day, (1998). How to Write and Publish a Scientific Paper. 5th Edition, 
+Published by The Oryx Press. Phoenix, Arizona
+Barbara Gaste & Robert A. Day, (2022). How to Write and Publish a Scientific Paper. 
+Nine Edition, Santa Barbara, CA: Greenwood.
+Gracias
+Material: 
+Dsc. David Mauricio

@@ -36,7 +36,7 @@ import { cn, getInitials } from '../../../shared/utils/cn';
         @for (lawyer of filteredLawyers(); track lawyer.id) {
           @let matchScore = getMatchScore(lawyer.id);
           @let matchReasons = getMatchReasons(lawyer.id);
-          @let alreadyRequested = hasActiveRequest(lawyer.userId);
+          @let alreadyRequested = hasActiveRequest(lawyer.id);
           @let isHighMatch = matchScore !== undefined && matchScore >= 80;
 
           <div [class]="cn('bg-white rounded-lg border p-5 space-y-4', isHighMatch ? 'border-amber-300 ring-1 ring-amber-200 bg-amber-50/30' : 'border-slate-200')">
@@ -180,8 +180,8 @@ export class DoctorLawyersComponent {
     onSuccess: () => this.queryClient.invalidateQueries({ queryKey: ['matching', 'contact-requests'] }),
   }));
 
-  protected sendContactRequest(lawyer: { userId?: string; fullName?: string }): void {
-    if (!lawyer.userId) return;
-    this.contactMutation.mutate(lawyer.userId);
+  protected sendContactRequest(lawyer: { id?: string; fullName?: string }): void {
+    if (!lawyer.id) return;
+    this.contactMutation.mutate(lawyer.id);
   }
 }

@@ -1,0 +1,2470 @@
+Coauthor Writing Guide - UPC
+A paper should allow readers to quickly discover the main
+results, and then, if interested, to examine the supporting
+evidence. Structure your paper to support this behavior:
+1) Describe the work in the context of accepted scientiﬁc
+knowledge.
+2) State the idea that is being investigated, often as a theory
+or hypothesis.
+3) Explain what is new about the idea, what is being
+evaluated, or what contribution the paper is making.
+4) Justify the theory, by proofs or experiments.
+I. A S IMPLIFIED PICTURE
+1) Work on a (relevant) Computer Science/Software Engi-
+neering/Information System question
+2) Write a scientiﬁc paper
+3) Submit the paper to an appropriate journal/conference
+4) If accepted for publication then
+• Add one line to CV
+• Present work at scientiﬁc meetings
+5) Else (paper rejected or to be modiﬁed) Go to Step 2
+Table I shows the activities week by week for developing:
+• Conference paper
+• Journal paper
+II. TP1
+F ormats
+Most of the conferences use one of these formats: IEEE
+template, Springer template, ACM template, Scitepress tem-
+plate.
+Week 1
+1) The coauthor explains the paper structure:
+• Title and information about authors
+• Abstract
+• Introduction
+• Related Works
+• Main Contribution
+– Context/Background/Overview
+– Method
+• Experiments
+• Conclusions and Perspectives
+• Bibliography
+Week 2
+• The students present a ﬁrst version of the introduction:
+– What is the problem?
+– Why is it interesting and important?
+– Why is it hard? (e.g., why do naive approaches fail?)
+– Why hasn’t it been solved before? (or, what’s wrong
+with previous proposed solutions? How does ours
+differ?)
+– What are the key components of our approach and
+results? Also include any speciﬁc limitations.
+Fig 1 shows the structure of the introduction in the ﬁrst
+two pages (in red).
+Week 3
+• The students present a ﬁnal version of the introduction,
+after the observations of the coauthor.
+Reproducing arm movements based on Pose
+Estimation with robot programming by
+demonstration
+FirstName LastName
+Universidad Peruana de
+Ciencias Aplicadas (UPC)
+Lima, Peru
+x.........@upc.edu.pe
+FirstName LastName
+Universidad Peruana de
+Ciencias Aplicadas (UPC)
+Lima, Peru
+x.........@upc.edu.pe
+FirstName LastName
+Universidad Peruana de
+Ciencias Aplicadas (UPC)
+Lima, Peru
+x.........@upc.edu.pe
+Abstract—The teaching of robot movements has always been
+considered a complex subject in which there is a lot of interest,
+since the slightest change in the robot programming can generate
+a high downtime that can last more than a month. In this work,
+we carried out a study of human movements to implement
+a new method of robot programming by demonstration using
+neural networks. Current methods require specialists with high
+mathematical and logical knowledge to teach robot movements.
+Using a famous pose estimation algorithm called Open Pose and a
+3D lifting method we obtain the estimated pose of the person arm
+in a simulated 3D space. Then, we use various classiﬁcation tools
+to traduce the predicted pose into the robot. The results show
+that it is feasible to make robot programming more accessible
+using pose estimation.
+Index Terms —Pose Estimation, Robot Programming by
+Demonstration, Open Pose, Neural Networks.
+I. I NTRODUCTION
+What is the problem?
+  
+Currently, many companies use robots with Machine Learn-
+ing technology to perform a variety of tasks, such as welding,
+machine care, material removal or other activity, since it
+would help humans to work together with robots, in order
+to enhance the operation of its warehouses and factories.
+After the emergence of the pandemic caused by COVID 19
+in 2020, multiple companies are re-evaluating their business
+model to adapt to this situation, which has accelerated the
+introduction of robots in various industries, since this virus
+has exposed the limitations of human labor 1. The method
+currently used to establish the movements of a robot is
+quite comprehensive and has a complex learning curve,
+since any alteration in robots would mean weeks or months
+of reprogramming by people who require high knowledge,
+which generates a robot downtime, a high cost and low
+consumption time for the company [1].
+.
+Why is it interesting and important?
+  
+Our goal is to provide an application that allows estimating
+the pose of a person’s arms in a simulated 3D space to
+transfer said information to a robot, which will allow people
+who have little or no knowledge in programming and / or
+robotics could program the actions to be carried out by a
+robot.
+.
+Why is it hard? (e.g., why do naive approaches fail?)
+  
+You could estimate the pose of a video with some algorithms
+as OpenPose [2], DeepCut [3], RMPE (Alpha Pose) [4] or
+PoseNet [5]. However, it isn’t perfect because even though
+OpenPose generates better results than the other algorithms
+mentioned previously, it needs a 3D lifting method [6] to
+convert information obtained in 2D to 3D. Additionally, it
+should be considered that information from the human body
+can’t be directly translated into a robot, since the latter has
+a large number of rotors.
+.
+Why hasn’t it been solved before? (or, what’s wrong with previous proposed solutions? How does ours differ?)
+  
+There are some solutions that have a similar approach, since
+they seek to do robot programming by demonstration. For
+example, in [7], the authors are inspired by the Evolutionary
+Algorithms framework to propose a framework, called by
+them as EPG. Therefore, they analyze the “policies” to
+predict movement through trial and error, rather than using
+a pose estimation method. This allows robots to perform
+movements learned by human demonstration in the face of
+possible changes in the environment. However, this process
+is relatively slow, which generates an unnecessary waste of
+time in cases where there are no changes in the environment.
+In [1], the authors use the YOLO and OpenPose algorithms
+to get the action that is performed and smooths the results
+with a Gaussian ﬁlter, without using nor estimating human
+pose. Instead, we estimate the human pose with OpenPose
+algorithm and then use a neural network to help us adapt the
+movement so that it can be reproduced by the robot.
+.
+What are the key components of our approach and results? Also include any speciﬁc limitations.
+  
+The key components of our research are composed by Open
+Pose, the most popular free non-commercial pose estimation
+method used to obtain the 2D pose of the person. Then, we
+use the 3D lifting method in order to translate the estimated
+2D pose to a 3D pose. These method of 3D pose estimation
+is fast but has some precision problems with the estimated
+points in the same axis of the point of view. Furthermore,
+we use the Unity3D to generate a dataset of 3D models and
+the ROS integration to simulate a robotic arm that repeats
+the human movements.
+.
+Summary of contributions
+  
+Our main contributions are as follows:
+• We are implementing a method that allows us to trans-
+form the input of a video into a 3D arm estimation.
+Then, we translate this information through robot pro-
+gramming.
+• We propose a arm movement dataset based on the the-
+ory of the kinesphere [8] using Unity3D 2 and different
+person models extracted from Mixamo 3.
+• We build a test dataset which consists videos of 10 test
+subjects performing 10 preset movements to be used in
+experiments.
+.
+Paper roadmap
+  
+This paper is distributed in the following sections: First, we
+review the related works of robot programming by demon-
+stration and pose estimation in Section II. Then, we talk
+about relevant concept and theory related to the background
+of our research in Section and describe in more detail
+our main contribution in Section III. Furthermore, we will
+explain procedures performed and the experiments that were
+carried out in this work in Section ??. In the end, we will
+show the main conclusions of the project and we will indicate
+some recommendations for future work in Section ??.
+.
+II. R ELATED WORKS
+Mini-introduction of the section
+  
+The ﬁeld of Robot Programming by Demonstration has been
+around for a few years as people wanted to discover new
+ways to teach a robot movements without the need for
+expensive equipment like detectors. Thus, a great variety
+of methods related to this ﬁeld were proposed over the
+years to improve the results more and more. In this section,
+related works that use techniques similar to the ones we use
+are mentioned. These articles mention the disadvantages of
+relying on kinesthetic demonstration when you want to teach
+a robot such as the fact that robots can only learn movements
+for speciﬁc cases and situations, which causes them to make
+mistakes before various required changes in movement.
+First Related Work
+  
+In [1], the authors propose a new LfD (Learning from
+Demonstration) system that learns to perform the actions
+demonstrated through the recognition of patterns and objects
+in an experimental environment. They use the YOLO and
+OpenPose algorithms to obtain the action that is performed
+and smooth the results with a Gaussian ﬁlter, without using
+or estimating the human pose. Instead, we estimate the
+human pose and then use a neural network to convert human
+arm movements into robotic arm movements that represent
+the same action.
+Second Related Work
+  
+In [9], the authors propose an action segmentation approach
+by frame and recognition that is invariant to the number or
+order of the object instances, does not require a temporal
+prioritization of the segmentation and predicts actions for
+each hand individually through the relationship between
+the object and the action. During the 2D pre-processing
+phase, object detection is done with the YOLO algorithm
+and the user’s hands are detected using OpenPose. These
+objects are later used to locate the human pose in 3D space.
+Instead, we estimate the 2D human pose directly and then
+use a 3D lifting method to convert the previously calculated
+coordinates from a 2D plane to a 3D plane. Also, we use
+this method since it allows us to improve the prediction of
+the network for the ﬁnal position.
+Third Related Work
+  
+In [10], the authors construct a robotic arm training model
+using videos of workers performing designated input tasks.
+The method used to solve the problem is visual demonstra-
+tion by creating a context translation method based on coded
+networks. A Markov network and a convolutional network
+are built to be able to translate human movements to the
+movements of a robot, generating a cycle of iterations in
+which the movement is perfected until the task is perfectly
+achieved. In other words, they analyze the context (setting,
+orientation, etc.) to decide how the robot will move. Instead,
+we seek to imitate human movements without considering
+external factors to streamline the process of Robot Program-
+ming by Demonstration.
+Fourth Related Work
+  
+In [11], the authors propose a method that learns the
+movements in a kinesthetic way and receives visual support
+to know if there are alterations in the environment. This
+allows the robots to make movements in the face of possible
+changes in the environment. Instead, we use a visual aid to
+estimate the pose and later be able to teach the robot that
+movement; however, we do not analyze the possible changes
+in the environment, since this process would considerably
+increase the complexity and make the process relatively
+slower, which generates an unnecessary waste of time in
+cases where there are no changes in the environment.
+Fig. 1: Introduction example
+TP1 TP2
+Presentation of the conference paper structure=⇒ 1• ⇐= Presentation of the journal paper structure
+Section 1: Introduction−−−−−−−−−−−−−−−−−−−−−→
+{ 2• ⇐= 3.1. Experimental Protocol
+ Section 5: Experiments3• ⇐= 3.2. Quantitative Results
+Section 2: Related Works
+{ 3 related works=⇒ 4• ⇐= 3.3. Qualitative Results
+2 related works=⇒ 5• ⇐= 5 related works }
+Section 2: Related Works
+Section 3: Contribution
+
+
+3.1. Context=⇒ 6• ⇐= 5 related works
+3.2. Method
+
+
+7• ⇐= 3.1. Preliminary Concepts}
+Section 3: Problem Statement and Overview8• ⇐= 3.2. The problem
+9• }
+←−−−−−−−−−−−−−−−−−−−−−−Section 4: Method
+Section 4: Experiments
+
+
+4.1. Experimental Protocol=⇒ 10•
+4.2. Results =⇒ 11• }
+←−−−−−−−−−−−−−−−−−−−−−−Section 1: Introduction4.3. Discussion=⇒ 12•
+Section 5: Conclusions and Perspectives−−−−−−−−−−−−−−−−−−−−−−−−−−−−→13• ←−−−−−−−−−−−−−−−−−−−−−−−−−−−Section 6: Conclusion and Perspectives
+Working title and an abstract=⇒ 14• Working title and an abstract
+Conference Paper
+Journal Paper
+TABLE I: A Simpliﬁed Picture.
+Week 4
+• The students present the ﬁrst version of the related works:
+– a mini-version of the state-of-the-art
+– compare your work with at least 5 papers out of the
+papers from the State-of-the-Art.
+– Most results are additions to existing knowledge.
+– A literature review is used to:
+∗ describe existing knowledge,
+∗ compare the new results to similar previously
+published results, and
+∗ explain how the new results extend existing
+knowledge.
+– Can also be used to explain how existing methods
+differ from one another and what their respective
+strengths and weaknesses are.
+Fig 2 shows the structure of the related works in two
+pages (in blue).
+.
+What are the key components of our approach and results? Also include any speciﬁc limitations.
+  
+The key components of our research are composed by Open
+Pose, the most popular free non-commercial pose estimation
+method used to obtain the 2D pose of the person. Then, we
+use the 3D lifting method in order to translate the estimated
+2D pose to a 3D pose. These method of 3D pose estimation
+is fast but has some precision problems with the estimated
+points in the same axis of the point of view. Furthermore,
+we use the Unity3D to generate a dataset of 3D models and
+the ROS integration to simulate a robotic arm that repeats
+the human movements.
+.
+Summary of contributions
+  
+Our main contributions are as follows:
+• We are implementing a method that allows us to trans-
+form the input of a video into a 3D arm estimation.
+Then, we translate this information through robot pro-
+gramming.
+• We propose a arm movement dataset based on the the-
+ory of the kinesphere [8] using Unity3D 2 and different
+person models extracted from Mixamo 3.
+• We build a test dataset which consists videos of 10 test
+subjects performing 10 preset movements to be used in
+experiments.
+.
+Paper roadmap
+  
+This paper is distributed in the following sections: First, we
+review the related works of robot programming by demon-
+stration and pose estimation in Section II. Then, we talk
+about relevant concept and theory related to the background
+of our research in Section and describe in more detail
+our main contribution in Section III. Furthermore, we will
+explain procedures performed and the experiments that were
+carried out in this work in Section ??. In the end, we will
+show the main conclusions of the project and we will indicate
+some recommendations for future work in Section ??.
+.
+II. R ELATED WORKS
+Mini-introduction of the section
+  
+The ﬁeld of Robot Programming by Demonstration has been
+around for a few years as people wanted to discover new
+ways to teach a robot movements without the need for
+expensive equipment like detectors. Thus, a great variety
+of methods related to this ﬁeld were proposed over the
+years to improve the results more and more. In this section,
+related works that use techniques similar to the ones we use
+are mentioned. These articles mention the disadvantages of
+relying on kinesthetic demonstration when you want to teach
+a robot such as the fact that robots can only learn movements
+for speciﬁc cases and situations, which causes them to make
+mistakes before various required changes in movement.
+First Related Work
+  
+In [1], the authors propose a new LfD (Learning from
+Demonstration) system that learns to perform the actions
+demonstrated through the recognition of patterns and objects
+in an experimental environment. They use the YOLO and
+OpenPose algorithms to obtain the action that is performed
+and smooth the results with a Gaussian ﬁlter, without using
+or estimating the human pose. Instead, we estimate the
+human pose and then use a neural network to convert human
+arm movements into robotic arm movements that represent
+the same action.
+Second Related Work
+  
+In [9], the authors propose an action segmentation approach
+by frame and recognition that is invariant to the number or
+order of the object instances, does not require a temporal
+prioritization of the segmentation and predicts actions for
+each hand individually through the relationship between
+the object and the action. During the 2D pre-processing
+phase, object detection is done with the YOLO algorithm
+and the user’s hands are detected using OpenPose. These
+objects are later used to locate the human pose in 3D space.
+Instead, we estimate the 2D human pose directly and then
+use a 3D lifting method to convert the previously calculated
+coordinates from a 2D plane to a 3D plane. Also, we use
+this method since it allows us to improve the prediction of
+the network for the ﬁnal position.
+Third Related Work
+  
+In [10], the authors construct a robotic arm training model
+using videos of workers performing designated input tasks.
+The method used to solve the problem is visual demonstra-
+tion by creating a context translation method based on coded
+networks. A Markov network and a convolutional network
+are built to be able to translate human movements to the
+movements of a robot, generating a cycle of iterations in
+which the movement is perfected until the task is perfectly
+achieved. In other words, they analyze the context (setting,
+orientation, etc.) to decide how the robot will move. Instead,
+we seek to imitate human movements without considering
+external factors to streamline the process of Robot Program-
+ming by Demonstration.
+Fourth Related Work
+  
+In [11], the authors propose a method that learns the
+movements in a kinesthetic way and receives visual support
+to know if there are alterations in the environment. This
+allows the robots to make movements in the face of possible
+changes in the environment. Instead, we use a visual aid to
+estimate the pose and later be able to teach the robot that
+movement; however, we do not analyze the possible changes
+in the environment, since this process would considerably
+increase the complexity and make the process relatively
+slower, which generates an unnecessary waste of time in
+cases where there are no changes in the environment.
+Fig. 2: Related works example
+Week 5
+• The students present a ﬁnal version of the related works,
+after the observations of the coauthor.
+Week 6
+• The students present a ﬁnal version of the context:
+– a mini-version of the theoretical framework
+– each concept/deﬁnition/theorem should have a refer-
+ence
+– Provides necessary (formal) background and termi-
+nology.
+– Deﬁnes the hypothesis and major concepts.
+Fig 3 shows the structure of the context in two pages (in
+green).
+(a) 2D Pose estimation with algorithm Open Pose.
+ (b) 3D pose estimation from the left image using a 3D lifting method.
+Fig. 1: Examples of Pose estimation for 2D and 3D representations [12].
+III. R OBOT PROGRAMMING BY DEMONSTRATION WITH
+POSE ESTIMATION
+A. Preliminary Concepts
+Mini-introduction of the section
+  
+In this section, the main concepts used in our work are
+presented. We aim to teach movements to a robot, using
+computer vision methods such as pose estimation to extract
+information from videos of a user’s body.
+First Subject
+  
+Deﬁnition 1 (Pose estimation [13]): It is the retrieval of
+geometric information regarding human movement from 2D
+images.
+When only one point of view is available (monocular cam-
+era), the appearance or arrangement of the points of interest
+of objects tends to be more difﬁcult to deduce.
+Deﬁnition 2 (2D Pose estimation [14]): 2D pose esti-
+mation tries to extract the human posture data in a two-
+dimensional environment that is used for training and cor-
+rection purposes.
+Example 1 (2D Pose Estimation): We can see the 2D pose
+estimation with the Open Pose algorithm of a soccer player
+kicking a ball in the Figure 1a.
+Deﬁnition 3 (3D Pose estimation [14]): 3D pose esti-
+mation tries to estimate the posture obtained in a three-
+dimensional simulated environment to be used in real con-
+texts such as robot training and software simulations.
+Example 2 (3D Pose Estimation): We can see the 3D pose
+estimation of a man stretching his arms to grab a box in the
+Figure 1b.
+Estimating the pose of an image or video held by several
+people simultaneously is much more complex than estimat-
+ing the pose of a single person, since the process is affected
+by a greater number of factors.
+.
+Deﬁnition 4 (Robot Programming [15]): Robot program-
+ming is the speciﬁcation of the desired motions of the robot
+such that it may perform sequences of prestored motions or
+motions computed as functions of sensory input.
+The problem is the complexity of robot programming re-
+mains one of the major barriers in adopting robotic technol-
+ogy for “Small and Medium-sized Enterprises” (SMEs).
+Among the variety of Robot Programming approaches that
+exist, the one with great potential is the following:
+.
+Second Subject
+  
+Deﬁnition 5 (Robot Programming by Demonstration
+(Robot PbD) [15]): Robot PbD refers to automatic program-
+ming of robots by demonstrating sample tasks and can be
+viewed as an intuitive way of transferring skill and tasks
+knowledge to a robot.
+Example 3: We can see how a robot learns to make a chess
+move in the Figure 2.
+.
+Fig. 2: Robot Programming by Demonstration [16].
+Fig. 3: Context example
+Week 7
+• The students present a ﬁrst version of the method:
+– describe in great detail your method/algorithm/model
+– put graphics/examples/tables to help the reader
+– step-by-step in the most simple and thoughtful way
+possible (don’t make the reviewer think!!)
+– Explains the chain of reasoning that leads to the
+results.
+∗ Provides the details of central proofs.
+∗ Explains the experimental setup and summarizes
+the outcomes.
+– Figures, Charts, Tables, Diagrams, etc. can be ex-
+tremely helpful to communicate ideas, observations,
+or data to others.
+– Many scientists outline their method by deciding on
+what ﬁgures, graphs and tables they need in order to
+convey their story, and then ﬁll the text around these
+ﬁgures.
+– If a ﬁgure is reproduced or copied or adapted from
+another source, that source must be properly ac-
+knowledged in the caption, and listed among other
+references.
+Fig 4 shows the structure of the main contribution in two
+pages (in red).
+Video 
+in 
+mp4 
+format
+Frame 
+separation
+ 
+2D 
+Pose 
+Estimation 
+(Openpose)
+3D 
+Pose 
+Estimation 
+(3D 
+lifting)
+Prediction  
+of  
+movements  
+to  
+be  
+executed  
+by  
+the  
+robot
+Robot 
+Simulation
+Fig. 3: Framework ﬂow.
+B. Method
+Mini-introduction of the section
+  
+In this section, the main contributions proposed in this
+project will be detailed.
+1) Architecture: .
+First Contribution
+  
+The main contribution of this research consists mainly in the
+use of computer vision and deep learning techniques to be
+able to correctly and accurately estimate the human poses
+captured in each frame of a video and optimize their saving
+in a database to be able to reproduce them in a robot.
+In the Figure 3, we can see the main process begins with a
+video in which a person moves their arms.
+• Upload Video: From the application a video is up-
+loaded4, which can be a video recorded with a camera
+connected to the computer or a video in “.mp4” format
+that is inside the computer.
+• Frame separation: Once the video is loaded, it is sepa-
+rated into frames.
+• 2D Pose Estimation: The OpenPose neural network
+predicts a series of 2D conﬁdence maps to estimate
+the possible locations of the body parts and establishes
+a series of vectors related to the afﬁnities between the
+body parts. Afterwards, a greedy approach is performed
+to infer the key points of the human body in the
+image and transform it into two arrays that contain the
+information of the human skeleton.
+• 3D Pose Estimation: The human skeleton predicted is
+used as input for the 3D lifting algorithm that raises
+the coordinates of the 2D reference points to 3D and
+projects it into a valid 3D pose space. When the 3D
+points are obtained we only save the points of the arms:
+the shoulder, elbow and hand.
+• Prediction of movements to be executed by the robot:
+The most complex part when transferring the move-
+ments of a person to a robot is to classify their move-
+ments so that the robot can be instructed what to do
+in each case. Therefore, a generalization of movements
+is proposed that simpliﬁes the possible movements of
+an arm in a set of combinations that the robot can
+better understand. The structure of these combinations
+will be detailed in the construction of the dataset (see
+Section III-B2). Once the possible movements have
+been deﬁned, it is necessary to implement a classiﬁ-
+cation method that translates them into the robot. We
+previously trained two neural network that predicts a
+general pose of the human arm based on the directions
+of the kinesphere. We use these neural network to have
+a better result in the prediction of the human arm. The
+output of the neural network is a label of the direction
+of the arm. With the predicted directions we obtain a
+point that will be used to simulate the human movement
+in the robot arm.
+• Robot simulation: It should be clariﬁed that the robotic
+arm simulator that we use is not capable of replicat-
+ing a movement, because it only has 3 articulations.
+Therefore, it is necessary to ﬁnd a point of conversion
+between human movements and those that the robot can
+perform. With this process the robot can simulate the
+arm movements.
+Second Contribution
+  
+2) Arm Movement Dataset: The second contribution of
+this work is a manually generated dataset that is used to
+generalize the human movements predicted with the pose
+estimation techniques. The dataset has 31 models performing
+176 movements. The ﬁrst thing that was done is determine
+what movements the human body can perform. For this, an
+investigation was carried out to determine a way to establish
+these movements. According to the theory of the kinesphere,
+the directions in which the human body can extend can be
+generalized.
+Fig. 4: All combinations of directions of the elbow-hand vector
+when the shoulder-elbow vector is ”0”.
+The ﬁrst ones are the 6 one-dimensional directions: up,
+down, right, left, forward and backward. Then follow the
+two-dimensional directions that are formed by the union of
+two planes: right up, left up, right down, left down, forward
+up, forward down, back up, back down, diagonal right
+forward, diagonal left forward, diagonal right back and left
+diagonal behind. Finally, when using a third plane, 8 three-
+dimensional directions can be recognized: right forward up,
+left forward up, right back up, left back up, right forward
+down, left forward down, right back down, left back down. In
+this way, these 26 directions are deﬁned in which each vector
+of the arm can move and the combinations of the two arm
+vectors are made. The combinations that a person cannot
+perform without forcing their body (e.g., see Figure 4) to
+locate the most common directions are manually removed
+and they are left with a list with the following format.
+Subsequently, 3D models were searched in Mixamo, which
+can graphically represent the movements of the previously
+obtained list. After choosing 31 models, a project was created
+in Unity3D where the combinations from the previous list
+were manually programmed to generate a data set of images
+labeled with the position they are mimicking. Finally, the
+obtained 3D model dataset is used to train the neural network
+mentioned at the beginning of this section.
+.
+IV. E XPERIMENTS
+Mini-introduction of the section
+  
+In this section we will discuss the experiments our project
+has undergone, as well as, what is needed to replicate said
+experiments and a discussion of the results obtained after
+this process.
+ID Direction
+0 Down
+1l Left Down
+1ﬂ Left Forward Down
+1f Forward Down
+1fr Right Forward Down
+1r Right Down
+1br Right Back Down
+1b Back Down
+1bl Left Back Down
+2l Left
+2ﬂ Left Forward
+2f Forward
+2fr Right Forward
+2r Right
+2br Right Back
+2b Backward
+2bl Left Back
+3l Left Up
+3ﬂ Left Forward Up
+3f Forward Up
+3fr Right Forward Up
+3r Right Up
+3br Right Back Up
+3b Back Up
+3bl Left Back Up
+4 Up
+TABLE I: Possible directions according to the Kinesphere
+theory with an ID.
+A. Experimental Protocol
+In this subsection, details the conﬁguration of the envi-
+ronment in which the experiments were performed, such as
+the local hardware conﬁguration and the applications used.
+Development Environment
+  
+This work was developed on a computer with an Intel Core
+i5-9600k CPU, an NVIDIA GeForce GTX 1080 GPU and
+16 GB of RAM at 2400Mhz. The application which can be
+opened by using Unity Hub 5. The application need “Tensor-
+ﬂow 2.3”, “Keras 2.4” and “Python 3.6”. Finally, our source
+code is available at https://github.com/Sedruol/MrMime.
+B. Results
+In this subsection, the experiments carried out and the
+results obtained in each of these are detailed.
+Fig. 4: Main Contribution example
+Week 9
+• The students present a ﬁnal version of the main contri-
+bution, after the observations of the coauthor.
+Week 10
+• The students present a ﬁrst version of the experiments:
+– States in detail and analyses the results of the re-
+search.
+– The structure should be evident in the section head-
+ings.
+– There must be a subsection called “Experimental
+Protocol” where it’s explained:
+∗ The PC conﬁguration (RAM, CPU, ...) or the
+service conﬁguration (Colab, AWS, Azure, . . . )
+∗ The data used (origin, construction, treatment, . . . )
+∗ it’s better if an url with the code, or access to the
+service (website, demo, . . . ) is put here.
+– Theoretical evaluation
+∗ Performance analysis
+∗ Properties, complexity, etc.
+– Experimental comparative evaluation
+∗ State clearly the target of experiments
+∗ Experiment design: should be fair
+∗ Draw conclusions from experiment results
+Fig 5 shows the structure of the experiments in two pages
+(in yellow).
+Fig. 4: All combinations of directions of the elbow-hand vector
+when the shoulder-elbow vector is ”0”.
+The ﬁrst ones are the 6 one-dimensional directions: up,
+down, right, left, forward and backward. Then follow the
+two-dimensional directions that are formed by the union of
+two planes: right up, left up, right down, left down, forward
+up, forward down, back up, back down, diagonal right
+forward, diagonal left forward, diagonal right back and left
+diagonal behind. Finally, when using a third plane, 8 three-
+dimensional directions can be recognized: right forward up,
+left forward up, right back up, left back up, right forward
+down, left forward down, right back down, left back down. In
+this way, these 26 directions are deﬁned in which each vector
+of the arm can move and the combinations of the two arm
+vectors are made. The combinations that a person cannot
+perform without forcing their body (e.g., see Figure 4) to
+locate the most common directions are manually removed
+and they are left with a list with the following format.
+Subsequently, 3D models were searched in Mixamo, which
+can graphically represent the movements of the previously
+obtained list. After choosing 31 models, a project was created
+in Unity3D where the combinations from the previous list
+were manually programmed to generate a data set of images
+labeled with the position they are mimicking. Finally, the
+obtained 3D model dataset is used to train the neural network
+mentioned at the beginning of this section.
+.
+IV. E XPERIMENTS
+Mini-introduction of the section
+  
+In this section we will discuss the experiments our project
+has undergone, as well as, what is needed to replicate said
+experiments and a discussion of the results obtained after
+this process.
+ID Direction
+0 Down
+1l Left Down
+1ﬂ Left Forward Down
+1f Forward Down
+1fr Right Forward Down
+1r Right Down
+1br Right Back Down
+1b Back Down
+1bl Left Back Down
+2l Left
+2ﬂ Left Forward
+2f Forward
+2fr Right Forward
+2r Right
+2br Right Back
+2b Backward
+2bl Left Back
+3l Left Up
+3ﬂ Left Forward Up
+3f Forward Up
+3fr Right Forward Up
+3r Right Up
+3br Right Back Up
+3b Back Up
+3bl Left Back Up
+4 Up
+TABLE I: Possible directions according to the Kinesphere
+theory with an ID.
+A. Experimental Protocol
+In this subsection, details the conﬁguration of the envi-
+ronment in which the experiments were performed, such as
+the local hardware conﬁguration and the applications used.
+Development Environment
+  
+This work was developed on a computer with an Intel Core
+i5-9600k CPU, an NVIDIA GeForce GTX 1080 GPU and
+16 GB of RAM at 2400Mhz. The application which can be
+opened by using Unity Hub 5. The application need “Tensor-
+ﬂow 2.3”, “Keras 2.4” and “Python 3.6”. Finally, our source
+code is available at https://github.com/Sedruol/MrMime.
+B. Results
+In this subsection, the experiments carried out and the
+results obtained in each of these are detailed.
+S1 S2 S3 S4 S5 S6 S7 S8 S9 S10 Avg.
+M ov = 1
+1.53 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.153
+1.84 1.97 0.59 0.00 1.53 0.77 1.53 1.00 0.77 0.00 1.000
+1.53 0.00 1.78 0.85 2.83 0.77 0.00 2.83 0.00 2.83 1.342
+M ov = 2
+1.33 2.00 2.21 2.14 2.83 1.41 1.47 2.83 0.00 0.77 1.699
+0.77 0.61 1.53 0.77 3.70 0.77 0.77 2.33 1.53 1.53 1.431
+0.92 0.00 0.92 0.77 3.57 0.77 0.00 3.34 0.00 0.92 1.121
+M ov = 3
+0.00 1.53 0.00 0.00 1.53 0.00 0.00 1.58 0.00 0.00 0.464
+1.00 0.00 0.00 0.00 0.61 0.00 0.37 1.00 0.00 0.00 0.298
+0.00 0.92 0.00 0.92 0.00 0.92 0.92 2.83 0.00 0.00 0.651
+M ov = 4
+0.00 0.00 0.00 0.00 0.00 0.00 0.92 0.00 0.00 0.92 0.184
+0.61 0.61 0.61 0.61 1.21 0.61 0.61 0.61 1.21 0.61 0.730
+2.55 0.77 0.77 0.00 0.00 2.55 0.00 4.00 4.00 0.00 1.464
+M ov = 5
+0.92 0.92 0.00 0.00 0.00 0.77 0.77 0.77 0.92 0.00 0.507
+1.18 1.41 1.41 1.61 1.10 1.83 1.61 1.41 1.00 2.14 1.470
+0.77 0.59 0.59 0.59 0.70 0.77 0.77 0.59 0.77 0.77 0.691
+M ov = 6
+1.33 0.00 0.77 0.77 0.77 0.77 0.77 1.78 0.77 0.59 0.832
+0.92 0.00 1.38 0.00 0.77 0.77 1.21 2.02 0.77 0.77 0.861
+1.41 0.77 0.92 0.00 2.72 0.77 1.78 1.41 0.77 0.77 1.132
+M ov = 7
+1.53 0.00 0.00 0.00 0.00 0.00 0.00 0.00 1.53 0.00 0.306
+0.00 0.00 0.61 0.00 0.92 0.61 1.10 0.00 0.00 0.61 0.385
+0.87 0.00 0.00 0.92 0.77 0.00 0.00 0.92 0.77 0.00 0.425
+M ov = 8
+1.41 0.77 0.77 0.77 1.00 1.08 0.77 0.00 0.00 0.77 0.734
+1.00 0.00 1.41 1.28 1.54 0.61 1.08 2.14 1.41 0.77 1.124
+1.53 0.77 0.92 0.92 0.77 0.92 1.96 2.83 0.92 2.83 1.437
+M ov = 9
+0.77 0.00 0.00 0.00 0.00 0.77 0.61 1.41 0.66 1.00 0.522
+1.81 1.36 0.77 0.77 1.36 0.77 1.00 1.44 1.41 1.81 1.250
+0.59 1.03 1.61 0.77 1.53 0.77 0.77 0.77 0.59 0.59 0.902
+M ov = 10
+1.18 1.87 0.88 0.92 1.91 1.27 0.92 1.27 0.61 1.27 1.210
+0.61 1.36 0.92 0.84 1.38 1.88 0.61 0.61 0.61 0.84 0.966
+1.21 1.21 1.21 1.21 1.15 0.61 1.21 0.61 0.61 0.61 0.964
+Avg. 1.035 0.683 0.751 0.580 1.205 0.783 0.784 1.412 0.722 0.788 0.8743
+TABLE II: Results obtained with the ADBP metric by keyframe for each test subject.
+Validation
+  
+1) Validation with metrics: As mentioned previously,
+in order to translate human movements into robotic arm
+movements, a conversion is necessary. For this case it was
+decided that the point of the arm hand coincides with the
+point of the human hand. Therefore, the metrics that will be
+used are based on that connection between the person’s hand
+and the robot. In addition, these will be applied to analyze
+three keyframes (initial position, intermediate position and
+ﬁnal position) in each movement. The metrics used are the
+following:
+• Average Distance Between Points (ADBP): This metric
+is based on the distance that is generated between the
+predicted point and the deﬁned point in order to check
+how far the prediction is from reality. Then, an average
+is made between all those carried out (300) to obtain
+the average distance. It should be borne in mind that
+the lower the result, the better it will be. In Table II
+you can see the results obtained in the 3 frames chosen
+for each movement by each test subject. Also, Table 5a
+shows the average results obtained in each movement
+for each test subject.
+Mov S1 S2 S3 S4 S5 S6 S7 S8 S9 S10 Avg.
+1 1.63 0.66 0.79 0.28 1.45 0.51 0.51 1.28 0.26 0.94 0.831
+2 1.00 0.87 1.55 1.22 3.37 0.98 0.75 2.83 0.51 1.07 1.415
+3 0.33 0.82 0.00 0.31 0.71 0.31 0.43 1.80 0.00 0.00 0.471
+4 1.05 0.46 0.46 0.20 0.40 1.05 0.51 1.54 1.74 0.51 0.792
+5 0.96 0.97 0.67 0.73 0.60 1.12 1.05 0.92 0.89 0.97 0.888
+6 1.22 0.26 1.02 0.26 1.42 0.77 1.25 1.74 0.77 0.71 0.942
+7 0.80 0.00 0.20 0.31 0.56 0.20 0.37 0.31 0.77 0.20 0.372
+8 1.31 0.51 1.03 0.99 1.10 0.87 1.27 1.66 0.78 1.45 1.097
+9 1.05 0.80 0.79 0.51 0.96 0.77 0.79 1.21 0.89 1.13 0.890
+10 1.00 1.48 1.00 0.99 1.48 1.25 0.91 0.83 0.61 0.90 1.045
+Avg. 1.035 0.683 0.751 0.580 1.205 0.783 0.784 1.412 0.722 0.788 0.8743
+(a) Average of results obtained with the ADBP metric for each test subject.
+Mov S1 S2 S3 S4 S5 S6 S7 S8 S9 S10 Amt.
+1 0/3 3/3 2/3 3/3 1/3 3/3 2/3 2/3 3/3 2/3 21/30
+2 3/3 2/3 1/3 2/3 0/3 3/3 3/3 0/3 2/3 2/3 18/30
+3 3/3 2/3 3/3 3/3 2/3 3/3 3/3 1/3 3/3 3/3 26/30
+4 2/3 3/3 3/3 3/3 3/3 2/3 3/3 2/3 2/3 3/3 26/30
+5 3/3 3/3 3/3 2/3 3/3 2/3 2/3 3/3 3/3 2/3 26/30
+6 3/3 3/3 3/3 3/3 2/3 3/3 2/3 1/3 3/3 3/3 26/30
+7 2/3 3/3 3/3 3/3 3/3 3/3 3/3 3/3 2/3 3/3 28/30
+8 2/3 3/3 3/3 3/3 2/3 3/3 2/3 1/3 3/3 2/3 24/30
+9 2/3 3/3 2/3 3/3 2/3 3/3 3/3 3/3 3/3 2/3 26/30
+10 3/3 2/3 3/3 3/3 2/3 2/3 3/3 3/3 3/3 3/3 27/30
+Amt. 23/30 27/30 26/30 28/30 20/30 27/30 26/30 19/30 27/30 25/30 82.67%
+(b) Results obtained with the Percentage of Correct Predictions metric for each test subject.
+Fig. 5: Results obtained for ADBP metric and Percentage of Correct Predictions.
+• Percentage of Correct Predictions: We manually ex-
+periment with various values to deﬁne a threshold
+that serves to validate whether the distances found in
+Table II are considered correct. In the end, we were
+left with a threshold of 1.5, since errors began to occur
+in the simulation of movements when this value was
+exceeded. Thus, we can classify the 300 predictions
+as correct or incorrect and obtain a percentage that
+indicates the performance of the project. The results
+are recorded in Table 5b.
+Comparison
+  
+2) Comparison of classiﬁcation methods: In the training
+phase with the arm movement dataset, the classiﬁcation
+metrics (Precision, Recall, F1) were used to compare other
+classiﬁcation algorithms with the proposed neural network.
+In Table 6a you can see the results obtained from the
+comparison in the shoulder-elbow vector, while in Table 6b
+you can see the results obtained from the comparison in the
+elbow-hand vector
+Classiﬁcation Model Precision Recall F1
+Decision Tree 0.65 0.67 0.65
+Random Forests 0.73 0.73 0.73
+Support Vector Machine 0.68 0.68 0.67
+KNN 0.69 0.68 0.68
+Neural Network (Our approach) 0.73 0.72 0.72
+(a) Comparison with shoulder-elbow vector.
+Classiﬁcation Model Precision Recall F1
+Decision Tree 0.72 0.70 0.69
+Random Forests 0.80 0.80 0.79
+Support Vector Machine 0.67 0.69 0.65
+KNN 0.82 0.81 0.81
+Neural Network (Our approach) 0.85 0.84 0.84
+(b) Comparison with elbow-hand vector.
+Fig. 6: Comparison for (a) shoulder-elbow vector and (b) elbow-hand vector.
+Average Distance Average Distance Average Distance
+Mov Between Points Between Points Between these
+with neural network with 3D lifting distances
+1 0.831 0.918 0.644
+2 1.415 1.286 0.804
+3 0.471 0.443 0.536
+4 0.792 0.994 0.590
+5 0.888 0.515 0.729
+6 0.942 0.758 0.735
+7 0.372 0.502 0.506
+8 1.097 0.818 0.777
+9 0.890 0.888 0.709
+10 1.045 0.971 0.698
+Avg. 0.874 0.809 0.673
+TABLE III: Comparison of 3D points with and without neural
+network.
+3) Comparison of 3D points with and without neural
+network: With the help of the videos used in the previous
+experiment, the average distance between the real point and
+the point predicted by the 3D lifting is compared with
+the average distance between the real point and the point
+predicted by the neural network. In Table III you can see
+the average distances mentioned previously and the average
+distance between these two values. It should be considered
+that the average distance of each movement is used.
+C. Discussion
+In this subsection, the results obtained in the previous
+section are detailed and discussed.
+Discussion
+  
+1) Validation with metrics: As mentioned above, the
+purpose of the ADBP metric is to determine the value of the
+distance between the predicted point and the actual point,
+so the smaller the result, the better. Whereas, the other
+metric aims to validate how many predictions were made
+correctly, so the higher the result, the better. Based on this,
+it can be clearly evidenced that there are movements and
+conﬁgurations at the time of recording that can negatively
+affect the result of the prediction. Despite this, in a greater
+number of cases it can be seen that the robotic arm responds
+in a good way when predicting people’s movements. In
+Table 5a it can be seen that an average distance of 0.8743
+was obtained, which shows that the distance between the
+predicted point and the real point is relatively small, it
+is even almost half of the threshold (1.5) that we use to
+deﬁne whether a prediction was correct. The best predictions
+were obtained in the seventh and third movement with a
+value of 0.372 and 0.471 respectively; while, the second
+movement caused the worst prediction with a value of 1,415.
+In addition, in Table 5b it can be seen that 82.67% of the
+predictions were made correctly.
+2) Comparison of classiﬁcation methods: As we previ-
+ously mentioned, one of the objectives of the investigation
+is to use a classiﬁcation algorithm to be able to correctly
+label each human movement and translate it to the robotic
+arms.
+This way, the results on the Table 6a are the comparison of
+the different classiﬁcation methods used with the shoulder-
+elbow vector. In other hand, the Table 6b is the comparison
+of the elbow-hand vector classiﬁcation methods, this table
+has better results than the previous mentioned because it
+use the result of the other vector prediction as an additional
+input. As a result, the Table 6b is more important to realize
+the ﬁnal result of the project and is the one that has more
+thought when choosing a classiﬁcation algorithm. As we can
+see in Table 6a, the algorithm that achieved the best results
+was Random Forest with 0.73 in precision, recall and F1
+slightly exceeding the result of the neural network. However,
+in Table 6b we can see that the results of the neural network
+far exceed those of the other methods with an F1 of 0.84.
+That’s why it was decided to work with neural networks for
+the development of the project.
+Fig. 5: Experiments example
+Week 11
+• The students present a revised version of the experiments,
+after the observations of the coauthor.
+Week 12
+• The students present a ﬁnal version of the experiments.
+Week 13
+• The students present a ﬁnal version of the conclusions
+and perspectives:
+– Are used to draw together the topics discussed in the
+paper.
+– Should include a concise statement of the paper’s
+important results and an explanation of their signif-
+icance.
+– Are an appropriate place to (re)state any limitations.
+– Should look beyond the current context to:
+∗ other problems that were not addressed;
+∗ questions that were not answered;
+∗ variations that could also be explored.
+– Perspectives should show possible future works, and
+show your interest in continuing with this topic.
+Fig 6 shows the structure of the conclusions in two pages
+(in blue).
+3) Comparison of 3D points with and without neural
+network: In the Table III we can see the comparison of
+the average distances of the different movements analyzed.
+The ﬁrst column shows us the results of the ﬁrst experiment
+and the second column shows the distance from the 3D
+prediction to the real point. When comparing both results
+we can realize that the points predicted and labeled by the
+neural network have a fairly similar distance to the point
+of the 3D pose estimate and that there is a correlation
+between their quantities. The third column shows us the
+distance between the point of the neural network and the
+point of the 3D pose estimation. There you can realize that
+no value is greater than 1 and that an average distance
+equivalent to 0.673 was obtained, so it can be considered
+that the prediction generated by the neural network manages
+to correctly generalize the movements proposed by the pose
+estimation.
+V. C ONCLUSION
+First Conclusion
+  
+In this work we can ﬁnd that the generalization of the
+arm movements can be effectively used to translate the
+human motion to robotic assistants, as could be seen in the
+different tests, the precision of the movement is strongly
+related to the quality of the recording and the pose estimation
+algorithm used. As we mentioned before is impossible to
+replicate at one hundred percent the human movements
+with all robotic assistants. They have different shapes and
+purpose, and the limitations of their articulations make them
+can’t move like a human does. However, as we see in the
+experimentation you can deﬁne a translation condition that
+make this assistant perform a similar movement that meets
+the user’s requirements. This condition can be like keep the
+center of the unit, keep the articulations position, keep the
+position relative to the space or keep the hand point like our
+research.
+Second Conclusion
+  
+It is very important to mention that covering the prob-
+lem with classiﬁcation algorithms and vectors has given
+a positive result. The second experiment shows that the
+neural networks works better with the vector data predictions
+than other classiﬁcation methods, this is attributed to the
+ﬂexibility that they have to work with different types of data.
+Finally, the best way to work with human motions is using
+unitary vectors that describes the articulation direction, this
+method avoid the problems such as the length of the limbs
+and the relative position they have in space, it also reduce
+the input data and normalice the results.
+Future works
+  
+We have two main perspectives for our work: i) A future
+approach with this research could be to augment the body
+parts to be analyzed to employ a humanoid robot, for
+example the NAO robot. ii) Another approach could be to
+improve the pose estimation to be able to estimate the pose
+of the arms with incomplete body videos, where at least both
+arms are seen, i.e., the other parts of the body may not be
+seen by the angle of the camera or because it is covered by
+some object. To these, the proposed metrics of ADBP and
+Percentage of Correct Predictions can be applied to evaluate
+the predictions, thus ensuring their quality.
+REFERENCES
+[1] P. Hwang, C. J. Hsu, and W. Wang, “Development of a mimic robot -
+learning from demonstration incorporating object detection and multiac-
+tion recognition,” IEEE Consumer Electron. Mag. , vol. 9, no. 3, 2020.
+[2] Z. Cao, G. Hidalgo, T. Simon, S. Wei, and Y . Sheikh, “Openpose:
+Realtime multi-person 2d pose estimation using part afﬁnity ﬁelds,”
+IEEE Trans. Pattern Anal. Mach. Intell. , vol. 43, no. 1, 2021.
+[3] L. Pishchulin, E. Insafutdinov, S. Tang, B. Andres, M. Andriluka, P. V .
+Gehler, and B. Schiele, “Deepcut: Joint subset partition and labeling
+for multi person pose estimation,” in CVPR. IEEE Computer Society,
+2016.
+[4] H. Fang, S. Xie, Y . Tai, and C. Lu, “RMPE: regional multi-person pose
+estimation,” in ICCV. IEEE Computer Society, 2017.
+[5] A. Kendall, M. Grimes, and R. Cipolla, “Posenet: A convolutional
+network for real-time 6-dof camera relocalization,” in ICCV. IEEE
+Computer Society, 2015.
+[6] D. Tom `e, C. Russell, and L. Agapito, “Lifting from the deep: Convo-
+lutional 3d pose estimation from a single image,” in CVPR. IEEE
+Computer Society, 2017.
+[7] J. Cao, W. Liu, Y . Liu, and J. Yang, “Generalize robot learning from
+demonstration to variant scenarios with evolutionary policy gradient,”
+Frontiers Neurorobotics, vol. 14, 2020.
+[8] L. Santos, J. A. Prado, and J. Dias, “Human robot interaction studies
+on laban human movement analysis and dynamic background segmen-
+tation,” in IROS. IEEE, 2009.
+[9] C. R. G. Dreher, M. W ¨achter, and T. Asfour, “Learning object-action
+relations from bimanual human demonstration using graph networks,”
+IEEE Robotics Autom. Lett. , vol. 5, no. 1, 2020.
+[10] C.-J. Liang, V . R. Kamat, and C. C. Menassa, “Teaching robots to per-
+form quasi-repetitive construction tasks through human demonstration,”
+Automation in Construction , vol. 120, 2020.
+[11] J. Vidakovic, B. Jerbic, B. Sekoranja, M. Svaco, and F. Suligoj, “Learn-
+ing from demonstration based on a classiﬁcation of task parameters and
+trajectory optimization,” J. Intell. Robotic Syst. , vol. 99, no. 2, 2020.
+[12] M. Andriluka, L. Pishchulin, P. V . Gehler, and B. Schiele, “2d human
+pose estimation: New benchmark and state of the art analysis,” in CVPR.
+IEEE Computer Society, 2014.
+[13] C. Doignon, “An introduction to model-based pose estimation and 3-
+d tracking techniques,” in Scene Reconstruction Pose Estimation and
+Tracking. Rijeka: IntechOpen, 2007.
+[14] Y . Chen, Y . Tian, and M. He, “Monocular human pose estimation: A
+survey of deep learning-based methods,” Comput. Vis. Image Underst. ,
+vol. 192, 2020.
+[15] A. Vakanski and F. Janabi-Shariﬁ, Robot Learning by Visual Observa-
+tion. John Wiley & Sons, Inc., 02 2017.
+[16] A. Billard, S. Calinon, R. Dillmann, and S. Schaal, “Robot programming
+by demonstration,” in Springer Handbook of Robotics . Springer, 2008.
+Fig. 6: Conclusions example
+Week 14
+• The students present a working title and a proposal of the
+abstract:
+– Title and information about authors
+– Abstract (see Fig 7):
+∗ Is typically a single paragraph of 50-200 words.
+∗ Allows readers to judge the relevance or the paper
+to them.
+∗ Is a concise summary of the paper’s aims, scope,
+and conclusions.
+∗ Should be as short as possible while remaining
+clear and informative.
+∗ The more speciﬁc, the more interesting.
+∗ Self-contained and written for as broad a reader-
+ship as possible.
+∗ Use past tense, since it refers to work already
+done.
+∗ Not to put in an abstract: minor details, paper
+structure, acronyms, abbreviations, mathematics,
+citations.
+Fig. 7: Abstract example
+• The coauthor gives his approval of the ﬁnal draft.
+7. Experiments
+We report an experimental study on several UCI benchmarks (see Section 7.1)
+and we show and discuss the practical use of our approach on a case study from
+chemoinformatics (see Section 7.2). All experiments were conducted on a com-
+puter running Linux operating system with a core i3 processor at 2.13 GHz and
+a RAM of 4 GB. The implementation of Aetheris refers to [1]. The imple-
+mentation of CP+Sky was carried out in Gecode3 by extending the CSP-based
+patterns extractor developed by [42]. For each method, reported CPU-times in-
+clude two steps. With Aetheris, computing the set of closed patterns w.r.t. M′
+(we use a minimal absolute frequency threshold of 1) and then applying theSky
+operator. With CP+Sky, computing the set of candidates using Dynamic CSP,
+and then ﬁltering all patterns that are not skypatterns.
+7.1. Experiments on UCI benchmarks
+We chose to focus experiments on UCI4 benchmarks on a thoroughly inves-
+tigation of the behaviors of Aetheris and CP+Sky. We evaluate CPU-times and
+several other parameters such as the numbers of extracted patterns.
+Experimental protocol. Experiments were carried out on 23 various (in terms of
+dimensions and density) datasets (see the left column in Table 5). We consid-
+ered the set of measures M ={freq , max, area, mean, growth-rate}. In the
+following, we use 6 sets of measures: the ﬁve combinations of 4 measures from
+M (M1={freq ,area,mean,growth-rate},M2={freq ,max,area,growth-
+rate},M3={freq ,max,area,mean},M4={freq ,max,mean,growth-rate},
+M5={max,area,mean,growth-rate}) andM6=M. Measures using numeric
+values, likemean ormax, were applied on attribute values that were randomly
+generated within the range [0..1].
+3http://www.gecode.org/
+4http://www.ics.uci.edu/˜mlearn/MLRepository.html
+28
+Dataset M6={freq,max,area,mean,growthrate} Averages over{M1,M2,M3,M4,M5}
+# items
+# transactions
+density
+# of Skypatterns
+CP+Sky Aetheris
+# of Skypatterns
+CP+Sky Aetheris
+# of Candidates
+Time (sec)
+# of Closed Patterns
+Time (sec)
+# of Candidates
+Time (sec)
+# of Closed Patterns
+Time (sec)
+abalone 28 4,178 0.321 76 5,255 25 9,947 1 43.20 3,393.20 6 9,808.80 1anneal 68 798 0.195 187 13,903 12 35,152 3 80.60 6,748.20 6 30,606.00 1austral 55 690 0.272 172 49,379 24 243,156 20 77.00 19,626.80 18 228,115.2013breast 43 286 0.231 38 2,311 1 7,721 1 23.60 1,374.20 1 7,369.201cleve 43 303 0.325 97 19,370 8 77,203 8 51.80 11,215.80 5 74,670.80 4cmc 28 1,474 0.357 62 12,760 12 25,649 1 36.00 7,702.80 9 25,408.60 1crx 59 690 0.269 143 78,327 44 349,721 55 59.40 31,482.80 19 317,090.20 27german 76 1,000 0.276 308 347,957 426 3,662,911 652 121.80 148,255.40249 3,525,072.40 305glass 34 216 0.295 52 2,633 1 7,165 1 31.80 1,587.80 1 6,920.801heart 38 270 0.368 154 16,960 6 72,618 8 73.60 9,118.00 4 70,124.204hepatic 45 155 0.421 237 41,096 10 222,333 31 103.20 16,156.20 4 206,742.00 13horse 75 300 0.235 63 28,275 27 191,177 47 34.20 12,609.60 16 182,982.20 23hypo 47 3,163 0.389 478 221,032 469 1,604,864 893 204.80 145,359.40303 1,565,797.20 481iris 15 151 0.333 7 86 1 93 1 5.80 72.40 1 91.80 1lymph 59 142 0.322 161 26,200 7 116,030 26 64.00 12,532.40 4 105,260.00 11mushroom 119 8,124 0.193 176 14,599 1,186 1,153,229548 75.40 5,767.60 1137 995,808.40221new-thyroid 21 216 0.287 15 200 1 288 1 12.00 151.80 1 285.00 1page 35 941 0.314 92 4,482 8 21,121 2 49.00 2,576.00 6 20,207.80 1pima 26 768 0.346 53 1,400 3 12,559 1 32.40 943.80 3 12,439.40 1tic-tac-toe 29 259 0.344 82 11,206 11 43,318 3 51.20 7,867.40 9 42,902.20 2vehicle 58 846 0.327 280 164,152 172 745,353 138 126.20 73,390.6069 689,937.80 84wine 45 179 0.311 43 7,780 2 36,671 4 25.40 4,538.60 2 34,397.002zoo 43 102 0.394 56 4,654 1 14,431 1 34.20 2,642.60 1 12,851.201
+Table 5: Comparing the two methods on 23 UCI datasets (a detailed summary).
+Performance analysis. Table 5 provides the results of CPU-times for CP+Sky
+and Aetheris. We report for each dataset and for each set of measures5:
+• the number of skypatterns (obviously, the same for both methods), these
+numbers always remain small (the largest is 478),
+• with CP+Sky: the number of candidates and the associated CPU-time,
+• with Aetheris: the number of closed patterns and the associated CPU-time.
+5Reported values in columns (6-9) are associated to M6. But, reported values in columns
+(10-14) represent average values overM 1,M 2,M 3,M 4 andM 5.
+29
+Figure 5: Comparing CPU times on the 7 selected datasets forMi,i∈ [1..6].
+Table 5 indicates that CP+Sky and Aetheris run within the same order of magni-
+tude. On 16 datasets, CPU times both for CP+Sky and Aetheris are very small
+(less than 30 seconds), then we decided to focus on the 7 remaining datasets.
+For these 7 datasets, Figure 5 depicts a scatter plot of CPU-times for CP+Sky
+and Aetheris. Each point represents a skypattern query for a dataset: its x-value
+(log-scale) is the CPU-time obtained with CP+Sky, its y-value (log scale) the
+CPU-time with Aetheris. A speciﬁc color is associated to each dataset. The line
+y = x highlights same CPU-times. As most of the points are above this line, it
+means a longer time for Aetheris. With all the measures (i.e.,M6), the speed-up
+is 1.9 (resp. 1.53) on hypo (resp. german). The only exception is mushroom.
+As this dataset has the lowest density (around 18%), we wondered on the impact
+of the density on the CPU-times. For that purpose, we generated several datasets
+by varying their density from 0.15 to 0.65 (as we were curious on the result
+on mushroom, we kept the numbers of items and transactions of this dataset).
+Figure 6 shows the evolution of CPU-times according to the density for both
+methods. As the items in the data are randomly generated to provide the density
+value, the number of closed patterns increases according to the density.
+30
+Figure 6: Measuring the impact of the density for the two methods.
+Thus, the running time of Aetheris also increases according to this parameter.
+The behavior of CP+Sky is more complex due to the dynamic pruning. Having
+more candidate skypatterns is a beneﬁt if these patterns are able to prune signif-
+icantly the search space. The experimental study shows a good trade-off with a
+density close to 0.5. Moreover, note that in practice there are very few datasets
+with a density higher than 0.5.
+Another interesting result provided by Table 5 is the number of closed patterns
+with Aetheris w.r.t the number of candidates with CP+Sky, in other words the
+number of representative patterns for both methods. The number of candidates
+with CP+Sky remains small (some thousands) compared to the number of closed
+patterns with Aetheris (about millions). Figure 7 summarizes these results un-
+der a graphical way. It reports for each set of measures Mi (i ∈ [1..6]) and
+the 7 datasets investigated in Figure 5, the number of closed patterns (Aetheris),
+the number of candidate patterns (CP+Sky) and the number of skypatterns (both
+methods). It clearly illustrates the lower number of representative patterns re-
+quired by CP+Sky w.r.t Aetheris.
+31
+Figure 7: Comparing # of closed patterns, candidates and skypatterns on 7 UCI datasets for
+M1,...,M 6.
+7.2. Case study: discovering toxicophores
+A major issue in chemoinformatics is to establish relationships between chem-
+icals and their activity in (eco)toxicity. Chemical fragments6 which cause toxic-
+ity are called toxicophores and their discovery is at the core of prediction models
+in (eco)toxicity [6, 52]. The aim of this study, which is part of a larger research
+collaboration with the CERMN Lab, is to investigate the use of skypatterns for
+discovering toxicophores.
+6A fragment denotes a connected part of a chemical structure having at least one chemical
+bond.
+32
+Experimental protocol. The dataset is collected from the ECB web site 7. For
+each chemical, the chemists associate it with hazard statement codes (HSC) in
+3 categories: H400 (very toxic, CL50≤ 1 mg/L), H401 (toxic, 1 mg/L < CL50
+≤ 10 mg/L), and H402 (harmful, 10 mg/L < CL50≤ 100 mg/L). We focus on
+the H400 and H402 classes. The dataset T consists of 567 chemicals (transac-
+tions), 372 from the H400 class and 195 from the H402 class. The chemicals
+are encoded using 1450 frequent closed subgraphs (items) previously extracted8
+with a 1% relative frequency threshold. Therefore, the extracted skypatterns are
+made of these frequent closed subgraphs corresponding to chemical fragments.
+Discovering candidate toxicophores is linked to a classiﬁcation problem w.r.t
+the HSC and thus we use the growth-rate as a contrast measure [13]. Indeed,
+when a pattern has a frequency which signiﬁcantly increases from the H402 class
+to the H400 class, then it stands a potential structural alert related to an excess
+of the toxicity. If a chemical has, in its structure, fragments that are related to an
+effect, then it is more likely to be toxic. Emerging patterns embody this natural
+idea by using the growth-rate measure. On the other hand, real-world datasets
+are often noisy and patterns with low frequency may be artefacts. Then we add
+the frequency measure to ensure the representativeness of the patterns (i.e., the
+higher the frequency, the better).
+The skypattern framework enables to integrate measures coming from the
+background domain. In ecotoxicity, chemists know that the aromaticity mea-
+sure is a chemical property that favors toxicity since their metabolites can lead
+to very reactive species which can interact with biomacromolecules in a harm-
+ful way (the higher the aromaticity, the higher the toxicity hypothesis). The
+chemical knowledge provides the aromaticity of the chemical fragments and we
+compute the aromaticity of pattern as the mean of the aromaticity of its chemical
+fragments.
+We tested several combinations of measures: M1={growth-rate,freq},
+M2={growth-rate, aromaticity }, M3={freq,aromaticity} and
+M4={growth-rate,freq,aromaticity }.
+7European Chemicals Bureau: http://echa.europa.eu/
+8A chemicalCh contains an itemA ifCh supportsA, andA is a frequent subgraph ofT .
+33
+Skypatterns
+# of Sky-
+patterns
+CP+Sky Aetheris# of Candidates
+CPU-Time
+# of closed patterns
+CPU-Time
+M1={growth-rate,freq} 8 613 18m:34s41,887 19m:20s
+M2={growth-rate,aromaticity} 5 140 15m:32s53,201 21m:33s
+M3={freq,aromaticity} 2 456 16m:45s157,911 21m:16s
+M4={growth-rate,freq,aromaticity} 21 869 17m:49s69,827 21m:40s
+Table 6: Skypattern mining on ECB dataset.
+Performance analysis. Table 6 reports, for each set of measuresMi∈ [1..4]: (i)
+the number of skypatterns, (ii) for CP+Sky, the number of candidates and the
+associated CPU-time and (iii) for Aetheris, the number of closed patterns and
+the associated CPU-time. CP+Sky outperforms Aetheris in term of CPU-times.
+Moreover, the number of candidates for CP+Sky is drastically smaller than the
+number of closed patterns computed by Aetheris. It clearly shows the interest of
+the ﬁltering of the dynamically posted constraints.
+Qualitative analysis. We now analyse qualitatively the skypatterns by compar-
+ing them with well-known environmental toxicophores [53]. With the growth
+rate and frequency measures (i.e., M1), only 8 skypatterns are found, and 3
+well-known toxicophores are emphasized. Figure 8a depicts these skypatterns
+denoted Pi, one of them is on the y-axis. Two of them are components of
+widespread pesticides, namely the chloro-substituted aromatic ring (P1:{Clc})
+and organo-phosphorus moiety (P3:{OP, OP=S}). The third one, the phenol
+ring (P2:{c1(ccccc1)O}) is related to hydrophobocity and formation of free
+radicals [54].
+The most interesting results are provided by adding the background knowl-
+edge. Indeed, adding the aromaticity measure leads to skypatterns with novel
+chemical characteristics. We comment the results obtained with the growth rate,
+frequency and aromaticity measures (i.e., M4). Once again, the whole set of
+skypatterns remains small and can lead to a straightforward analysis. 21 sky-
+patterns are mined (see Figure 8b). To simplify the picture, Si denotes a set of
+skypatterns sharing a common chemical feature.
+34
+(a) Distribution of the skypatterns forM1.
+ (b) Distribution of the skypatterns forM4.
+Figure 8: Analysing the skypatterns.
+The ﬁgure emphasizes several environmentally hazardous chemical fragments:
+the phenol ring (S4), the chloro-substituted aromatic ring (S3), the alkyl-substituted
+benzene (S2), and the organophosphorus moiety (P1). Besides, information deal-
+ing with nitrogen aromatic compounds are also extracted (S1). The comparison
+of this list of patterns with jumping emerging fragments (JEF) extracted from
+previous experiments [55] highlights the generalization potency of the skypat-
+terns. As an example, the organophosphorus moiety skypattern is a generaliza-
+tion of around 90 JEFs and can be seen as a kind of maximum common structure
+(i.e., consensus structure) of these fragments.
+Note that adding p-value as a measure in order to provide a statistical signif-
+icance in the skypatterns does not signiﬁcantly change the results in this experi-
+ment. Indeed, p-value is maximized by the closed patterns adequate to frequency
+and with the set of measures M5={growth-rate,freq,aromaticity,p -value}
+only the aromaticity leads to another closed patterns. Out of curiosity, we ran
+the experiment with M5 and we get 28 skypatterns instead of 21 with M4 (the
+21 skypatterns extracted with M4 are still skypatterns with M5). There is no
+signiﬁcant new insights from a chemical point of view.
+35
+Fig. 8: Experiments example
+III. TP2
+A. F ormats
+Most of the conferences use one of these formats: IEEE
+template, Springer template, ACM template, or others.
+Week 1
+• The coauthor explain the journal paper structure:
+– Title and information about authors
+– Abstract
+– Introduction
+– Related Works
+– Problem Statement and Overview
+– Method
+– Experiments
+– Conclusions and Perspectives
+– Bibliography
+Week 2
+• The students present a ﬁrst version of the Experiments
+section: a in depth version of the Experiments of the
+conference paper (see TP1 Weeks 10-12)
+Fig 8 show the structure of the Results (in blue).
+Week 3
+• The students present a revised version of the Results, after
+the observations of the coauthor.
+Week 4
+• The students present a ﬁnal version of the Results.
+2. Related work
+2.1. Pattern mining
+Frequent itemset mining was ﬁrst described in [10]. The problem can be
+deﬁned as follows: a transaction is a subset of a given set of items I, and a
+transaction database, denotedT , is a set of such transactions. A subset X ofI
+is a frequent itemset inT if the number of transactions containing X exceeds a
+given threshold, denoted by σ. One of the earliest ﬁndings in the data mining
+community is that a mining process usually produces large collections of pat-
+terns. Many researchers have proposed methods to reduce the size of the output.
+The constraint-based pattern mining framework [30], the condensed representa-
+tions [29] and the compression of the dataset by exploiting Minimum Descrip-
+tion Length Principle [31], to name a few. A general observation is that patterns
+represent “fragmented knowledge”, and often there is no clear view of how these
+knowledge fragments interact and combine to produce a global model. Recent
+approaches have therefore used schemes such as pattern teams [32], constraint-
+based pattern set mining [33] and pattern selections [34] that aim to minimize
+the redundancy and the number of patterns. A common theme in these studies
+is to select patterns from the initial large set of patterns on the basis of their
+usefulness in a given context. This approach comes within the general trend to
+produce pattern sets i.e. sets of patterns satisfying properties on the whole set
+of patterns [33]. Other approaches take advantage of closed patterns to maxi-
+mize a speciﬁc measure such as the growth rate for emerging patterns [35] and
+the area for tiling [36, 14]. Often, these methods focus on optimizing a global
+measure on the discovered pattern set and neglect the relationships between pat-
+terns. Moreover, these approaches suffer from a lack of ﬂexibility to express
+the queries requested by the analyst. For each method, the user has to under-
+stand its semantics and express queries satisfying its algorithmic properties and
+constraints.
+Another class of techniques considers statistical signiﬁcance of patterns. The
+objective is to extract patterns for which a given characteristic (usually the fre-
+quency) deviates so much from its expected value under a null model that it is
+unlikely to have been generated by it. The frequency of a pattern is then con-
+sidered as a random variable, whose distribution under the null hypothesis has
+to be calculated or approximated, and the signiﬁcance of the pattern is assessed
+through a statistical test that compares the expected frequency under the null
+model to the observed frequency.
+5
+The null model will ideally involve a trade-off between adjustment to the data
+and simplicity. The model should capture some characteristics of the data, other-
+wise all patterns would be signiﬁcant, but it should not overﬁt the data. A num-
+ber of works have explored various notions of statisticalsigniﬁcance for itemsets
+and have proposed novel and efﬁcient methods for their extraction. In [37], an
+approach is developed to mine statistically signiﬁcant association rules, under
+an assumption of independence between the condition and the consequence of
+the rule. The expected frequency for the condition and consequence is derived
+analytically, based on the marginal frequencies of the dataset. In [20], the au-
+thors use two null models to calculate the expected frequencies. The ﬁrst is an
+independence model, where items are assumed to be mutually independent and
+their probabilities of occurrence are their observed marginal relative frequencies.
+The second model is obtained by assuming a distinct distribution for each trans-
+action, where each of the items has the same transaction-dependent probability
+of occurrence. This second model considers large transactions to be less inter-
+esting, because two such transactions are likely to share items by chance. As
+the expected frequency is anti-monotone (the expected frequency of an itemset
+is greater than the expected frequencies of its subsets), the authors only con-
+sider closed itemsets (itemsets having no super-set with the same observed fre-
+quency). They then introduce the MINI algorithm to mine for non-redundant
+unexpected itemsets, by penalizing itemsets overlapping with itemsets with the
+highest p-values. An alternative to the independence model is the maximum en-
+tropy model [38]. A related framework is developed in [39], where unexpected
+itemsets with respect to a maximum entropy model are used to update the model
+iteratively, resulting in a large coverage of the database and minimal redundancy
+between the itemsets.
+Pattern mining and Constraint programming. Pattern mining beneﬁt from
+the recent progress on cross-fertilization between data mining and Constraint
+Programming (CP) [40, 41, 42, 25]. CP is a general declarative methodology
+for solving constraint satisfaction problems. Within this framework, the user
+speciﬁes in a declarative way by using constraints what the problem is rather
+than a method dedicated to the problem. Then a general solver provides the
+complete set of solutions satisfying all the constraints. Results show that these
+methods are more expressive and work well.
+6
+2.2. Skyline
+The notion of dominance is at the core of the skyline processing. This notion
+can also be used to handle many pattern mining problems that involved pairwise
+comparisons between patterns [3]. The skyline points can be viewed as compro-
+mise points with respect to a given set of criteria. Skyline computation is strongly
+related to mathematical and microeconomics problems such as maximum vec-
+tors [43], Pareto set [44], and multi-objective optimization [45]. Since its redis-
+covery within the database community by B ¨orzs¨onyi et al. [28], many methods
+have been developed for answering skyline queries that can handle various con-
+straints in different computational environments [46, 47]. Skyline queries focus
+on the extraction of tuples from a given dataset and assume that all the elements
+are in the dataset, while the skypattern mining task consists of extracting patterns
+which are elements of the frontier deﬁned by the given measures. The skypat-
+tern problem is clearly harder because the search space for skypatterns is much
+larger than the search space for skylines (cf. Section 3.2). Another aspect of
+preference-based processing is the top-k procedure [26, 27]. A ranking function
+fr is applied to patterns, and the k best patterns with the highest score with re-
+spect to fr are returned. As previously mentioned, this approach suffers from
+some limitations. The choice of k is not trivial (i.e., the horizon problem). A
+low value may miss useful patterns and too high a value introduces redundancy
+within the produced patterns (i.e., highly similar patterns). This limitation is the
+main motivation for the notion of the “most informative patterns” (MIP) that
+were proposed in [48]. MIPs can be seen as patterns that locally dominate other
+patterns according to a scoring function. This approach shares a similar spirit to
+ours as it also limits the number of enumerated patterns to a more manageable
+level. However, in contrast to our approach, work on MIPs includes a notion of
+dominance that is local and speciﬁc only to subsets of patterns.
+7
+Fig. 9: Related Works example
+Week 5
+• The students present a ﬁnal version of the Related Works:
+– a mini-version of the state-of-the-art
+– compare your work with 10 papers out of the papers
+from the State-of-the-Art.
+– Most results are additions to existing knowledge.
+Fig 9 shows the structure of the related works in two
+pages (in blue).
+Week 6
+• The students present a ﬁnal version of the Related Works.
+3. Problem Statement and Overview
+We introduce in this section some basic deﬁnitions and the formal problem
+statement. We also give an overview of the two methods (called Aetheris and
+CP+Sky) that we propose. These methods fully exploit an adequate representa-
+tion of patterns dedicated to user preferences [49]. Our study is interesting for
+several reasons. By carefully selecting patterns that are “the best available” for
+a given set of preferences, we reduce signiﬁcantly the output and we limit the
+curse of “pattern explosion”. The user is guaranteed that only the most signif-
+icant patterns w.r.t. his criteria are present in the ﬁnal result. Last but not least,
+our approach is threshold-free. Thresholds are entirely optional, depending on
+the analyst’s needs and do not depend on the algorithm. Only the preferences
+and the dataset are required as an input.
+3.1. Preliminary deﬁnitions
+Although the problem can be formulated for any kind of pattern, for the sake
+of simplicity, we will illustrate our deﬁnitions using the itemset pattern domain.
+Section 8 discusses the computational and theoretical aspects associated with the
+problem when extracting more sophisticated kinds of patterns.
+LetI be a set of distinct literals called items, an itemset (or pattern) corre-
+sponds to a non-null subset of I. These patterns are gathered together in the
+languageL:L = 2I\∅. A transactional datasetT is a multi-set of patterns ofL.
+Each element ofT , named transaction, is a database entry. Table 1(a) presents a
+transactional datasetT where 6 transactions denoted byt1,...,t 6 are described
+by 6 items denoted byA,...,F .
+All the measures discussed in this study are based on the set of primitive-based
+measuresM that were ﬁrst deﬁned in the context of constraint-based pattern
+mining [50]. Table 2 presents some general deﬁnitions of measures and Ta-
+ble 1(b) gives some speciﬁc examples (gr denotes the growth rate). Interestingly,
+our framework is suitable with techniques beneﬁting from statistical signiﬁcance
+of patterns as discussed in related work. For instance, the p-value under the null
+model considering all items to be independent random variables is rewritable as
+a primitive-based measure (seep-value). As claimed in [50],M encompasses a
+very large set of interesting measures.
+8
+Table 1: Example of a toy dataset and measures
+(a) A toy data setT
+Tid Items
+t1 A B C D E F
+t2 A B C D E F
+t3 A B
+t4 D
+t5 A C
+t6 E
+Items val
+A 10
+B 55
+C 70
+D 30
+E 15
+F 25
+(b) Some measures ofM
+Name Deﬁnition
+area X ↦→freq(X)×length(X)
+mean X ↦→min(X.val)+max(X.val))
+2
+bond X ↦→freq(X)
+freq∨(X)
+aconf X ↦→ freq(X)
+max(X.freq)
+gr1 X↦→|T2|
+|T1|×freq(X,T1)
+freq(X,T2)
+p-value X↦→−binomial(prod(X.supp),freq(X))
+Table 2: A subset of the primitive-based measures
+Measurem∈M Primitive(s) Operand(s)
+m1θm2 θ∈{ +,−,×,/,binomial} (m1,m 2)∈M 2
+θ(s) θ∈{freq,freq∨,length} s∈S
+θ(s.val) θ∈{sum,max,min,prod} s∈S
+constantr∈ℜ + - -
+Syntactic expressions∈S Primitive(s) Operand(s)
+s1θs2 θ∈{∪,∩,\} (s1,s 2)∈S 2
+θ(s) θ∈{f,g} s∈S
+variableX∈L - -
+constantl∈L - -
+In addition to the classical operators ofℜ+ (i.e., +,−,×,/ ) andL (i.e.,∪,∩,\),
+the function freq denotes the frequency of a pattern (i.e., freq(X,T ) = |{t∈
+T|X⊆t}| ), andlength its cardinality. The disjunctive support isfreq∨(X) =
+|{t∈T|∃ i∈X :i∈t}|. More atypical primitives also ﬁt the primitive-based
+framework likebinomial(p,i ) =∑n
+k=i
+(n
+k
+)
+pk(1−p)n−k.
+Given a function val :I→ R+, we extend it to a pattern X and denote by
+X.val the multi-set{val(i)|i∈X}. This kind of function is used with the usual
+SQL-like primitivessum,min andmax. For instance, sum(X.val) is the sum
+ofval for each item ofX. Note thatprod is slightly different aggregate function
+due to val :I →[0, 1] (e.g., the support of each item in p-value deﬁnition).
+Finally,f is the intensive function i.e. f (T ) ={i∈I|∀ t∈ T, i∈ t}, andg is
+the extensive function i.e.g(X) ={t∈Tid|X⊆t}.
+9
+This large variety of measures can be source of preferences for the end-user
+by using well-known interestingness measures or even, formulating new ones
+that match its data and/or objectives. In general, several interestigness measures
+emerge and the user wishes to extract patterns that maximize all. Rather than
+using a ranking function for combining these measures, we propose to use the
+Pareto composition:
+Deﬁnition 1 ((Pareto-)Dominance). Given a set of measures M⊆M , a pat-
+ternX dominates another pattern Y with respect to M, denoted by X≻M Y ,
+iff for any measurem∈ M,m(X)≥ m(Y ) and there existsm∈ M such that
+m(X)> m(Y ). Two patternsX andY are said to be indistinct with respect to
+M, denoted byX =M Y , iffm(X) equals tom(Y ) for any measurem∈M (if
+M =∅, thenX =∅ Y ). Finally,X⪰M Y denotes that (X≻M Y )∨(X =M Y ).
+Notice that we deﬁne the Pareto dominance only with symbol greater than
+(i.e., >) assuming that the end-user wants to maximize a set of measures. If
+she aims to minimize a measure m, without loss of generality, it is equivalent
+to maximize the measure m′ =−m. For this reason, our deﬁnition of p-value
+contains a minus.
+Consider our running example using the data set T in Table 1 and suppose
+thatM ={freq,area}, then the pattern ABCDEF dominatesABC because
+freq(ABC ) = freq(ABCDEF ) = 2 andarea(ABCDEF ) > area(ABC ).
+Notice in this case thatABCDEF is indistinct toABC with respect to{freq}.
+Similarly, suppose thatM ={freq,mean,length}, the pattern AC dominates
+AB becausefreq(AC) = freq(AB) = 3 ,|AB| =|AC| = 2 andmean(AC)>
+mean(AB).
+3.2. The skypattern mining problem
+Given a set of measures M, if a pattern is dominated by another according
+to all measures of M, it is irrelevant and must be discarded in the output. The
+notion of skyline pattern, skypattern for short, formalizes this intuition.
+Deﬁnition 2 (Skypattern operator). Given a pattern set P ⊆L and a set of
+measuresM⊆M , a skypattern of P with respect to M is a pattern not dom-
+inated in P with respect to M. The skypattern operator Sky(P,M ) returns all
+the skypatterns ofP with respect toM:
+Sky(P,M ) ={X∈P|̸∃ Y∈P :Y≻M X}
+Then, the skypattern problem can be stated:
+Problem 1. Given a set of measures M⊆M , the skypattern mining problem
+is to evaluate the querySky(L,M ).
+10
+For instance, from the running data set (cf. Table 1),Sky(L,{freq,length}) =
+{ABCDEF,AB,AC,A }, as illustrated in Figure 1.
+Figure 1: Example of skypatterns for a given set of measures (all other patterns are in the domi-
+nated area).
+In the general case, the skypattern mining problem is challenging because of the
+very high number of candidate patterns (i.e |L|). Indeed, a naive enumeration
+ofL is not feasible. For example, with 1000 items a naive approach will need
+to compute (21000− 1)×|M| measures and then compare them. A less naive
+approach based on heuristics (such as the anti-monotonicity of some measures)
+may give some results. However, the performance will be closely tied to the
+underlying properties of the data sets. For instance, in the case of the frequency
+measure, the density of the data set plays a major role in the performance and
+some algorithms are not able to extract frequent patterns at very low thresholds.
+Nevertheless, considering the following property sheds new insights into an ef-
+ﬁcient computation of skypattern queries.
+Property 1. Given a set of measuresM⊆M ,Sky(L,M ) equals toSky(P,M )
+for any pattern setP containingSky(L,M ),
+(∀P⊆L )(Sky(L,M )⊆P⇒Sky(L,M ) =Sky(P,M ))
+11
+AsSky(L,M )⊆P⊆L and|P|≤|L| , we argue that evaluatingSky(P,M ) is
+signiﬁcantly less costly than evaluatingSky(L,M ) since the cost ofSky(x,M )
+generally decreases with the cardinality of x. Consequently, we aim to reduce
+the cost of evaluatingSky(P,M ) by ﬁnding a small but relevant set P (i.e. that
+includesSky(L,M )) by means of 1) pattern condensed representations and 2)
+dynamic pruning.
+Pattern condensed representations. In many pattern mining tasks (e.g., associ-
+ation rule mining or clustering), condensed representations signiﬁcantly reduce
+the mining effort without loss of precision. Could we use this principle in the
+case of skypattern mining? A direct approach would be to compute a concise
+representation for each measure m∈ M, but this is generally not possible be-
+cause some measures, such as area or length, are simply not condensable (i.e.,
+the condensed representation is equal to |L|). Therefore, our problem can be
+reformulated as following: given a set of measuresM, how to identify a smaller
+set of measuresM′ which allows the computation of a concise representation on
+the patterns without loss of skypatterns? In addition, how to use this set of mea-
+sures to extract efﬁciently the skypatterns without redundancies? We address
+this problem in the next sections.
+Dynamic pruning. Instead of extracting the whole condensed representation and
+then, applying theSky operator, this operator may be applied locally during the
+extraction. Indeed, as soon as a pattern is a candidate skypattern, the search space
+dominated by this pattern can be directly eliminated. In other words, each new
+candidate skypattern adds a constraint allowing to safely prune the search space.
+These new constraints avoid to consider patterns that should be extracted by
+considering the technique indicated above ant only based on pattern condensed
+representation. But, how to manage these new constraints that can be obtained
+during the extraction to dynamically reduce the search space? We will see in
+Section 6 that CSP enable us to provide a positive answer.
+3.3. Overview
+In an effort to clarify our methodology, we illustrate in Figure 2 the different
+processes of the two methods Aetheris and CP+Sky we propose. These two
+methods share the same overall methodology and mainly differ in the speciﬁc
+step of the computation of representative patterns of the skypatterns.
+12
+Data
+User 
+Preferences M
+User
+M'
+Skypatterns
+Representative 
+skypatterns
+Minimal and maximal 
+skylineable converters
+Distinct
+operator
+Indisctinct 
+operator Sky operator
+0
+1
+4
+2 2'
+Aetheris
+CP+Sky
+Representative patterns according 
+to M thanks to M'
+4
+Figure 2: Overview of skypattern mining with Aetheris and CP+Sky.
+After the user’s preferences selection, in a ﬁrst step, Aetheris and CP+Sky auto-
+matically identify a smaller set of measuresM′ which allows for the computation
+of a concise representation on the patterns thanks to the use of converters. The
+second step (respectively 2 and 2’ for Aetheris and CP+Sky) aims at computing
+the supersets as small as possible that enable to retrieve all the skypatterns. For
+that purpose, Aetheris builds a static set of representative patterns according to
+M thanks toM′ while CP+Sky builds dynamically a more concise set by prun-
+ing some unpromising patterns (the set of representative patterns of CP+Sky is
+included in the set of representative patterns of Aetheris). Then the third step
+ﬁlters the set of representative patterns with theSky operator. This step remains
+efﬁcient because the number of representative patterns is much smaller than the
+number of possible skypatterns. Finally, this step provides a concise representa-
+tion of the skypatterns. The end-user can either output this concise representa-
+tion or the entire list of skypatterns as a ﬁnal step depending on the application
+needs. Our methodology revolves around the simple idea that to be able to ex-
+tract and analyze efﬁciently skypatterns, one needs to be able to (dynamically or
+statically) exhibit a concise representation of the skypatterns that will be used as
+an input to the skyline operator.
+13
+4. Skylineability
+The set of skypatterns has no good property like downard closure or convex-
+ity. Conventional techniques used for pruning the pattern search space like anti-
+monotone properties are thus ineffective. However, the computation of skypat-
+terns is right as soon as the Sky operator is applied on a collection S that is a
+superset of skypatterns. Of course the smaller this collection is, the faster the
+computation. Basically the skylineability aims at computing a reduced collec-
+tion of representative patterns of the skypatterns (cf. the end of the previous
+section) through the notion of free [18], and closed patterns [16].
+4.1. Skylineability of a set of measures
+Intuitively, the skylineability points out local extrema in the search space.
+Only these extrema may therefore be skypatterns. Thus it is not necessary to
+take into account the other patterns which are necessarily dominated by these
+extrema. Assume that two patterns X andY such that X⊂ Y have the same
+value for each measure ofM′:X =M ′ Y . IfY always dominatesX with respect
+toM, thenM is said to be maximallyM′-skylineable. This information is great
+because it allows us not to consider non-maximal patterns (here, X) which are
+dominated by maximal patterns (here,Y ).
+For instance, let us consider patterns from T that maximize the frequency
+and the area: M ={freq,area}. In our example (cf. Table 1), the patterns B
+andAB have the same frequencyB =freq AB andAB≻M B because the area
+ofAB is greater than that of B. More generally, two patterns X⊂Y such that
+X =freq Y implies that Y ≻M X. Such set of measures M ={freq,area} is
+said to be maximally{freq}-skylineable. In practice, local extrema are not nec-
+essarily the longest patterns (closed patterns/maximal patterns of equivalence
+classes) and the concept of skylineability is dually deﬁned with the shortest pat-
+terns (i.e., free patterns/minimal patterns of equivalence classes):
+Deﬁnition 3 (Minimal skylineability). Given a set of measures M′ ⊆ M, a
+set of measures M is said to be (strictly) minimally M′-skylineable iff for any
+patternsX =M ′ Y such thatX⊂Y , one hasX⪰M Y (respectivelyX≻M Y ).
+Deﬁnition 4 (Maximal skylineability). Given a set of measures M′⊆M , a
+set of measures M is said to be (strictly) maximally M′-skylineable iff for any
+patternsX =M ′ Y such thatX⊂Y , one hasY⪰M X (respectivelyY≻M X).
+14
+From the previous deﬁnitions, given a set of measures M which is maximally
+M′-skylineable, ifX =M ′ Y andX⊃Y , it is clear thatX cannot be dominated
+by Y on M. For instance, M = {freq,area} is strictly maximally {freq}-
+skylineable becausearea(X) strictly increases with the cardinality of X (when
+the frequency remains constant). Notice that {freq} is (weakly) maximally (or
+minimally){freq}-skylineable and that {length(X)} is strictly maximally ∅-
+skylineable.
+Property 2. Given a set of measuresM, there is at least one setM′⊆M such
+thatM is minimally and maximallyM′-skylineable.
+Property 2 is a very important result as it means that a set of measures is
+always skylineable (due to the fact thatM is at leastM-skylineable). Obviously,
+for a set of measuresM, the smaller1M′, the stronger itsM′-skylineability. For
+instance,{freq}-skylineability is more interesting than{freq,area}-skylineability
+becausearea is not a condensable function [49]: there is no pair of distinct pat-
+ternsX andY such thatX ={freq,area} Y . How to choose automatically a subset
+M′ is discussed next.
+4.2. Minimal and maximal skylineable converters
+One of the disadvantages of skylineability is that it depends on a set of mea-
+sures M′ whose choice is essential to effectively reduce the search space. We
+propose two operators to automatically buildM′ given the initial set of measures
+M. Basically, the construction ofM′ consists in identifying primitives that must
+remain constant in order that minimal or maximal patterns are always dominant
+patterns. Intuitively, any primitivep that is part of the measurem∈M that hin-
+ders theM′-skylineability ofm, has to be added toM′. For instance, it is easy to
+see that the frequency decreases the area because the frequency decreases with
+the specialization. In order that the closed patterns maximize the area, the fre-
+quency has to belong to M′. More generally, it is essential to take into account
+the monotone behavior of primitives: decreasing or increasing. For instance,
+the length increases with X while the frequency decreases. It is also necessary
+to consider the operations that combine these primitives. The result of a multi-
+plication increases when one of its operands increases. However, the result of
+a division decreases with its second operand. For this purpose, we deﬁne two
+operators denotedc andc (see Table 3).
+1In the sense of cardinality.
+15
+Table 3: Deﬁnition of the minimal and maximal skylineable convertersc andc
+Expr.e Primitive(s) c(e) c(e)
+e1θe2 θ∈{ +,×,∪} c(e1)∪c(e2) c(e1)∪c(e2)
+e1θe2 θ∈{−,/,binomial, ∩} c(e1)∪c(e2) c(e1)∪c(e2)
+constant - ∅ ∅
+d(X) d∈{freq,min,g,prod } ∅ { d(X)}
+i(X) i∈{length,max,sum,freq ∨,f} { i(X)} ∅
+d(e1) d∈{freq,min,g,prod } c(e1) c(e1)
+i(e1) i∈{length,max,sum,freq ∨,f} c(e1) c(e1)
+Given a primitive-based measure m∈M , the minimal skylineable converter
+returns a set of measures M′ =c(m) guaranteeing that for any pattern X⊂Y ,
+ifX =M ′ Y thenm(X)≥m(Y ). In other words, X dominatesY with respect
+tom. Dually, the maximal converter c guarantees that m(X)≤ m(Y ) for any
+patternX⊂Y such thatX =c(m) Y .
+Let us illustratec andc on the area measure. The area is deﬁned as a product
+of the frequency and length. Thus, we report to the ﬁrst deﬁnition in Table 3.
+c(area) = c(freq(X))∪c(length(X)) = ∅∪{ length(X)} ={length(X)}.
+Symmetrically,c(area) = c(freq(X))∪c(length(X)) = {freq(X)}∪∅ =
+{freq(X)}. The skylineable converters enable us to automatically ﬁnd opti-
+mization techniques already known for speciﬁc measures such as area [36, 14],
+p-value [20] or growth rate [35] (see Table 4 (a)). We can observe that many
+measures are maximized by the closed itemsets adequate to frequency which
+may explain the success of closed pattern mining. But, in this work, wegeneral-
+ize this principle to optimize any primitive-based measures. Note that when the
+converterc returns no measure (e.g., bond oraconf), it means that the measure
+decreases with respect to the specialization. Dually, c(m) = ∅ means that m
+increases with respect to the specialization.
+16
+Table 4: Applying the minimal and maximal converters
+(a) Individual measures
+Meas.m c (m) c(m)
+area {length(X)} { freq(X)}
+mean {max(X.val)} { min(X.val)}
+bond ∅ { freq(X),freq∨(X)}
+aconf ∅ { freq(X),max(X.val)}
+gr1 {freq(X,T2)} { freq(X,T1)}
+p-value {prod(X.supp)} { freq(X)}
+(b) A set of measuresM ={freq(X),area(X)}
+c({freq(X),area(X)})
+c(freq(X)) c(freq(X)×length(X))
+c(freq(X)) c(length(X))
+In practice, as the skypatterns are computed for a set of measures, we extend the
+minimal and maximal converters:
+Deﬁnition 5 (Minimal and maximal skylineable converters). The minimal and
+maximal skylineable converters deﬁned by Table 3 for any primitive-based mea-
+sure are naturally extended to a set of primitive-based measures M ⊆ M:
+c(M ) =⋃
+m∈Mc(m) andc(M ) =⋃
+m∈Mc(m).
+For instance, c({freq(X),area (X)}) = c(freq(X))∪ c(area(X)) =
+{freq(X)} and c({freq(X),area (X)}) = c(freq(X))∪ c(area(X)) =
+{length(X)}. c({freq(X),area (X)}) ={freq(X)} means that the most spe-
+ciﬁc patterns (when the frequency remains unchanged) maximize the measures
+{freq(X),area (X)}. The following property formalizes this observation:
+Property 3. A set of primitive-based measures M ⊆ Mis minimally c(M )-
+skylineable and maximallyc(M )-skylineable.
+In our implementation, the set of measures M is parsed through a syntax
+tree. Following this step, the minimal and maximal skylineable converters are
+recursively applied to automatically compute c(M ) and c(M ) (an example is
+provided in Table 4 (b) for M ={freq(X),area (X)}). This process is illus-
+trated in Figure 2 with the edge labelled1. From now on, the set of measuresM′
+refers toc(M ) orc(M ).
+17
+5. Pattern condensed representations for static mining of skypatterns
+This section presents our static method called Aetheris based on the theoret-
+ical relationships between pattern condensed representations and skypatterns.
+Aetheris follows a two-step process (cf. Section 3.3) : ﬁrst, a set of representative
+patterns is extracted and then theSky operator is applied on these patterns. The
+technique is said static because the extraction of a representative pattern does
+not depend on the patterns already extracted, contrary to the CP+Sky method
+presented in the next section.
+A major issue is how to extract representative patterns for a group of skypat-
+terns? In the previous section, we remarked that some skypatterns share exactly
+the same values on the whole set of measures M′ (e.g. B ={freq} AB). This
+observation enables us to properly answer to the question: instead of directly
+evaluating the skypattern query onL, we can compute the skypatterns on a con-
+densed representation ofL and then regenerate the entire set of skypatterns. For
+this end, we introduce thedistinct operator which is at the core of the production
+of a condensed representation adequate toM′:
+Deﬁnition 6 (Distinct operator). Given a set of measures M′⊆M , the dis-
+tinct operator for P ⊆L with respect to M′ and θ∈{⊂ ,⊃} returns all the
+patternsX ofP such that their generalizations (or specializations) are distinct
+fromX with respect toM′:
+Disθ(P,M′) ={X∈P|∀YθX :X̸=M ′ Y}
+whereθ∈{⊂,⊃}.
+Given a set of measures M′, the set of free (respectively closed) pat-
+terns adequate to M′ corresponds exactly to Dis⊂(L,M′) (respectively
+Dis⊃(L,M′)). For instance, from our running example, Dis⊂(L,{freq}) =
+{A,B,C,D,E,F,AD,AE,BC,BD,BE,CD,CE,DE } and
+Dis⊃(L,{freq}) ={A,D,E,AB,AC,ABCDEF }.
+We now introduce the indistinct operator that enables the retrieval of all the
+indistinct patterns from their representatives:
+Deﬁnition 7 (Indistinct operator). Given a set of measures M′⊆M , the in-
+distinct operator returns all the patterns ofL being indistinct with respect toM′
+with at least one pattern inP .
+Ind(L,M′,P ) ={X∈L|∃Y∈P :X =M ′ Y}
+18
+For instance, from Table 1, the set of patterns that have exactly the same fre-
+quency as patternsB andC isInd(L,{freq},{AB,AC}) ={B,C,AB,AC }.
+Preserving functions express a property of condensation and are at the core of
+Property 4. A preserving function is a condensable primitive (many functions are
+preserving:freq,freq∨,count,min,max,sum, etc., see more details in [49]).
+Property 4. Given a set of preserving functionsM′, one has the following rela-
+tion for anyP⊆L andθ∈{⊂,⊃}:
+Ind(P,M′,Disθ(P,M′)) = P
+In other words, the indistinct operator is the inverse function for the dis-
+tinct operator. For instance,Ind(L,{freq},Dis⊃({B,C,AB,AC },{freq})) =
+{B,C,AB,AC }.
+These operators are the basis of an efﬁcient technique to compute skypat-
+terns. The key principle is to confront only distinct patterns together instead
+of individually comparing each pattern. Indeed, the computation of skypatterns
+with respect to M ={freq,area} can be limited toDis⊃(L,{freq}) because
+maximal{freq}-skylineability ensures us that the other patterns are not dom-
+inant patterns. For instance, as AB =freq B, the{freq}-skylineability of M
+givesAB≻M B andB cannot be a skypattern. More formally, we know that
+Sky(Ind(L,M′,Disθ(L,M′)),M ) =Sky(L,M ) from Property 4. Theorem 1
+now proves that the skypattern operator can be pushed into the indistinct opera-
+tor:
+Theorem 1 (Operational equivalence). If a set of measuresM isM′-skylineable
+with respect toθ∈{⊂,⊃} andM′ is a set of measures, then one has:
+Sky(L,M ) =Ind(L,M,Sky(Disθ(L,M′),M ))
+Proof LetM be a set of measuresM′-skylineable withθ∈{⊂,⊃}.
+1. Sky(L,M )⊇Ind(L,M,Sky(Disθ(L,M′),M )).
+Let X ∈ Ind(L,M,Sky(Disθ(L,M′),M )) and Y ∈ L. There exist
+X′∈Sky(Disθ(L,M′),M ) such that X′ =M X andY′∈D isθ(L,M′) such
+that Y′ =M ′ Y and Y′ ⪰M Y (i.e., M′-skylineability). As X′ belongs to
+Sky(Disθ(L,M′),M ), it cannot be dominated by any pattern of Disθ(L,M′):
+Y′̸≻M X. Thus,X is not dominated byY (i.e.,X is a skyline ofL with respect
+toM) becauseX′ =M X andY′⪰M Y .
+2.Sky(L,M )⊆Ind(L,M,Sky(Disθ(L,M′),M )).
+LetY ∈Sky(L,M ). There exists Y′∈D isθ(L,M′) such that Y′ =M ′ Y
+andY′⪰M Y . AsY is a skypattern, one hasY⪰M Y′ and thus,Y′ =M Y . Fur-
+thermore, no pattern ofDisθ(L,M′) dominatesY norY′:Y′∈Sky(Disθ(L,M′),M ).
+Finally, asY′ =M Y ,Y belongs toInd(L,M,Sky(Disθ(L,M′),M )).
+19
+L
+Dis⊃
+L
+= {A, D, E, AB, AC, ABCDEF}
+= {A, AB, AC, ABCDEF}
+= {A, AB, AC, ABCDEF}
+1
+2
+3
+4
+{freq;area} Sky
+= {freq}c({freq;area})
+{freq;area}
+Ind
+Figure 3: Computing the skypatterns with respect to{freq;area} from the running example
+The skypatterns of Sky(Disθ(L,M′),M ) form a condensed representation of
+Sky(L,M ). It is well-known that the size of adequate condensed representa-
+tions (i.e.,Dis⊂(L,M′) orDis⊃(L,M′)) is smaller than the whole collection of
+patterns [29]. Thus, we have achieved our objective as mentioned in Section 3.2.
+The technique is even more efﬁcient if the set of measures is strictly M′-
+skylineable. In this case, the Ind operator can be skipped and Theorem 1 is
+reduced to the following relation: Sky(L,M ) = Sky(Disθ(L,M′),M ) (with
+θ∈{⊂,⊃}).
+Figure 3 illustrates the computation of the skypatterns with our method Aetheris.
+Suppose that M = {freq,area}, the ﬁrst step applies the maximal skyline-
+able converter on M. Then, the distinct operator preserves the closed itemsets
+(Step 2). The skyline operator selects the dominant patterns at Step 3 by remov-
+ing D and E which are dominated by AB (i.e., area(D) = area(E) = 3 <
+area(AB) = 6 ). Finally, the last step computes the indistinct patterns of sky-
+patterns. Note that this step in this example is unnecessary because the area is
+strictly{freq}-skylineable.
+20
+Fig. 10: Materials example
+Week 7
+• The students present a ﬁrst version of Problem Statement
+and Overview section: a in depth version of the context
+(see TP1 Week 6). Fig 10 shows the structure of the
+problem statement (in green).
+Week 8
+• The students present a revised version of the Problem
+Statement section, after the observations of the coauthor.
+.
+6. Mining skypatterns using Dynamic CSP
+This section describes our dynamic method called CP+Sky for the skypattern
+mining problem. We show how this problem can be modeled and solved by
+using Dynamic CSP [51]. A major advantage of this method is to improve the
+mining step during the process thanks to constraints dynamically posted and
+stemming from the current set of the candidate skypatterns. These constraints
+avoid producing solutions dominated by the current solutions and thus reduce the
+search space. More precisely, each time a solution is found, a new constraint is
+dynamically posted. The process stops when we cannot enlarge the “dominated
+area” (cf. Figure 1). The set of obtained representative patterns is a subset
+of the set of representative patterns extracted with Aetheris (cf. Section 3.3).
+Finally, the completeness of our method is insured by the completeness of the
+CSP solver. The implementation has been carried out inGecode2 extending the
+(CSP based) pattern extractor developed by [42].
+6.1. CSP and Dynamic CSP
+This section recalls background on Constraint Satisfaction Problem and Dy-
+namic CSP.
+CSP. A Constraint Satisfaction Problem (CSP)P =(X,D,C) is deﬁned by:
+• a ﬁnite set of variablesX ={x1,x 2,...,x k},
+• a domainD, which maps every variable xi∈X to a ﬁnite set of values
+D(xi),
+• a ﬁnite set of constraintsC.
+Algorithm 1 [40] shows how a CSP can be solved using a depth-ﬁrst search.
+D and C denote respectively the current domains and the current set of con-
+straints. In each node of the search tree, the algorithm branches by assigning
+values to a variable that is unﬁxed (line 7). It backtracks when a violation of
+constraints is found, i.e. at least one domain is empty (line 2). The search is
+further optimized by carefully choosing the variable that is ﬁxed next (line 5);
+for instance, heuristicsdom/deg selects the variablexi having the smallest ratio
+between the size of its current domain and the number of constraints it occurs.
+2http://www.gecode.org/
+21
+The main concept used to speed-up the search is Filtering (constraint propaga-
+tion) (line 1). Filtering reduces the domains of variables such that the domain
+remains locally consistent. A solution is obtained (line 9) when each domain
+D(xi) is reduced to a singleton and all constraints are satisﬁed.
+Algorithm 1: Constraint-Search(D,C )
+1 D←propagate(D,C );
+2 if there existsxi∈X s.t.D(xi) is empty then
+3 return failure;
+4 if there existsxi∈X s.t.|D(xi)|> 1 then
+5 Selectxi∈X s.t.|D(xi)|> 1;
+6 forallv∈D(xi) do
+7 Constraint-Search(D∪{xi−>{v}});
+8 else
+9 output solutionD;
+Dynamic CSP. A Dynamic CSP [51] is a sequence P1,P 2,...,P n of CSP, each
+one resulting from some changes in the deﬁnition of the previous one. These
+changes may affect every component in the problem deﬁnition: variables (addings
+or removals), domains (value addings or removals), constraints (addings or re-
+movals).
+Solving such dynamic CSP involves solving a single CSP with additional
+constraints posted during search. Each time a new solution is found, new con-
+straintsφ(X ) are imposed. Such constraints will survive backtracking and state
+that next solutions should verify both the current set of constraintsC andφ(X ).
+So line 9 of Algorithm 1 becomes:
+1 Output solutionD;
+2 C←C∪{φ(X )}
+Note that C is a variable which is global to all calls to the procedureConstraint-
+Search(D,C ).
+22
+6.2. Mining skypatterns using Dynamic CSP
+This section provides our CSP method CP+Sky for mining skypatterns. As
+previously, the representative patterns are searched according to M′ by using
+the skylineability principle. The key idea is the introduction of constraints on
+the dominance relation that are dynamically posted during the mining process.
+These constraints avoids producing solutions dominated by the solutions already
+extracted and thus reduce the search space.
+Variablex will denote the (unknown) skypattern we are looking for. In
+our method, changes on the dynamic CSP are only performed by adding new
+constraints. So, we consider the sequence P1,P 2,...,P n of CSP where each
+Pi = ({x},L,qi(x)) and:
+• q1(x) = disθ(x) wheredisθ(x) denotes the representative patternx.
+• qi+1(x) = qi(x)∧φi(x) wheresi is the ﬁrst solution to queryqi(x)
+First, the constraint disθ(x) states that x must be either a closed pattern
+w.r.t.M′ (i.e.,disθ(x) = closedM ′(x)) or a free pattern w.r.t.M′ (i.e.,disθ(x) =
+freeM ′(x)). Then, the constraint φi(x)≡¬ (si≻M x) states that the next so-
+lution (which is searched) will not be dominated by si. Using a short induction
+proof, we can easily argue that query qi+1(x) looks for a pattern x that will not
+be dominated by any of the patternss1,s2,... ,si.
+Each time the ﬁrst solutionsi to queryqi(x) is found, we dynamically post a
+new constraintφi(x) leading to reduce the search space. This process stops when
+we cannot enlarge the dominated area (i.e. there exists n s.t. query qn+1(x) has
+no solution). For skypatterns,φi(x) states that¬(si≻M x):
+φi(x)≡
+(⋁
+m∈M
+m(si)<m (x)
+)
+∨
+(⋀
+m∈M
+m(si) = m(x)
+)
+But, then extracted patternss1,s2,... ,sn are not necessarily all skypatterns.
+Some of them can only be “intermediate” patterns simply used to enlarge the
+dominated area. A post processing step must be performed to ﬁlter all candidate
+patternssi that are not skypatterns, i.e. for which there existssj (1≤i<j ≤n)
+s.t.sj dominatessi. So mining skypatterns is achieved in a two-steps approach:
+1. Compute the set S ={s1,s 2,...,s n} of candidates using Dynamic CSP.
+2. Filter all patterns si∈S that are not skypatterns.
+23
+While the number of candidates (n) could be very large , it remains reasonably-
+sized in practice for the experiments we conducted (see the experiment section).
+6.3. Pattern encoding
+We now introduce the model of a pattern that can be provided to the con-
+straint programming system. Let d— be the 0/1 matrix where, for each transac-
+tiont and each itemi, (dt,i = 1) iff (i∈t) Pattern variables are set variables rep-
+resented by their characteristic function with boolean variables. [40, 41] model
+an unknown pattern x and its associated dataset T by introducing two sets of
+boolean variables:
+• {Xi|i∈I} where (Xi = 1) iff (i∈x),
+• {Tt|t∈T} where (Tt = 1) iff (x⊆t).
+Each set of boolean variables aims at representing the characteristic function of
+the unknown pattern.
+The relationship between x andT is modeled by posting reiﬁed constraints
+stating that, for each transactiont, (Tt = 1) ifft is covered byx:
+∀t∈T , (Tt = 1)⇔
+∑
+i∈I
+Xi× (1−dt,i) = 0 (1)
+A reiﬁed constraint associates a 0/1 variable to a constraint reﬂecting whether
+the constraint is satisﬁed (value 1) or not (value 0). Such constraints are useful
+for expressing propositional formulas over constraints and for expressing that a
+certain number of constraints hold. Reiﬁed constraints do not enjoy the same
+level of propagation as simple constraints, but if the solver deducesTt = 1 (resp.
+Tt = 0 ), then the sum must be equal to 0 (resp. must be different from 0). The
+propagation is also performed, in a same way, from the sum constraint toward the
+equality constraint. Using these reiﬁed constraints, some measures are easy to
+encode: freq (x) = ∑
+t∈T Tt andsize(x) = ∑
+i∈IXi. The minimal frequency
+constraint freq (x)≥ θ (where θ is a threshold) is encoded by the constraint∑
+t∈T Tt≥θ.
+24
+6.4. Closedness constraint
+The section describes how to encode closedM ′(x). As an illustration, we
+provide the examples ofM′={min} andM′={freq}. Recalling that thanks to
+the skylineability, these measures also allow to handle measures such as mean,
+area,growth-rate, etc. In practice, these two examples are enough for running
+experiments given in Section 7.
+Let M′={min} and val(j) a function that associates an attribute value to
+each itemj. If itemi belongs tox, then its value must be greater than or equal to
+the min. Conversely, if this value is greater than or equal to the min, theni must
+belong tox (if not,x would not be maximal for inclusion). Item i belongs tox
+is encoded as (Xi = 1). So,x is a closed pattern for the measuremin iff:
+∀i∈I , (Xi = 1) ⇔ val(i)≥min{val(j)|j∈x} (2)
+Let M′={freq}, the closedness constraint ensures that a pattern has no
+superset with the same frequency. If item i belongs to x, it is obvious that
+freq (x∪{i}) = freq (x). Conversely, if freq (x∪{i}) = freq (x), then i
+must belong to x (if not, x would not be maximal for inclusion). freq (x) is
+encoded as∑
+t∈T Tt andfreq (x∪{i}) is encoded as ∑
+t∈T Tt×dt,i. Finally,
+the constraintclosedM ′(x) is encoded using Equation (1) and Equation (3).
+∀i∈I , (Xi = 1) ⇔
+∑
+t∈T
+Tt× (1−dt,i) = 0 (3)
+6.5. Freeness constraint
+Similarly to the closedness constraint, we now give two examples of encod-
+ing of the freeness constraint. Following our principle of dealing with measures
+used in the experiments, we give the examples ofM′={freq} andM′={max}
+because applying the minimal converterc onmean givesmax (cf. Table 4).
+Let M′={max} and val(j) a function that associates an attribute value to
+each itemj. If itemi does not belong tox, then its value must be greater than or
+equal to the min. Conversely, if this value is greater than or equal to the min, then
+i must not belong tox (ifi belongs tox,x would not be minimal for inclusion).
+Itemi does not belong to x is encoded as (Xi = 0) . So, x is a free pattern for
+the measuremax iff:
+∀i∈I , (Xi = 0) ⇔ val(i)≤max{val(j)|j∈x} (4)
+25
+LetM′={freq}, the freeness constraint ensures that a pattern has no subset with
+the same frequency. If item i does not belong to x, it is obvious that freq (x\
+{i}) = freq (x). Conversely, iffreq (x\{i}) = freq (x), theni must not belong
+tox (ifi belongs tox,x would not be minimal for inclusion).
+In order to encodefreq (x\{i}), we introduce boolean variablesT′
+t,i such that
+the relationship betweenx\{i} andT is modeled by posting reiﬁed constraints
+stating that, for each transactiont, (T′
+t,i = 1) ifft is covered byx\{i}.
+∀t∈T , (T′
+t,i = 1)⇔
+∑
+j∈I\{i}
+Xj× (1−dt,j) = 0 (5)
+freq (x) is encoded as∑
+t∈T Tt andfreq (x\{i}) is encoded as∑
+t∈T T′
+t,i.
+SofreeM ′(x) is modeled using Equation (1) and Equation (6).
+∀i∈I , (Xi = 0) ⇔
+∑
+t∈T
+(Tt−T′
+t,i) = 0 (6)
+6.6. Solving the running example using Dynamic CSP
+We now illustrate CP+Sky on the running example in Table 1 with
+M ={freq,area}. We use the maximal converterc and thus the closedness con-
+straint. As c(area) = freq , we get M′={freq}. Figure 4 depicts the various
+steps of the resolution.
+26
+(a) 1st solution:s1 =ABCDEF .
+ (b) 2nd solution:s2 =AB.
+(c) 3rd solution:s3 =AC.
+ (d) Last solution:s4 =A.
+Figure 4: Solving the running example using Dynamic CSP.
+LetP1 be the associated dynamic CSP (see Section 6.2). P1 = ({x},L,q 1(x))
+where queryq1(x) = closedM ′(x). Its ﬁrst solution is pattern s1 = ABCDEF
+(withfreq(s1) = 2 andarea(s1) = 12 ), cf. Figure 4a. So, we consider query
+q2(x) = closedM ′(x)∧¬ (s1 ≻M x) stating that we are looking for a closed
+patternx not dominated by s1 = ABCDEF . Its ﬁrst solution is pattern s2 =
+AB (withfreq(s2) = 3 andarea(s2) = 6 ), cf. Figure 4b. Then, the next query
+isq3(x) = closedM ′(x)∧¬ (s1≻M x)∧¬ (s2≻M x) stating that we are looking
+for a closed patternx neither dominated bys1 nors2. Its ﬁrst solution is pattern
+s3 =AC (withfreq(s3) = 3 andarea(s3) = 6 ), cf. Figure 4c. The next query
+isq4(x) = q3(x)∧¬ (s3≻M x) whose ﬁrst solution is s4 = A (cf. Figure 4d)
+and then query q5(x) = q4(x)∧¬ (s4≻M x). q5(x) has no solution since the
+dominated area cannot be enlarged and the process ends forn = 5.
+In this example, note that all extracted patterns are skypatterns (i.e., there
+is no intermediate patterns). The CSP system did not generate solution that
+does not satisfy the dominance relation. Experiments in the next section provide
+examples with intermediate patterns.
+27
+Fig. 11: Method example
+Week 9
+• The students present a ﬁnal version of Method section:
+a in depth version of the main contribution of the con-
+ference paper (see TP1 Weeks 7 to 9). Fig 11 show the
+Method section (in green).
+Week 10
+• The students present a ﬁnal version of the Method sec-
+tion, after the observations of the coauthor.
+1. Introduction
+The process of extracting useful patterns from data, called pattern mining, is an
+important subﬁeld of data mining, and has been used in a wide range of applica-
+tions and domains such as bioinformatics [5], chemoinformatics [6], social net-
+work analysis [7], web mining [8] and network intrusions detection [9]. Since the
+seminal papers of Agrawal et al. [10], Mannila et al. [11], a considerable num-
+ber of patterns, such as itemsets, strings, sequences, trees and graphs, have been
+studied and used in real-world applications. Nowadays, many pattern extraction
+problems like subgroup discovery [12], discriminant pattern mining [13], and
+tiling [14] are understood from both theoretical and computational perspectives.
+Most existing pattern mining approaches enumerate patterns with respect to
+a given set of constraints that range from simple to complex. For instance, given
+a transaction database, a well-known pattern mining task is to enumerate all
+itemsets (i.e., sets of items) that appear in at least s transactions. Another min-
+ing approach is to extract from a given graph database all subgraphs that have
+a diameter larger than l, connectivity higher than c, and where each vertex has
+a degree bounded by d. The output for these mining approaches, however, can
+be extremely large even for moderately sized datasets. For instance, in the worst
+case, the number of frequent itemsets is exponential in the size of the items in
+the dataset. So far, the community has made great efforts on sophisticated algo-
+rithms which push the constraints deep into the mining process [15]. But also
+in condensation (i.e., reduction) techniques to limit the number of output pat-
+terns depending on the application contexts. Examples of these condensation
+techniques include: closed itemsets [16], non-derivable itemsets [17] and free
+itemsets [18]. Several other studies in the pattern mining community focused on
+approaches that consider a statistical null hypothesis and which assess patterns
+according to how much their observed frequency (or more rarely the length [19])
+deviates from their expected frequency under the null model [20, 21, 22, 23].
+One of the key points of such approaches is to choose an appropriate null hy-
+pothesis. It will involve a trade-off between adjustment to the data and simplic-
+ity.
+2
+The pattern mining community, however, has paid less attention to combining
+mining constraints. In practice, many constraints entail choosing threshold val-
+ues such as the well-used minimal frequency. This notion of“thresholding” has
+serious drawbacks. Unless speciﬁc domain knowledge is available, the choice is
+often arbitrary and may lead to a very large number of extracted patterns which
+can reduce the success of any subsequent data analysis. This drawback is even
+deeper when several thresholds have to be combined. A second drawback is
+the stringent enumeration aspect : a pattern is either above or below a thresh-
+old. But what about patterns that respect only some thresholds? Should they
+be discarded? It is often very difﬁcult to apply subtle selection mechanisms.
+There are very few works such as [24, 25] which propose to introduce a softness
+criterion into the mining process. Other studies blend user preferences in the
+mining task in order to limit the number of extracted patterns such as the top-k
+patterns [26, 27]. By associating each pattern with a rank score, this approach
+returns an ordered list of the k patterns with the highest score to the user. How-
+ever, combining several measures in a single scoring function is difﬁcult and the
+performance of top-k approaches are often sensitive to the size of the datasets
+and to the threshold value,k.
+Here, we present a new framework that aims to make the results of pattern
+mining useful from a user-preference point of view . To this end, we integrate
+into the pattern discovery process the idea of skyline queries [28] in order to
+mine skyline patterns in a threshold-free manner. Such queries have attracted
+considerable attention due to their importance in multi-criteria decision making
+and economics where they are usually called “Pareto efﬁciency or optimality
+queries”. Brieﬂy, in a multidimensional space where a preference is deﬁned for
+each dimension, a point a dominates another point b if a is better (i.e., more
+preferred) than b in at least one dimension, and a is not worse than b on every
+other dimension. For example, a user selecting a set of patterns may prefer a
+pattern with a low frequency, a large length and a high conﬁdence. In this case,
+we say that patterna dominates another patternb ifa.frequency≤b.frequency ,
+a.length≥ b.length,a.confidence≥ b.confidence, where at least one strict in-
+equality holds. Given a set of patterns, the skyline set contains the patterns that
+are not dominated by any other patterns.
+3
+Skyline pattern mining is interesting for several reasons. Firstly, skyline process-
+ing does not require any threshold selection or ranking function. Secondly, the
+formal property of dominance satisﬁed by the skyline pattern deﬁnes a global
+interest with semantics easily understood by the user. These semantics are dis-
+cussed at length in the economics literature, where the Pareto efﬁciency is ap-
+plied to the selection of alternatives in resource distributions. However, while
+this notion of skylines has been extensively developed in engineering and database
+applications, it has remained unused for data mining purposes except for just a
+few works in the last three years [1, 2, 3, 4].
+Extension
+  
+Contributions and roadmap
+Here, we present signiﬁcant extensions of our recent papers [1, 4] on the dis-
+covery of skyline patterns, or “skypatterns”. First, we detail the static method
+based on the theoretical relationships with pattern condensed representations
+(representations which return a subset of the patterns having the same expres-
+siveness as the whole set of patterns [29]). Second, we describe the dynamic
+method which produces a continuous reﬁnement of the skyline constraints based
+on the extracted patterns. This is achieved through a Dynamic CSP (Constraint
+Satisfaction Problems) framework. Third, the key notion of “skylineability”
+which constitutes the cornerstone of our two methods is explained in more de-
+tail. Furthermore, we discuss the generic aspect of the skypattern framework
+and we show that we can combine different measures to provide statistical as-
+sessments of pattern mining results. Finally, we present an extensive empirical
+study which includes a wide range of datasets and comparisons of our tech-
+niques. This enables us to draw some lessons on the strengths and weaknesses
+of each method.
+The rest of this paper is organized as follows. Section 2 surveys the works re-
+lated to skyline pattern analysis. Section 3 introduces some basic deﬁnitions,
+the formal problem statement and an overview of our work. The key notion of
+skylineability is then studied in Section 4. Section 5 discusses the computation
+of pattern condensed representation for skypattern queries. Section 6 discusses
+skylineability but within a dynamic CSP framework. We report an empirical
+study on several datasets and a case study from the chemoinformatics domain in
+Section 7. Finally, Section 8 discusses the learnt lessons.
+4
+Fig. 12: Introduction example
+Week 11
+• The students present: A ﬁrst version of the introduction,
+that is not the same as the one for the conference paper.
+It should clearly state that it is an extension of a previous
+paper.
+Fig 12 shows the structure of the introduction in the ﬁrst
+three pages (in red).
+Week 12
+• The students present a ﬁnal version of the introduction,
+after the observations of the coauthor.
+.
+8. Conclusion and Perspectives
+In this paper, we investigate in detail the skyline pattern mining problem by
+studying the theoretical relationships between pattern condensed representations
+and skypatterns. Based on the concept of skylineability, we have devised the
+static method Aetheris and the dynamic method CP+Sky. Aetheris exploits the
+pattern condensed representations to provide a proper superset of skypatterns
+to apply the Sky operator. CP+Sky iteratively reﬁnes the skyline constraints
+using the extracted patterns. This gives a better pruning of the search space. We
+produce the complete set of skypatterns in a generic way (i.e., with a large set of
+measures that includes statistical assessments such as the p-value). The practical
+goal is to make the result of pattern mining useful from auser-preference point of
+view. One strength of the approach lies in the fact that no threshold has to be set,
+the end-user only needs to specify as input the dataset and the set of measures
+she is interested in.
+An extensive empirical study as well as a case study from chemoinformat-
+ics show the efﬁciency of our two algorithms according to both quantitative and
+qualitative aspects. Despite the gain in generality brought by the CSP frame-
+work and the fact that Aetheris takes beneﬁt of the pruning strategies based on
+the anti-monotonicity to extract patterns, CP+Sky competes with Aetheris and
+even outperforms it in some cases. Moreover, with CP+Sky, the search order of
+the patterns may signiﬁcantly impact the efﬁciency of the CSP machinery. Inves-
+tigating the most beneﬁcial order in which patterns are produced is a promising
+research track to maximize the effectiveness of the strategy of the constraints
+dynamically posted.
+Skypattern mining can generally be applied to a wide range of problems
+by adapting either the language or the dominance relation. For instance, the
+language of sequences or graphs can also produce skypatterns. The dominance
+relation can be changed or extended to take into account different other criteria
+for user-preferences. We sketch now these two issues.
+Language. Our formalization, and especially the skylineability notion, is gen-
+eral enough to be applied to a large set of languages (sequences, trees and graph
+for instance). However, a change in the language can impact the efﬁciency of
+the extraction methods. Regarding Aetheris, the efﬁciency of the approach is
+based on Theorem 1 involving the distinct and indistinct operators. As afore-
+mentioned, with itemset patterns and the frequency measure, the distinct oper-
+ator corresponds to the well-known closed or free frequent pattern condensed
+representations. Consequently, the efﬁcient extraction of skypatterns for more
+complex languages (i.e., skyline sequential patterns or skyline graph patterns) is
+strongly correlated to the advances and progress on complex pattern condensed
+representations.
+36
+Evaluating efﬁciently the distinct operator on more complex patterns such as
+sequences, trees and graphs implies additional challenges. To cite one, in the
+case of sequences, convenient properties such as the free patterns apriori prop-
+erty [56], which implies effective search space pruning, cannot be used. How-
+ever, there are already many methods of extraction dedicated to closed sequen-
+tial patterns, closed graphs and so on. Extending CP+Sky to other languages is a
+challenging task due to the difﬁculty of modeling complex patterns. To the best
+of our knowledge, only certain types of pattern in sequence mining have been
+successfully studied [57, 58].
+Dominance relation. Dominance relation is based on two levels: the measures
+that form basic preference criteria (e.g., frequency, area) and the combination
+of these basic preferences (here, the Pareto composition). Primitive-based mea-
+sures are ﬂexible enough to allow the user to express a wide variety of criteria.
+Indeed, classical interestingness measures for pattern mining (such as frequency,
+growth rate), utility functions and the most recent measures of signiﬁcance (like
+p-value) fall within this framework. Of course, Aetheris depends again on con-
+densed representations that are well-adapted for the desired measures. Con-
+versely, all interestingness measures are easily expressible with CP+Sky.
+Thanks to its declarative nature, CSP offers through CP+Sky a very ﬂexible
+way to change the dominance relationship. For instance the strict dominance
+(i.e., a pattern is dominated by another pattern when the latter has a better value
+for all measures inM), is easily conﬁgurable with CSP and this relaxation of the
+dominance relation leads to the mining of soft-skypatterns [4].
+References
+[1] A. Soulet, C. Ra ¨ıssi, M. Plantevit, B. Cr´emilleux, Mining dominant patterns
+in the sky, in: ICDM, 2011, pp. 655–664.
+[2] M. van Leeuwen, A. Ukkonen, Discovering skylines of subgroup sets, in:
+ECML/PKDD (3), 2013, pp. 272–287.
+[3] B. N ´egrevergne, A. Dries, T. Guns, S. Nijssen, Dominance programming for
+itemset mining, in: ICDM, 2013, pp. 557–566.
+[4] W. Ugarte, P. Boizumault, S. Loudni, B. Cr ´emilleux, A. Lepailleur, Mining
+37
+(a) Conclusions example.
+ (b) Abstract example.
+Fig. 13: Conclusions and Abstract examples.
+Week 13
+• The students present a ﬁnal version of the conclusions
+and perspectives: Fig 13a shows the structure of the
+conclusions in two pages (in blue).
+Week 14
+• The students present:
+– Title and information about authors
+– Abstract (see Fig 13b): it should clearly state that is
+an extended version of a previous paper.
+• The coauthor gives his approval of the ﬁnal draft.
+Finally, two appendix to check the ﬁnal draft.
+.
+APPENDIX
+You should look for these typos in the drafts presented by
+students:
+• Consistency:
+– Are the titles and headings consistent with the con-
+tent?
+– Have all terms been deﬁned?
+– Is the style of deﬁnition consistent? For example,
+were all new terms introduced in italics, or only
+some?
+– Has terminology been used consistently?
+– Are abbreviations and acronyms stated in full when
+ﬁrst used? Are any abbreviations or acronyms intro-
+duced more than once?
+– Are any abbreviations used less than, say, four times?
+If not, can they be removed?
+• Syntaxis:
+– Has a term been capitalized in one place and not in
+another‘?
+– Is the style and wording of headings and captions
+consistent?
+– Are names always used in the same way?
+– Is spelling consistent? What about “-ise” versus “-
+ize”, “dispatch” versus “despatch”, or “disc” versus
+“disk”?
+– Is tense used correctly?
+– Is the use of indentation consistent?
+– Do the parentheses match?
+• References:
+– Are references discussed in a consistent way?
+– Have bold and italic been used logically?
+– In the references, has each ﬁeld been formatted
+consistently?
+• Experiments:
+– Have units been used logically? If milliseconds have
+been used for some measurements and microseconds
+for others, is there a logical reason for doing so?
+– Has “megabyte” been written as “Mb” in some
+places and “Mbyte” in others?
+– Are all values of the same type presented with the
+same precision?
+– Are the graphs all the same size?
+– Are the axis units always given? If, say, the x-axes
+on different graphs measure the same units, do the
+axes have the same label?
+– Are all tables in the same format?
+– Are units given for every value?
+– Are labels and headings named consistently?
+– If, say, columns have been used for properties A to
+E in one table, have rows been used elsewhere? That
+is, do all tables have the same orientation?
+• Each reference should be:
+– relevant;
+– up-to-date: check when taking over references from
+other papers;
+– reasonably accessible: pay attention to abbreviations
+of conference names, check validity of pointers to
+online material;
+– necessary.
+• Three main styles:
+– numbered references: [16,32,18]
+– named references: (Chen and Li 2005, Deutsch et at.
+1997)
+– uppercase abbreviations: [CL05, DPV97]
+Which one to use is usually determined by the conference
+or format (IEEE, Springer, ACM, ...).
+• Avoid making references the subject of a sentence:
+– No: [18] shows that query answering . . .
+– Yes: Chen and Li [18] show that query answering
+. . .
+– No: (Chen and Li 2005) shows that query answering
+. . .
+– Yes: Chen and Li (2005) show that query answering
+. . .
