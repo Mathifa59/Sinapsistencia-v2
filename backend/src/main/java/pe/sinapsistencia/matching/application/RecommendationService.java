@@ -75,7 +75,7 @@ public class RecommendationService {
 	@Transactional(readOnly = true)
 	public RecommendationsResponse recommendations(AuthenticatedUser user, String doctorIdParam) {
 		UUID doctorId = resolveDoctor(user, doctorIdParam);
-		return computeRecommendations(doctorId);
+		return computeRecommendations(doctorId, null);
 	}
 
 	/** POST: calcula recomendaciones (para una consulta opcional) y las PERSISTE con factores XAI. */
@@ -95,7 +95,7 @@ public class RecommendationService {
 			}
 		}
 
-		RecommendationsResponse response = computeRecommendations(doctorId);
+		RecommendationsResponse response = computeRecommendations(doctorId, legalCase);
 
 		var doctorProfileUser = profileRepository.findById(doctorId)
 				.orElseThrow(() -> new NotFoundException("Perfil no encontrado"));
@@ -122,9 +122,25 @@ public class RecommendationService {
 		return response;
 	}
 
-	private RecommendationsResponse computeRecommendations(UUID doctorId) {
+	/**
+	 * Calcula recomendaciones para un médico. Si se pasa una consulta (caso), la
+	 * especialidad y el tipo de evento DEL CASO mandan sobre el perfil fijo del
+	 * médico — dos consultas distintas del mismo médico deben poder recomendar
+	 * abogados distintos (HU-31/32).
+	 */
+	private RecommendationsResponse computeRecommendations(UUID doctorId, LegalCase legalCase) {
 		DoctorProfile doctorProfile = doctorProfileRepository.findByUserId(doctorId)
 				.orElseThrow(() -> new NotFoundException("Perfil de médico no encontrado"));
+
+		String specialty = legalCase != null && legalCase.getMedicalSpecialty() != null
+				&& !legalCase.getMedicalSpecialty().isBlank()
+				? legalCase.getMedicalSpecialty()
+				: doctorProfile.getSpecialty();
+
+		List<String> subSpecialties = new ArrayList<>(doctorProfile.getSubSpecialties());
+		if (legalCase != null && legalCase.getEventType() != null && !legalCase.getEventType().isBlank()) {
+			subSpecialties.add(legalCase.getEventType());
+		}
 
 		// Solo abogados disponibles y activos entran al matching (HU-40)
 		List<LawyerProfile> lawyers = lawyerProfileRepository.findAllByOrderByRatingDesc().stream()
@@ -137,8 +153,8 @@ public class RecommendationService {
 		try {
 			Map<String, Object> profilePayload = new LinkedHashMap<>();
 			profilePayload.put("name", doctorProfile.getUser().getName());
-			profilePayload.put("specialty", doctorProfile.getSpecialty());
-			profilePayload.put("sub_specialties", doctorProfile.getSubSpecialties());
+			profilePayload.put("specialty", specialty);
+			profilePayload.put("sub_specialties", subSpecialties);
 			profilePayload.put("hospital", doctorProfile.getHospital());
 			profilePayload.put("years_experience", doctorProfile.getYearsExperience());
 
@@ -178,10 +194,10 @@ public class RecommendationService {
 		}
 
 		// ── Fallback cold-start: matching por specialty ↔ medical_areas ──
-		String specialty = doctorProfile.getSpecialty().toLowerCase();
+		String specialtyLower = specialty.toLowerCase();
 		List<RecommendationDto> fallback = lawyers.stream()
 				.filter(l -> l.getMedicalAreas().stream().anyMatch(area ->
-						area.toLowerCase().contains(specialty) || specialty.contains(area.toLowerCase())))
+						area.toLowerCase().contains(specialtyLower) || specialtyLower.contains(area.toLowerCase())))
 				.map(l -> new RecommendationDto(
 						"rec-" + doctorId + "-" + l.getUser().getId(),
 						doctorId.toString(),

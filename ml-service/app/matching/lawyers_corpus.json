@@ -1,17 +1,57 @@
 [
   {
     "lawyer_id": "d0000000-0000-0000-0000-000000000002",
-    "name": "Dra. Lucia Fernandez",
+    "name": "Dra. Lucía Fernández Torres",
     "specialties": ["Derecho Médico", "Responsabilidad Civil Profesional", "Derecho Sanitario"],
     "medical_areas": ["Cirugía General", "Ginecología y Obstetricia", "Medicina de Emergencia"],
     "years_experience": 15,
     "rating": 4.80,
     "resolved_cases": 47,
-    "bio": "Abogada especialista en derecho médico y responsabilidad civil profesional, con 15 años asesorando a profesionales de la salud en cirugía y emergencias."
+    "bio": "Abogada especialista en derecho médico y responsabilidad civil profesional, con 15 años asesorando a profesionales de la salud en cirugía general, cirugía laparoscópica y atención de emergencias."
   },
   {
-    "lawyer_id": "d0000000-0000-0000-0000-000000000003",
-    "name": "Dr. Mario Castillo",
+    "lawyer_id": "d2000000-0000-0000-0000-000000000001",
+    "name": "Abg. Joaquín Espinoza Ruiz",
+    "specialties": ["Responsabilidad Civil Médica", "Negligencia Médica"],
+    "medical_areas": ["Cirugía General", "Traumatología"],
+    "years_experience": 10,
+    "rating": 4.60,
+    "resolved_cases": 32,
+    "bio": "Abogado especialista en responsabilidad civil médica y casos de negligencia quirúrgica, con experiencia en cirugía de emergencia, cirugía de columna y manejo de fracturas complejas en traumatología."
+  },
+  {
+    "lawyer_id": "d2000000-0000-0000-0000-000000000002",
+    "name": "Abg. Daniela Vargas Solís",
+    "specialties": ["Derecho Sanitario", "Consentimiento Informado"],
+    "medical_areas": ["Ginecología y Obstetricia", "Pediatría"],
+    "years_experience": 7,
+    "rating": 4.50,
+    "resolved_cases": 19,
+    "bio": "Abogada especialista en derecho sanitario, consentimiento informado y atención materno-infantil, con casos de obstetricia de alto riesgo y seguimiento neonatológico en pediatría."
+  },
+  {
+    "lawyer_id": "d2000000-0000-0000-0000-000000000003",
+    "name": "Abg. Mateo Huamán Ríos",
+    "specialties": ["Derecho Penal Médico", "Bioética y Derecho"],
+    "medical_areas": ["Anestesiología", "Cirugía General"],
+    "years_experience": 18,
+    "rating": 4.90,
+    "resolved_cases": 64,
+    "bio": "Abogado penalista con amplia trayectoria en bioética y derecho médico, especializado en anestesiología, anestesia regional y procedimientos quirúrgicos de cirugía general."
+  },
+  {
+    "lawyer_id": "d2000000-0000-0000-0000-000000000004",
+    "name": "Abg. Patricia Núñez Flores",
+    "specialties": ["Seguros Médicos", "Derecho Médico"],
+    "medical_areas": ["Medicina General", "Dermatología"],
+    "years_experience": 5,
+    "rating": 4.30,
+    "resolved_cases": 11,
+    "bio": "Abogada especialista en seguros médicos y derecho médico general, con casos de medicina familiar, atención primaria y dermatología."
+  },
+  {
+    "lawyer_id": "d3000000-0000-0000-0000-000000000001",
+    "name": "Abg. Mario Castillo Bravo",
     "specialties": ["Negligencia Médica", "Derecho Penal Médico", "Derecho Médico"],
     "medical_areas": ["Cardiología", "Medicina General", "Neumología"],
     "years_experience": 12,
@@ -20,8 +60,8 @@
     "bio": "Especialista en negligencia médica y derecho penal sanitario, con experiencia en casos de cardiología y medicina interna."
   },
   {
-    "lawyer_id": "d0000000-0000-0000-0000-000000000004",
-    "name": "Dra. Paola Ramirez",
+    "lawyer_id": "d3000000-0000-0000-0000-000000000002",
+    "name": "Abg. Paola Ramírez Soto",
     "specialties": ["Consentimiento Informado", "Bioética y Derecho", "Derecho Sanitario"],
     "medical_areas": ["Ginecología y Obstetricia", "Pediatría", "Endocrinología"],
     "years_experience": 9,
@@ -30,8 +70,8 @@
     "bio": "Asesora en consentimiento informado y bioética, enfocada en obstetricia, pediatría y casos endocrinológicos."
   },
   {
-    "lawyer_id": "d0000000-0000-0000-0000-000000000005",
-    "name": "Dr. Renato Salazar",
+    "lawyer_id": "d3000000-0000-0000-0000-000000000003",
+    "name": "Abg. Renato Salazar Méndez",
     "specialties": ["Seguros Médicos", "Responsabilidad Civil Médica", "Derecho Médico"],
     "medical_areas": ["Traumatología", "Cirugía General", "Anestesiología"],
     "years_experience": 18,
@@ -40,8 +80,8 @@
     "bio": "Experto en seguros médicos y responsabilidad civil en traumatología, cirugía y anestesiología, con amplia trayectoria en litigios complejos."
   },
   {
-    "lawyer_id": "d0000000-0000-0000-0000-000000000006",
-    "name": "Dra. Carmen Vega",
+    "lawyer_id": "d3000000-0000-0000-0000-000000000004",
+    "name": "Abg. Carmen Vega Ibáñez",
     "specialties": ["Derecho Médico", "Negligencia Médica", "Bioética y Derecho"],
     "medical_areas": ["Oncología", "Hematología", "Medicina General"],
     "years_experience": 10,
@@ -50,8 +90,8 @@
     "bio": "Acompaña a oncólogos y hematólogos en la documentación clínica y defensa frente a reclamos por negligencia médica."
   },
   {
-    "lawyer_id": "d0000000-0000-0000-0000-000000000007",
-    "name": "Dr. Diego Huaman",
+    "lawyer_id": "d3000000-0000-0000-0000-000000000005",
+    "name": "Abg. Diego Huamán Vera",
     "specialties": ["Derecho Penal Médico", "Responsabilidad Civil Profesional", "Derecho Sanitario"],
     "medical_areas": ["Neurología", "Psiquiatría", "Medicina General"],
     "years_experience": 14,
@@ -60,8 +100,8 @@
     "bio": "Litigante en derecho penal médico con foco en neurología y psiquiatría, especializado en evaluación de riesgo legal."
   },
   {
-    "lawyer_id": "d0000000-0000-0000-0000-000000000008",
-    "name": "Dra. Ines Quispe",
+    "lawyer_id": "d3000000-0000-0000-0000-000000000006",
+    "name": "Abg. Inés Quispe Loayza",
     "specialties": ["Derecho Sanitario", "Consentimiento Informado", "Derecho Médico"],
     "medical_areas": ["Dermatología", "Oftalmología", "Urología"],
     "years_experience": 7,
@@ -70,8 +110,8 @@
     "bio": "Asesora legal para procedimientos ambulatorios y consentimiento informado en dermatología, oftalmología y urología."
   },
   {
-    "lawyer_id": "d0000000-0000-0000-0000-000000000009",
-    "name": "Dr. Jorge Paredes",
+    "lawyer_id": "d3000000-0000-0000-0000-000000000007",
+    "name": "Abg. Jorge Paredes Flores",
     "specialties": ["Responsabilidad Civil Médica", "Seguros Médicos", "Negligencia Médica"],
     "medical_areas": ["Gastroenterología", "Nefrología", "Infectología"],
     "years_experience": 16,
