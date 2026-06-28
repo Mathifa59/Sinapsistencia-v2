@@ -22,7 +22,6 @@ import pe.sinapsistencia.matching.application.RecommendationService;
 import pe.sinapsistencia.matching.application.RelevantCasesService;
 import pe.sinapsistencia.matching.web.dto.ContactRequestResponse;
 import pe.sinapsistencia.matching.web.dto.DoctorCardDto;
-import pe.sinapsistencia.matching.web.dto.LawyerCardDto;
 import pe.sinapsistencia.matching.web.dto.RecommendationDto.RecommendationsResponse;
 import pe.sinapsistencia.shared.api.ApiResponse;
 
