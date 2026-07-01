@@ -15,6 +15,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import pe.sinapsistencia.cases.domain.CaseStatus;
 import pe.sinapsistencia.cases.domain.LegalCase;
 
 @Repository
@@ -49,4 +50,12 @@ public interface LegalCaseRepository extends JpaRepository<LegalCase, UUID>, Jpa
 			         c.createdAt DESC
 			""")
 	List<LegalCase> findRelevantUnassigned(@Param("doctorIds") Collection<UUID> doctorIds, Pageable pageable);
+
+	/**
+	 * Consulta abierta más reciente del médico sin abogado (auto-vínculo en
+	 * solicitudes de contacto). Solo pendiente o clasificada.
+	 */
+	@EntityGraph(attributePaths = { "doctor", "lawyer" })
+	Optional<LegalCase> findFirstByDoctor_IdAndLawyerIsNullAndStatusInOrderByCreatedAtDesc(
+			UUID doctorId, Collection<CaseStatus> statuses);
 }

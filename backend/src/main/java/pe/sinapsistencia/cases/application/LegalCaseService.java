@@ -46,20 +46,27 @@ public class LegalCaseService {
 	private final LegalCaseRepository caseRepository;
 	private final CaseContextRepository contextRepository;
 	private final ProfileRepository profileRepository;
+	private final CaseClassificationService classificationService;
 
 	public LegalCaseService(LegalCaseRepository caseRepository,
 			CaseContextRepository contextRepository,
-			ProfileRepository profileRepository) {
+			ProfileRepository profileRepository,
+			CaseClassificationService classificationService) {
 		this.caseRepository = caseRepository;
 		this.contextRepository = contextRepository;
 		this.profileRepository = profileRepository;
+		this.classificationService = classificationService;
 	}
 
 	@Transactional(readOnly = true)
 	public ListResponse<CaseResponse> list(AuthenticatedUser user, String status, String priority,
-			String doctorId, String search, int page, int pageSize) {
+			String doctorId, String search, boolean assignedOnly, int page, int pageSize) {
 
 		Specification<LegalCase> spec = ownershipSpec(user);
+
+		if (assignedOnly && user.role() == UserRole.LAWYER) {
+			spec = spec.and((root, q, cb) -> cb.equal(root.get("lawyer").get("id"), user.id()));
+		}
 
 		if (status != null) {
 			CaseStatus statusEnum = parseStatus(status);
@@ -136,6 +143,13 @@ public class LegalCaseService {
 			context = contextRepository.save(context);
 		}
 
+		classificationService.classifyAndPrioritize(legalCase);
+		legalCase = caseRepository.findWithPeopleById(legalCase.getId())
+				.orElseThrow(() -> new NotFoundException("Caso no encontrado"));
+		if (context == null) {
+			context = contextRepository.findByLegalCaseId(legalCase.getId()).orElse(null);
+		}
+
 		return CaseResponse.from(legalCase, context);
 	}
 
@@ -162,7 +176,9 @@ public class LegalCaseService {
 		assertCanModify(user, legalCase, request);
 
 		if (request.status() != null) {
-			legalCase.setStatus(parseStatus(request.status()));
+			CaseStatus newStatus = parseStatus(request.status());
+			assertValidStatusTransition(user, legalCase.getStatus(), newStatus);
+			legalCase.setStatus(newStatus);
 		}
 		if (request.lawyerId() != null) {
 			UUID lawyerUuid = parseUuid(request.lawyerId());
@@ -234,6 +250,10 @@ public class LegalCaseService {
 		}
 	}
 
+	public static CasePriority parsePriorityPublic(String value) {
+		return parsePriority(value);
+	}
+
 	private static CasePriority parsePriority(String value) {
 		try {
 			return CasePriority.fromValue(value);
@@ -252,5 +272,26 @@ public class LegalCaseService {
 
 	private static boolean isBlank(String value) {
 		return value == null || value.isBlank();
+	}
+
+	/** Valida transiciones del flujo de 6 estados (admin puede saltar). */
+	private static void assertValidStatusTransition(AuthenticatedUser user, CaseStatus from, CaseStatus to) {
+		if (from == to) {
+			return;
+		}
+		if (user.role() == UserRole.ADMIN) {
+			return;
+		}
+		boolean valid = switch (from) {
+			case PENDIENTE -> to == CaseStatus.CLASIFICADA;
+			case CLASIFICADA -> to == CaseStatus.ASIGNADA;
+			case ASIGNADA -> to == CaseStatus.EN_REVISION;
+			case EN_REVISION -> to == CaseStatus.RESPONDIDA || to == CaseStatus.CERRADA;
+			case RESPONDIDA -> to == CaseStatus.CERRADA;
+			case CERRADA -> false;
+		};
+		if (!valid) {
+			throw new BadRequestException("Transición de estado no válida: " + from.getValue() + " → " + to.getValue());
+		}
 	}
 }

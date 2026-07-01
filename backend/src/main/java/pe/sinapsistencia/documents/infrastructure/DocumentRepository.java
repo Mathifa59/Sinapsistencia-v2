@@ -1,5 +1,6 @@
 package pe.sinapsistencia.documents.infrastructure;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -22,4 +23,6 @@ public interface DocumentRepository extends JpaRepository<Document, UUID>, JpaSp
 
 	@EntityGraph(attributePaths = { "author", "legalCase", "legalCase.lawyer" })
 	Optional<Document> findWithRelationsById(UUID id);
+
+	List<Document> findByLegalCase_IdOrderByUpdatedAtDesc(UUID caseId);
 }

@@ -19,10 +19,14 @@ import pe.sinapsistencia.auth.application.AuthService;
 import pe.sinapsistencia.auth.security.AuthenticatedUser;
 import pe.sinapsistencia.auth.security.JwtAuthFilter;
 import pe.sinapsistencia.auth.security.JwtService;
+import pe.sinapsistencia.auth.web.dto.ChangePasswordRequest;
+import pe.sinapsistencia.auth.web.dto.ForgotPasswordRequest;
+import pe.sinapsistencia.auth.web.dto.ForgotPasswordResponse;
 import pe.sinapsistencia.auth.web.dto.LoginRequest;
 import pe.sinapsistencia.auth.web.dto.LoginResponse;
 import pe.sinapsistencia.auth.web.dto.MessageResponse;
 import pe.sinapsistencia.auth.web.dto.RegisterRequest;
+import pe.sinapsistencia.auth.web.dto.ResetPasswordRequest;
 import pe.sinapsistencia.auth.web.dto.UserDto;
 import pe.sinapsistencia.shared.api.ApiResponse;
 import pe.sinapsistencia.shared.exception.UnauthorizedException;
@@ -88,6 +92,28 @@ public class AuthController {
 		authService.register(request);
 		return ResponseEntity.status(HttpStatus.CREATED)
 				.body(ApiResponse.ok(new MessageResponse("Cuenta creada exitosamente. Ya puedes iniciar sesión.")));
+	}
+
+	@PostMapping("/forgot-password")
+	public ApiResponse<ForgotPasswordResponse> forgotPassword(@RequestBody ForgotPasswordRequest request) {
+		return ApiResponse.ok(authService.forgotPassword(request.email()));
+	}
+
+	@PostMapping("/reset-password")
+	public ApiResponse<MessageResponse> resetPassword(@RequestBody ResetPasswordRequest request) {
+		authService.resetPassword(request.email(), request.token(), request.newPassword());
+		return ApiResponse.ok(new MessageResponse("Contraseña restablecida correctamente"));
+	}
+
+	@PostMapping("/change-password")
+	public ApiResponse<MessageResponse> changePassword(
+			@AuthenticationPrincipal AuthenticatedUser user,
+			@RequestBody ChangePasswordRequest request) {
+		if (user == null) {
+			throw new UnauthorizedException("No autorizado");
+		}
+		authService.changePassword(user.id(), request.currentPassword(), request.newPassword());
+		return ApiResponse.ok(new MessageResponse("Contraseña actualizada correctamente"));
 	}
 
 	private ResponseCookie buildAccessTokenCookie(String token) {

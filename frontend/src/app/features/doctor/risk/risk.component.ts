@@ -5,6 +5,7 @@ import { MlApi } from '../../../core/api/ml.api';
 import { BtnDirective } from '../../../shared/ui/button.directive';
 import { InputDirective, LabelDirective, TextareaDirective, SelectDirective } from '../../../shared/ui/field.directives';
 import { MEDICAL_SPECIALTIES } from '../../../shared/constants';
+import { MlAdvisoryNoteComponent } from '../../../shared/ui/ml-advisory-note.component';
 import { cn } from '../../../shared/utils/cn';
 
 interface RiskFactor {
@@ -44,13 +45,15 @@ const FACTOR_LABELS: Record<string, string> = {
 /** Réplica de app/doctor/risk/page.tsx (POST /api/ml/risk). */
 @Component({
   selector: 'app-doctor-risk',
-  imports: [ReactiveFormsModule, LucideAngularModule, BtnDirective, InputDirective, LabelDirective, TextareaDirective, SelectDirective],
+  imports: [ReactiveFormsModule, LucideAngularModule, BtnDirective, InputDirective, LabelDirective, TextareaDirective, SelectDirective, MlAdvisoryNoteComponent],
   template: `
     <div class="max-w-4xl mx-auto space-y-6">
       <div>
         <h1 class="text-2xl font-bold text-slate-900">Evaluación de Riesgo Médico-Legal</h1>
         <p class="text-slate-500 text-sm mt-1">Analiza el nivel de riesgo legal de una consulta basándose en factores clínicos y procesales</p>
       </div>
+
+      <app-ml-advisory-note />
 
       <div class="grid lg:grid-cols-2 gap-6 items-start">
         <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-5">

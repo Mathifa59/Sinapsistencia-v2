@@ -14,8 +14,10 @@ import org.springframework.transaction.annotation.Transactional;
 import pe.sinapsistencia.auth.domain.UserRole;
 import pe.sinapsistencia.auth.infrastructure.ProfileRepository;
 import pe.sinapsistencia.auth.security.AuthenticatedUser;
+import pe.sinapsistencia.cases.application.CaseWorkflowService;
 import pe.sinapsistencia.cases.domain.CaseStatus;
 import pe.sinapsistencia.cases.domain.LegalCase;
+import pe.sinapsistencia.cases.infrastructure.CaseEventRepository;
 import pe.sinapsistencia.cases.infrastructure.LegalCaseRepository;
 import pe.sinapsistencia.matching.domain.ContactRequest;
 import pe.sinapsistencia.matching.domain.ContactRequestStatus;
@@ -37,17 +39,20 @@ public class ContactRequestService {
 	private final ContactRequestRepository contactRequestRepository;
 	private final ProfileRepository profileRepository;
 	private final LegalCaseRepository caseRepository;
+	private final CaseEventRepository eventRepository;
 	private final DoctorProfileRepository doctorProfileRepository;
 	private final LawyerProfileRepository lawyerProfileRepository;
 
 	public ContactRequestService(ContactRequestRepository contactRequestRepository,
 			ProfileRepository profileRepository,
 			LegalCaseRepository caseRepository,
+			CaseEventRepository eventRepository,
 			DoctorProfileRepository doctorProfileRepository,
 			LawyerProfileRepository lawyerProfileRepository) {
 		this.contactRequestRepository = contactRequestRepository;
 		this.profileRepository = profileRepository;
 		this.caseRepository = caseRepository;
+		this.eventRepository = eventRepository;
 		this.doctorProfileRepository = doctorProfileRepository;
 		this.lawyerProfileRepository = lawyerProfileRepository;
 	}
@@ -112,11 +117,23 @@ public class ContactRequestService {
 		ContactRequest request = new ContactRequest(doctor, lawyer, message);
 		if (caseIdParam != null && !caseIdParam.isBlank()) {
 			LegalCase legalCase = caseRepository.findWithPeopleById(UUID.fromString(caseIdParam))
-					.orElse(null);
-			if (legalCase != null) {
-				if (!legalCase.getDoctor().getId().equals(user.id())) {
-					throw new ForbiddenException("No puedes vincular una consulta ajena");
-				}
+					.orElseThrow(() -> new NotFoundException("Consulta no encontrada"));
+			if (!legalCase.getDoctor().getId().equals(user.id())) {
+				throw new ForbiddenException("No puedes vincular una consulta ajena");
+			}
+			if (legalCase.getLawyer() != null) {
+				throw new BadRequestException("La consulta ya tiene un abogado asignado");
+			}
+			if (legalCase.getStatus() != CaseStatus.PENDIENTE && legalCase.getStatus() != CaseStatus.CLASIFICADA) {
+				throw new BadRequestException("Solo se pueden vincular consultas pendientes o clasificadas");
+			}
+			request.setLegalCase(legalCase);
+			request.setCaseTitle(legalCase.getTitle());
+		} else {
+			var openCase = caseRepository.findFirstByDoctor_IdAndLawyerIsNullAndStatusInOrderByCreatedAtDesc(
+					user.id(), List.of(CaseStatus.PENDIENTE, CaseStatus.CLASIFICADA));
+			if (openCase.isPresent()) {
+				LegalCase legalCase = openCase.get();
 				request.setLegalCase(legalCase);
 				request.setCaseTitle(legalCase.getTitle());
 			}
@@ -135,6 +152,9 @@ public class ContactRequestService {
 		if (!"aceptado".equals(status) && !"rechazado".equals(status)) {
 			throw new BadRequestException("Status debe ser 'aceptado' o 'rechazado'");
 		}
+		if ("rechazado".equals(status) && (responseMessage == null || responseMessage.isBlank())) {
+			throw new BadRequestException("Debe indicar el motivo del rechazo");
+		}
 
 		ContactRequest request = contactRequestRepository.findById(UUID.fromString(requestIdParam))
 				.orElseThrow(() -> new NotFoundException("Solicitud no encontrada"));
@@ -148,14 +168,15 @@ public class ContactRequestService {
 		request.setResponseMessage(responseMessage);
 		request = contactRequestRepository.save(request);
 
-		// HU-18: aceptar una solicitud con consulta vinculada asigna al abogado
-		// y mueve la consulta a "en_revision".
+		// HU-18: aceptar asigna al abogado y mueve la consulta a "asignada".
 		LegalCase legalCase = request.getLegalCase();
 		if (request.getStatus() == ContactRequestStatus.ACEPTADO && legalCase != null
 				&& legalCase.getLawyer() == null) {
 			legalCase.setLawyer(request.getToLawyer());
-			legalCase.setStatus(CaseStatus.EN_REVISION);
+			legalCase.setStatus(CaseStatus.ASIGNADA);
 			caseRepository.save(legalCase);
+			CaseWorkflowService.recordSystemEvent(eventRepository, legalCase, request.getToLawyer(),
+					"asignacion", "Abogado asignado tras aceptar la solicitud de contacto");
 		}
 
 		return enrich(List.of(request)).get(0);

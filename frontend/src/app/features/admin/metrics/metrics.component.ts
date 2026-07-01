@@ -147,6 +147,47 @@ const BAR_COLORS: Record<string, string> = {
           </div>
         }
       </div>
+
+      <div class="bg-white rounded-lg border border-slate-200 p-5">
+        <h2 class="font-semibold text-slate-900 mb-1">Métricas de modelos ML (HU-35)</h2>
+        <p class="text-xs text-slate-400 mb-4">Precisión, recall, F1 y pertinencia del matching</p>
+        @if (modelMetricsQuery.isLoading()) {
+          <div class="flex items-center justify-center py-10 text-slate-400">
+            <lucide-icon name="loader-2" class="h-5 w-5 animate-spin" />
+          </div>
+        } @else if ((modelMetricsQuery.data() ?? []).length === 0) {
+          <p class="text-sm text-slate-400 text-center py-6">Sin métricas registradas</p>
+        } @else {
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="border-b border-slate-100 text-left text-slate-500">
+                  <th class="py-2 pr-4 font-medium">Modelo</th>
+                  <th class="py-2 pr-4 font-medium">Versión</th>
+                  <th class="py-2 pr-4 font-medium">Precisión</th>
+                  <th class="py-2 pr-4 font-medium">Recall</th>
+                  <th class="py-2 pr-4 font-medium">F1</th>
+                  <th class="py-2 pr-4 font-medium">Matching %</th>
+                  <th class="py-2 font-medium">Tiempo ms</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-50">
+                @for (m of modelMetricsQuery.data() ?? []; track m.id) {
+                  <tr>
+                    <td class="py-2.5 pr-4 font-medium text-slate-800">{{ m.modelName }}</td>
+                    <td class="py-2.5 pr-4 text-slate-600">{{ m.modelVersion }}</td>
+                    <td class="py-2.5 pr-4">{{ formatPct(m.precisionScore) }}</td>
+                    <td class="py-2.5 pr-4">{{ formatPct(m.recallScore) }}</td>
+                    <td class="py-2.5 pr-4">{{ formatPct(m.f1Score) }}</td>
+                    <td class="py-2.5 pr-4">{{ formatPct(m.matchingRelevanceRate) }}</td>
+                    <td class="py-2.5">{{ m.avgResponseTimeMs ?? '—' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
     </div>
   `,
 })
@@ -170,6 +211,16 @@ export class AdminMetricsComponent {
     queryFn: () => this.mlApi.health(),
     retry: false,
   }));
+
+  protected readonly modelMetricsQuery = injectQuery(() => ({
+    queryKey: ['ml', 'metrics'],
+    queryFn: () => this.mlApi.metrics(),
+  }));
+
+  protected formatPct(value?: number | null): string {
+    if (value == null) return '—';
+    return `${Math.round(value * 1000) / 10}%`;
+  }
 
   protected readonly mlStatusLabel = computed(() => {
     if (this.mlHealthQuery.isLoading()) return '...';

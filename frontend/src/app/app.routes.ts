@@ -20,6 +20,18 @@ export const routes: Routes = [
       import('./features/auth/register/register.component').then((m) => m.RegisterComponent),
   },
   {
+    path: 'forgot-password',
+    canActivate: [guestGuard],
+    loadComponent: () =>
+      import('./features/auth/forgot-password/forgot-password.component').then((m) => m.ForgotPasswordComponent),
+  },
+  {
+    path: 'reset-password',
+    canActivate: [guestGuard],
+    loadComponent: () =>
+      import('./features/auth/reset-password/reset-password.component').then((m) => m.ResetPasswordComponent),
+  },
+  {
     path: 'doctor',
     canActivate: [authGuard, roleGuard('doctor')],
     loadComponent: () =>
@@ -39,7 +51,7 @@ export const routes: Routes = [
       {
         path: 'cases/:id',
         loadComponent: () =>
-          import('./features/doctor/cases/case-detail.component').then((m) => m.DoctorCaseDetailComponent),
+          import('./shared/features/case-detail/case-detail.component').then((m) => m.CaseDetailComponent),
       },
       {
         path: 'documents',
@@ -61,6 +73,11 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/doctor/profile/profile.component').then((m) => m.DoctorProfileComponent),
       },
+      {
+        path: 'manual',
+        loadComponent: () =>
+          import('./features/shared/manual/manual.component').then((m) => m.ManualComponent),
+      },
       { path: '**', redirectTo: 'dashboard' },
     ],
   },
@@ -77,6 +94,16 @@ export const routes: Routes = [
           import('./features/lawyer/dashboard/dashboard.component').then((m) => m.LawyerDashboardComponent),
       },
       {
+        path: 'cases',
+        loadComponent: () =>
+          import('./features/lawyer/cases/cases-list.component').then((m) => m.LawyerCasesComponent),
+      },
+      {
+        path: 'cases/:id',
+        loadComponent: () =>
+          import('./shared/features/case-detail/case-detail.component').then((m) => m.CaseDetailComponent),
+      },
+      {
         path: 'requests',
         loadComponent: () =>
           import('./features/lawyer/requests/requests.component').then((m) => m.LawyerRequestsComponent),
@@ -90,6 +117,11 @@ export const routes: Routes = [
         path: 'profile',
         loadComponent: () =>
           import('./features/lawyer/profile/profile.component').then((m) => m.LawyerProfileComponent),
+      },
+      {
+        path: 'manual',
+        loadComponent: () =>
+          import('./features/shared/manual/manual.component').then((m) => m.ManualComponent),
       },
       { path: '**', redirectTo: 'dashboard' },
     ],
@@ -130,6 +162,11 @@ export const routes: Routes = [
         path: 'profile',
         loadComponent: () =>
           import('./features/admin/profile/profile.component').then((m) => m.AdminProfileComponent),
+      },
+      {
+        path: 'manual',
+        loadComponent: () =>
+          import('./features/shared/manual/manual.component').then((m) => m.ManualComponent),
       },
       { path: '**', redirectTo: 'dashboard' },
     ],

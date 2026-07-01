@@ -2,8 +2,10 @@ package pe.sinapsistencia.ml.web;
 
 import java.time.Instant;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,7 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import pe.sinapsistencia.auth.security.AuthenticatedUser;
 import pe.sinapsistencia.ml.application.MlProxyService;
+import pe.sinapsistencia.ml.application.ModelMetricService;
 import pe.sinapsistencia.ml.application.N8nNotifier;
+import pe.sinapsistencia.ml.web.dto.ModelMetricDto;
 import pe.sinapsistencia.shared.api.ApiResponse;
 
 /**
@@ -27,10 +31,13 @@ public class MlController {
 
 	private final MlProxyService mlProxyService;
 	private final N8nNotifier n8nNotifier;
+	private final ModelMetricService modelMetricService;
 
-	public MlController(MlProxyService mlProxyService, N8nNotifier n8nNotifier) {
+	public MlController(MlProxyService mlProxyService, N8nNotifier n8nNotifier,
+			ModelMetricService modelMetricService) {
 		this.mlProxyService = mlProxyService;
 		this.n8nNotifier = n8nNotifier;
+		this.modelMetricService = modelMetricService;
 	}
 
 	@PostMapping("/risk")
@@ -63,5 +70,11 @@ public class MlController {
 	@GetMapping("/health")
 	public ApiResponse<Map<String, Object>> health() {
 		return ApiResponse.ok(mlProxyService.health());
+	}
+
+	@GetMapping("/metrics")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ApiResponse<List<ModelMetricDto>> metrics() {
+		return ApiResponse.ok(modelMetricService.list());
 	}
 }

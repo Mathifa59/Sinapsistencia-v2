@@ -28,8 +28,10 @@ export class MatchingApi {
   }
 
   /** Con doctorId, /api/matching/lawyers responde recomendaciones ML (legacy). */
-  recommendations(doctorId: string): Promise<RecommendationsResponse> {
-    return this.api.get<RecommendationsResponse>('/api/matching/lawyers', { doctorId });
+  recommendations(doctorId: string, caseId?: string): Promise<RecommendationsResponse> {
+    const params: Record<string, string> = { doctorId };
+    if (caseId) params['caseId'] = caseId;
+    return this.api.get<RecommendationsResponse>('/api/matching/lawyers', params);
   }
 
   generateRecommendations(body: GenerateRecommendationsBody): Promise<RecommendationsResponse> {

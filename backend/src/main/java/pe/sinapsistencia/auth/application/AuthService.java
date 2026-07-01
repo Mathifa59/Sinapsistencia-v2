@@ -1,5 +1,9 @@
 package pe.sinapsistencia.auth.application;
 
+import java.security.SecureRandom;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.HexFormat;
 import java.util.Map;
 import java.util.UUID;
 
@@ -7,10 +11,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import pe.sinapsistencia.auth.domain.PasswordResetToken;
 import pe.sinapsistencia.auth.domain.Profile;
 import pe.sinapsistencia.auth.domain.UserRole;
+import pe.sinapsistencia.auth.infrastructure.PasswordResetTokenRepository;
 import pe.sinapsistencia.auth.infrastructure.ProfileRepository;
 import pe.sinapsistencia.auth.security.JwtService;
+import pe.sinapsistencia.auth.web.dto.ForgotPasswordResponse;
 import pe.sinapsistencia.auth.web.dto.LoginResponse;
 import pe.sinapsistencia.auth.web.dto.RegisterRequest;
 import pe.sinapsistencia.auth.web.dto.UserDto;
@@ -41,17 +48,21 @@ public class AuthService {
 	private final ProfileRepository profileRepository;
 	private final DoctorProfileRepository doctorProfileRepository;
 	private final LawyerProfileRepository lawyerProfileRepository;
+	private final PasswordResetTokenRepository passwordResetTokenRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final JwtService jwtService;
+	private final SecureRandom secureRandom = new SecureRandom();
 
 	public AuthService(ProfileRepository profileRepository,
 			DoctorProfileRepository doctorProfileRepository,
 			LawyerProfileRepository lawyerProfileRepository,
+			PasswordResetTokenRepository passwordResetTokenRepository,
 			PasswordEncoder passwordEncoder,
 			JwtService jwtService) {
 		this.profileRepository = profileRepository;
 		this.doctorProfileRepository = doctorProfileRepository;
 		this.lawyerProfileRepository = lawyerProfileRepository;
+		this.passwordResetTokenRepository = passwordResetTokenRepository;
 		this.passwordEncoder = passwordEncoder;
 		this.jwtService = jwtService;
 	}
@@ -154,6 +165,83 @@ public class AuthService {
 			lawyerProfile.setMedicalAreas(request.medicalAreas());
 			lawyerProfileRepository.save(lawyerProfile);
 		}
+	}
+
+	/** HU-04: solicitud de restablecimiento (en prototipo devuelve token para demo). */
+	@Transactional
+	public ForgotPasswordResponse forgotPassword(String email) {
+		if (email == null || email.isBlank()) {
+			throw new BadRequestException("El correo electrónico es requerido");
+		}
+
+		String message = "Si el correo está registrado, recibirás instrucciones para restablecer tu contraseña.";
+		Profile profile = profileRepository.findByEmail(email.trim()).orElse(null);
+		if (profile == null || !profile.isActive()) {
+			return new ForgotPasswordResponse(message, null);
+		}
+
+		byte[] bytes = new byte[24];
+		secureRandom.nextBytes(bytes);
+		String token = HexFormat.of().formatHex(bytes);
+
+		PasswordResetToken resetToken = new PasswordResetToken(
+				profile.getEmail(),
+				token,
+				Instant.now().plus(1, ChronoUnit.HOURS));
+		passwordResetTokenRepository.save(resetToken);
+
+		return new ForgotPasswordResponse(
+				message + " (prototipo: usa el token mostrado para continuar)",
+				token);
+	}
+
+	@Transactional
+	public void resetPassword(String email, String token, String newPassword) {
+		if (isBlank(email) || isBlank(token) || isBlank(newPassword)) {
+			throw new BadRequestException("Correo, token y nueva contraseña son requeridos");
+		}
+		if (newPassword.length() < 8) {
+			throw new BadRequestException("La contraseña debe tener al menos 8 caracteres");
+		}
+
+		PasswordResetToken resetToken = passwordResetTokenRepository.findByTokenAndUsedFalse(token.trim())
+				.orElseThrow(() -> new BadRequestException("Token inválido o expirado"));
+
+		if (!resetToken.getEmail().equalsIgnoreCase(email.trim())) {
+			throw new BadRequestException("Token inválido o expirado");
+		}
+		if (resetToken.getExpiresAt().isBefore(Instant.now())) {
+			throw new BadRequestException("Token inválido o expirado");
+		}
+
+		Profile profile = profileRepository.findByEmail(email.trim())
+				.orElseThrow(() -> new NotFoundException("Usuario no encontrado"));
+
+		profile.setPasswordHash(passwordEncoder.encode(newPassword));
+		profileRepository.save(profile);
+
+		resetToken.setUsed(true);
+		passwordResetTokenRepository.save(resetToken);
+	}
+
+	@Transactional
+	public void changePassword(UUID userId, String currentPassword, String newPassword) {
+		if (isBlank(currentPassword) || isBlank(newPassword)) {
+			throw new BadRequestException("Contraseña actual y nueva son requeridas");
+		}
+		if (newPassword.length() < 8) {
+			throw new BadRequestException("La contraseña debe tener al menos 8 caracteres");
+		}
+
+		Profile profile = profileRepository.findById(userId)
+				.orElseThrow(() -> new NotFoundException("Perfil no encontrado"));
+
+		if (!passwordEncoder.matches(currentPassword, profile.getPasswordHash())) {
+			throw new UnauthorizedException("Contraseña actual incorrecta");
+		}
+
+		profile.setPasswordHash(passwordEncoder.encode(newPassword));
+		profileRepository.save(profile);
 	}
 
 	private static boolean isBlank(String value) {

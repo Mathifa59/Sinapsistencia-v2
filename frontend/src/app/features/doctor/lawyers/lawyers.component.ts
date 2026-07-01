@@ -1,29 +1,90 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, Injector, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { injectMutation, injectQuery, injectQueryClient } from '@tanstack/angular-query-experimental';
 import { LucideAngularModule } from 'lucide-angular';
+import { map } from 'rxjs';
 import { AuthService } from '../../../core/auth/auth.service';
+import { CasesApi } from '../../../core/api/cases.api';
 import { MatchingApi } from '../../../core/api/matching.api';
 import { BtnDirective } from '../../../shared/ui/button.directive';
-import { InputDirective } from '../../../shared/ui/field.directives';
+import { InputDirective, SelectDirective } from '../../../shared/ui/field.directives';
 import { BadgeDirective } from '../../../shared/ui/badge.directive';
+import { CasePriorityBadgeComponent } from '../../../shared/ui/status-badges.component';
+import { MlAdvisoryNoteComponent } from '../../../shared/ui/ml-advisory-note.component';
 import { cn, getInitials } from '../../../shared/utils/cn';
+import type { CasePriority } from '../../../shared/constants';
 
-/** Réplica de app/doctor/lawyers/page.tsx (Abogados sugeridos, con recomendaciones ML). */
+/** Abogados sugeridos: el médico elige la consulta a vincular antes de solicitar contacto. */
 @Component({
   selector: 'app-doctor-lawyers',
-  imports: [FormsModule, LucideAngularModule, BtnDirective, InputDirective, BadgeDirective],
+  imports: [
+    FormsModule,
+    RouterLink,
+    LucideAngularModule,
+    BtnDirective,
+    InputDirective,
+    SelectDirective,
+    BadgeDirective,
+    CasePriorityBadgeComponent,
+    MlAdvisoryNoteComponent,
+  ],
   template: `
     <div class="space-y-5">
       <div>
         <h1 class="text-2xl font-bold text-slate-900">Abogados sugeridos</h1>
-        <p class="text-slate-500 text-sm mt-1">Profesionales compatibles con tu perfil y consultas activas</p>
+        <p class="text-slate-500 text-sm mt-1">Elige la consulta a asignar y solicita contacto con un abogado compatible</p>
+      </div>
+
+      <app-ml-advisory-note />
+
+      <div class="bg-white rounded-lg border border-slate-200 p-5 space-y-3">
+        <div class="flex items-center gap-2">
+          <lucide-icon name="briefcase" class="h-4 w-4 text-blue-600" />
+          <h2 class="font-semibold text-slate-900">Consulta a asignar</h2>
+        </div>
+
+        @if (openCasesQuery.isLoading()) {
+          <p class="text-sm text-slate-400">Cargando consultas...</p>
+        } @else if (openCases().length === 0) {
+          <div class="rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            No tienes consultas pendientes de asignar. Crea una en
+            <a routerLink="/doctor/cases" class="font-medium underline">Mis Consultas</a>
+            antes de buscar abogado.
+          </div>
+        } @else {
+          <select
+            appSelect
+            class="w-full"
+            [ngModel]="selectedCaseId()"
+            (ngModelChange)="onCaseSelected($event)"
+          >
+            @for (c of openCases(); track c.id) {
+              <option [value]="c.id">{{ c.title }} — {{ c.context?.contextCode ?? 'sin código' }}</option>
+            }
+          </select>
+
+          @if (selectedCase(); as selected) {
+            <div class="flex flex-wrap items-center gap-2 text-sm text-slate-600">
+              <app-case-priority-badge [priority]="asPriority(selected.priority)" />
+              <span class="text-slate-400">·</span>
+              <span>{{ selected.medicalSpecialty || 'Sin especialidad' }}</span>
+            </div>
+          }
+        }
       </div>
 
       <div class="relative">
         <lucide-icon name="search" class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
         <input appInput placeholder="Buscar por nombre o especialidad..." class="pl-9" [(ngModel)]="search" />
       </div>
+
+      @if (!selectedCaseId() && openCases().length > 0) {
+        <p class="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-4 py-3">
+          Selecciona una consulta para ver recomendaciones y enviar la solicitud de contacto.
+        </p>
+      }
 
       @if (lawyersQuery.isLoading()) {
         <div class="flex items-center justify-center py-16 text-slate-400">
@@ -34,9 +95,10 @@ import { cn, getInitials } from '../../../shared/utils/cn';
 
       <div class="grid md:grid-cols-2 gap-4">
         @for (lawyer of filteredLawyers(); track lawyer.id) {
-          @let matchScore = getMatchScore(lawyer.id);
-          @let matchReasons = getMatchReasons(lawyer.id);
-          @let alreadyRequested = hasActiveRequest(lawyer.id);
+          @let lawyerUserId = lawyer.userId ?? lawyer.id;
+          @let matchScore = getMatchScore(lawyerUserId);
+          @let matchReasons = getMatchReasons(lawyerUserId);
+          @let alreadyRequested = hasActiveRequest(lawyerUserId);
           @let isHighMatch = matchScore !== undefined && matchScore >= 80;
 
           <div [class]="cn('bg-white rounded-lg border p-5 space-y-4', isHighMatch ? 'border-amber-300 ring-1 ring-amber-200 bg-amber-50/30' : 'border-slate-200')">
@@ -103,7 +165,7 @@ import { cn, getInitials } from '../../../shared/utils/cn';
               size="sm"
               class="w-full gap-2"
               (click)="sendContactRequest(lawyer)"
-              [disabled]="alreadyRequested || contactMutation.isPending()"
+              [disabled]="!selectedCaseId() || alreadyRequested || contactMutation.isPending()"
             >
               @if (alreadyRequested) {
                 <lucide-icon name="check-circle" class="h-4 w-4" />Solicitud enviada
@@ -114,19 +176,74 @@ import { cn, getInitials } from '../../../shared/utils/cn';
           </div>
         }
       </div>
+
+      @if (contactSuccess()) {
+        <p class="text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-md px-4 py-3">
+          Solicitud enviada. El abogado verá la consulta «{{ selectedCase()?.title }}» al aceptar.
+        </p>
+      }
+      @if (contactError()) {
+        <p class="text-sm text-red-700 bg-red-50 border border-red-200 rounded-md px-4 py-3">{{ contactError() }}</p>
+      }
     </div>
   `,
 })
 export class DoctorLawyersComponent {
   private readonly auth = inject(AuthService);
+  private readonly casesApi = inject(CasesApi);
   private readonly matchingApi = inject(MatchingApi);
   private readonly queryClient = injectQueryClient();
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly injector = inject(Injector);
 
   protected readonly search = signal('');
+  protected readonly selectedCaseId = signal('');
+  protected readonly contactSuccess = signal(false);
+  protected readonly contactError = signal<string | null>(null);
   protected readonly getInitials = getInitials;
   protected readonly cn = cn;
+  protected readonly asPriority = (p?: string) => (p ?? 'media') as CasePriority;
 
   private readonly userId = computed(() => this.auth.user()?.id ?? '');
+
+  private readonly caseIdFromRoute = toSignal(
+    this.route.queryParamMap.pipe(map((params) => params.get('caseId') ?? '')),
+    { initialValue: '', injector: this.injector },
+  );
+
+  protected readonly openCasesQuery = injectQuery(() => ({
+    queryKey: ['cases', 'open-for-lawyer', this.userId()],
+    queryFn: () => this.casesApi.list({ doctorId: this.userId(), pageSize: 100 }),
+    enabled: !!this.userId(),
+  }));
+
+  protected readonly openCases = computed(() =>
+    (this.openCasesQuery.data()?.data ?? []).filter(
+      (c) =>
+        !c.lawyer &&
+        !c.lawyerId &&
+        (c.status === 'pendiente' || c.status === 'clasificada'),
+    ),
+  );
+
+  protected readonly selectedCase = computed(() =>
+    this.openCases().find((c) => c.id === this.selectedCaseId()),
+  );
+
+  constructor() {
+    effect(() => {
+      const fromRoute = this.caseIdFromRoute();
+      const cases = this.openCases();
+      if (fromRoute && cases.some((c) => c.id === fromRoute)) {
+        this.selectedCaseId.set(fromRoute);
+        return;
+      }
+      if (!this.selectedCaseId() && cases.length > 0) {
+        this.selectedCaseId.set(cases[0].id ?? '');
+      }
+    });
+  }
 
   protected readonly lawyersQuery = injectQuery(() => ({
     queryKey: ['matching', 'lawyers'],
@@ -134,9 +251,9 @@ export class DoctorLawyersComponent {
   }));
 
   protected readonly recommendationsQuery = injectQuery(() => ({
-    queryKey: ['matching', 'recommendations', this.userId()],
-    queryFn: () => this.matchingApi.recommendations(this.userId()),
-    enabled: !!this.userId(),
+    queryKey: ['matching', 'recommendations', this.userId(), this.selectedCaseId()],
+    queryFn: () => this.matchingApi.recommendations(this.userId(), this.selectedCaseId() || undefined),
+    enabled: !!this.userId() && !!this.selectedCaseId(),
   }));
 
   protected readonly contactRequestsQuery = injectQuery(() => ({
@@ -156,32 +273,68 @@ export class DoctorLawyersComponent {
     );
   });
 
-  protected getMatchScore(lawyerId?: string): number | undefined {
-    return this.recommendationsQuery.data()?.recommendations?.find((r) => r.lawyer?.id === lawyerId)?.score;
+  protected onCaseSelected(caseId: string): void {
+    this.selectedCaseId.set(caseId);
+    this.contactSuccess.set(false);
+    this.contactError.set(null);
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { caseId: caseId || null },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
   }
 
-  protected getMatchReasons(lawyerId?: string): string[] {
-    return this.recommendationsQuery.data()?.recommendations?.find((r) => r.lawyer?.id === lawyerId)?.reasons ?? [];
+  protected getMatchScore(lawyerUserId?: string): number | undefined {
+    return this.recommendationsQuery.data()?.recommendations?.find(
+      (r) => (r.lawyer?.userId ?? r.lawyer?.id) === lawyerUserId,
+    )?.score;
   }
 
-  protected hasActiveRequest(lawyerId?: string): boolean {
+  protected getMatchReasons(lawyerUserId?: string): string[] {
+    return (
+      this.recommendationsQuery.data()?.recommendations?.find(
+        (r) => (r.lawyer?.userId ?? r.lawyer?.id) === lawyerUserId,
+      )?.reasons ?? []
+    );
+  }
+
+  protected hasActiveRequest(lawyerUserId?: string): boolean {
     return (this.contactRequestsQuery.data() ?? []).some(
-      (r) => r.toLawyerId === lawyerId && (r.status === 'pendiente' || r.status === 'aceptado'),
+      (r) => r.toLawyerId === lawyerUserId && (r.status === 'pendiente' || r.status === 'aceptado'),
     );
   }
 
   protected readonly contactMutation = injectMutation(() => ({
-    mutationFn: (toLawyerId: string) =>
+    mutationFn: (payload: { toLawyerUserId: string; caseId: string; caseTitle: string }) =>
       this.matchingApi.createContactRequest({
         fromDoctorId: this.userId(),
-        toLawyerId,
-        message: `Hola, me gustaría contactarte para revisar una consulta.`,
+        toLawyerId: payload.toLawyerUserId,
+        caseId: payload.caseId,
+        message: `Hola, me gustaría contactarte para revisar la consulta «${payload.caseTitle}».`,
       }),
-    onSuccess: () => this.queryClient.invalidateQueries({ queryKey: ['matching', 'contact-requests'] }),
+    onSuccess: () => {
+      this.contactSuccess.set(true);
+      this.contactError.set(null);
+      this.queryClient.invalidateQueries({ queryKey: ['matching', 'contact-requests'] });
+    },
+    onError: () => {
+      this.contactSuccess.set(false);
+      this.contactError.set('No se pudo enviar la solicitud. Verifica que no exista una pendiente con ese abogado.');
+    },
   }));
 
-  protected sendContactRequest(lawyer: { id?: string; fullName?: string }): void {
-    if (!lawyer.id) return;
-    this.contactMutation.mutate(lawyer.id);
+  protected sendContactRequest(lawyer: { id?: string; userId?: string; fullName?: string }): void {
+    const caseId = this.selectedCaseId();
+    const selected = this.selectedCase();
+    const toLawyerUserId = lawyer.userId ?? lawyer.id;
+    if (!toLawyerUserId || !caseId || !selected) return;
+    this.contactSuccess.set(false);
+    this.contactError.set(null);
+    this.contactMutation.mutate({
+      toLawyerUserId,
+      caseId,
+      caseTitle: selected.title ?? 'Consulta',
+    });
   }
 }

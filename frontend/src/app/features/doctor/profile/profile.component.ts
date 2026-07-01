@@ -8,13 +8,14 @@ import { BtnDirective } from '../../../shared/ui/button.directive';
 import { InputDirective, LabelDirective, TextareaDirective, SelectDirective } from '../../../shared/ui/field.directives';
 import { BadgeDirective } from '../../../shared/ui/badge.directive';
 import { AvatarComponent } from '../../../shared/ui/avatar.component';
+import { ChangePasswordComponent } from '../../../shared/features/change-password/change-password.component';
 import { getInitials } from '../../../shared/utils/cn';
 import { MEDICAL_SPECIALTIES } from '../../../shared/constants';
 
 /** Réplica de app/doctor/profile/page.tsx (ProfileHeader + form profesional + avatar). */
 @Component({
   selector: 'app-doctor-profile',
-  imports: [ReactiveFormsModule, LucideAngularModule, BtnDirective, InputDirective, LabelDirective, TextareaDirective, SelectDirective, BadgeDirective, AvatarComponent],
+  imports: [ReactiveFormsModule, LucideAngularModule, BtnDirective, InputDirective, LabelDirective, TextareaDirective, SelectDirective, BadgeDirective, AvatarComponent, ChangePasswordComponent],
   template: `
     <div class="max-w-3xl mx-auto space-y-6">
       <div>
@@ -179,6 +180,8 @@ import { MEDICAL_SPECIALTIES } from '../../../shared/constants';
             </div>
           </form>
         </div>
+
+        <app-change-password />
       }
     </div>
   `,

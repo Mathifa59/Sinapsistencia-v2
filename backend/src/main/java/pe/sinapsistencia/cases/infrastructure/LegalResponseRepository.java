@@ -1,5 +1,6 @@
 package pe.sinapsistencia.cases.infrastructure;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,4 +10,6 @@ import pe.sinapsistencia.cases.domain.LegalResponse;
 
 @Repository
 public interface LegalResponseRepository extends JpaRepository<LegalResponse, UUID> {
+
+	List<LegalResponse> findByLegalCase_IdOrderByCreatedAtDesc(UUID caseId);
 }

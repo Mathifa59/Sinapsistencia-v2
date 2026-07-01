@@ -63,9 +63,10 @@ public class MatchingController {
 	@GetMapping("/lawyers")
 	public ApiResponse<?> lawyers(
 			@AuthenticationPrincipal AuthenticatedUser user,
-			@RequestParam(required = false) String doctorId) {
+			@RequestParam(required = false) String doctorId,
+			@RequestParam(required = false) String caseId) {
 		if (doctorId != null && !doctorId.isBlank()) {
-			return ApiResponse.ok(recommendationService.recommendations(user, doctorId));
+			return ApiResponse.ok(recommendationService.recommendations(user, doctorId, caseId));
 		}
 		return ApiResponse.ok(directoryService.listLawyers());
 	}

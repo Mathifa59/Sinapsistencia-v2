@@ -1,4 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { injectMutation, injectQuery, injectQueryClient } from '@tanstack/angular-query-experimental';
 import { LucideAngularModule } from 'lucide-angular';
 import { AuthService } from '../../../core/auth/auth.service';
@@ -15,7 +16,7 @@ const FILTERS: RequestFilter[] = ['todas', 'pendiente', 'aceptado', 'rechazado']
 /** Réplica de app/lawyer/requests/page.tsx. */
 @Component({
   selector: 'app-lawyer-requests',
-  imports: [LucideAngularModule, BtnDirective, ContactRequestStatusBadgeComponent],
+  imports: [RouterLink, LucideAngularModule, BtnDirective, ContactRequestStatusBadgeComponent],
   template: `
     <div class="space-y-5">
       <div>
@@ -77,6 +78,12 @@ const FILTERS: RequestFilter[] = ['todas', 'pendiente', 'aceptado', 'rechazado']
               </div>
             }
 
+            @if (request.status === 'aceptado' && request.caseId) {
+              <a [routerLink]="['/lawyer/cases', request.caseId]" class="inline-flex items-center gap-1.5 text-sm text-emerald-600 hover:underline font-medium">
+                <lucide-icon name="briefcase" class="h-4 w-4" />Ir a consulta asignada
+              </a>
+            }
+
             @if (request.status === 'pendiente') {
               <div class="flex gap-2 pt-1">
                 <button appBtn size="sm" variant="primary" class="gap-1.5 flex-1" [disabled]="respondMutation.isPending()" (click)="respond(request.id!, 'aceptado')">
@@ -126,12 +133,25 @@ export class LawyerRequestsComponent {
   });
 
   protected readonly respondMutation = injectMutation(() => ({
-    mutationFn: (params: { requestId: string; status: string }) =>
-      this.matchingApi.respondContactRequest({ requestId: params.requestId, status: params.status }),
-    onSuccess: () => this.queryClient.invalidateQueries({ queryKey: ['matching', 'contact-requests'] }),
+    mutationFn: (params: { requestId: string; status: string; responseMessage?: string }) =>
+      this.matchingApi.respondContactRequest({
+        requestId: params.requestId,
+        status: params.status,
+        responseMessage: params.responseMessage,
+      }),
+    onSuccess: () => {
+      this.queryClient.invalidateQueries({ queryKey: ['matching', 'contact-requests'] });
+      this.queryClient.invalidateQueries({ queryKey: ['cases'] });
+    },
   }));
 
   protected respond(requestId: string, status: string): void {
+    if (status === 'rechazado') {
+      const reason = window.prompt('Indica el motivo del rechazo:');
+      if (!reason?.trim()) return;
+      this.respondMutation.mutate({ requestId, status, responseMessage: reason.trim() });
+      return;
+    }
     this.respondMutation.mutate({ requestId, status });
   }
 }

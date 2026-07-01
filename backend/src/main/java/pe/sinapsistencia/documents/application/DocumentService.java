@@ -167,7 +167,7 @@ public class DocumentService {
 		Document document = documentRepository.findWithRelationsById(id)
 				.orElseThrow(() -> new NotFoundException("Documento no encontrado"));
 
-		assertCanView(user, document);
+		assertCanModify(user, document);
 
 		DocumentStatus newStatus = parse(() -> DocumentStatus.fromValue(request.status()));
 		document.setStatus(newStatus);
@@ -213,6 +213,17 @@ public class DocumentService {
 		};
 		if (!allowed) {
 			throw new ForbiddenException("No tienes permisos para acceder a este documento");
+		}
+	}
+
+	private void assertCanModify(AuthenticatedUser user, Document document) {
+		boolean allowed = switch (user.role()) {
+			case DOCTOR -> document.getAuthor().getId().equals(user.id());
+			case ADMIN -> true;
+			default -> false;
+		};
+		if (!allowed) {
+			throw new ForbiddenException("No tienes permisos para modificar este documento");
 		}
 	}
 

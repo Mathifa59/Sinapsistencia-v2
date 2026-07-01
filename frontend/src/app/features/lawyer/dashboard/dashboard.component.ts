@@ -71,6 +71,9 @@ interface RelevantCasesResponse {
                     <app-contact-request-status-badge [status]="asReqStatus(request.status)" />
                   </div>
                   <p class="text-xs text-slate-600 line-clamp-2">{{ request.message }}</p>
+                  @if (request.caseTitle) {
+                    <p class="text-xs font-medium text-slate-700">Consulta: {{ request.caseTitle }}</p>
+                  }
                   <p class="text-xs text-slate-400">{{ formatDateTime(request.createdAt ?? '') }}</p>
                   <div class="flex gap-2">
                     <button appBtn size="sm" variant="primary" class="gap-1.5 text-xs flex-1" [disabled]="respondMutation.isPending()" (click)="respond(request.id!, 'aceptado')">
@@ -108,6 +111,11 @@ interface RelevantCasesResponse {
                       <lucide-icon name="clock" class="h-3.5 w-3.5 text-slate-400 mt-0.5 shrink-0" />
                       {{ request.responseMessage }}
                     </p>
+                  }
+                  @if (request.caseId) {
+                    <a [routerLink]="['/lawyer/cases', request.caseId]" class="inline-flex items-center gap-1 text-xs text-emerald-600 hover:underline font-medium mt-2">
+                      Ir a consulta <lucide-icon name="arrow-right" class="h-3 w-3" />
+                    </a>
                   }
                 </div>
               }
@@ -199,12 +207,25 @@ export class LawyerDashboardComponent {
   protected readonly medicalAreas = computed(() => this.relevantCasesQuery.data()?.medicalAreas ?? []);
 
   protected readonly respondMutation = injectMutation(() => ({
-    mutationFn: (params: { requestId: string; status: string }) =>
-      this.matchingApi.respondContactRequest({ requestId: params.requestId, status: params.status }),
-    onSuccess: () => this.queryClient.invalidateQueries({ queryKey: ['matching', 'contact-requests'] }),
+    mutationFn: (params: { requestId: string; status: string; responseMessage?: string }) =>
+      this.matchingApi.respondContactRequest({
+        requestId: params.requestId,
+        status: params.status,
+        responseMessage: params.responseMessage,
+      }),
+    onSuccess: () => {
+      this.queryClient.invalidateQueries({ queryKey: ['matching', 'contact-requests'] });
+      this.queryClient.invalidateQueries({ queryKey: ['cases'] });
+    },
   }));
 
   protected respond(requestId: string, status: string): void {
+    if (status === 'rechazado') {
+      const reason = window.prompt('Indica el motivo del rechazo:');
+      if (!reason?.trim()) return;
+      this.respondMutation.mutate({ requestId, status, responseMessage: reason.trim() });
+      return;
+    }
     this.respondMutation.mutate({ requestId, status });
   }
 }

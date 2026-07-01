@@ -1,5 +1,6 @@
 package pe.sinapsistencia.ml.infrastructure;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,4 +10,6 @@ import pe.sinapsistencia.ml.domain.ModelMetric;
 
 @Repository
 public interface ModelMetricRepository extends JpaRepository<ModelMetric, UUID> {
+
+	List<ModelMetric> findAllByOrderByEvaluatedAtDesc();
 }

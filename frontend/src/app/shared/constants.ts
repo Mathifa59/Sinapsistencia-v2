@@ -94,13 +94,16 @@ export const NAVIGATION_DOCTOR: NavigationItem[] = [
   { label: 'Abogados', href: '/doctor/lawyers', icon: 'Scale' },
   { label: 'Evaluación de Riesgo', href: '/doctor/risk', icon: 'AlertTriangle' },
   { label: 'Mi Perfil', href: '/doctor/profile', icon: 'User' },
+  { label: 'Manual', href: '/doctor/manual', icon: 'BookOpen' },
 ];
 
 export const NAVIGATION_LAWYER: NavigationItem[] = [
   { label: 'Dashboard', href: '/lawyer/dashboard', icon: 'LayoutDashboard' },
+  { label: 'Mis Consultas', href: '/lawyer/cases', icon: 'Briefcase' },
   { label: 'Solicitudes', href: '/lawyer/requests', icon: 'Bell' },
   { label: 'Médicos', href: '/lawyer/doctors', icon: 'Stethoscope' },
   { label: 'Mi Perfil', href: '/lawyer/profile', icon: 'User' },
+  { label: 'Manual', href: '/lawyer/manual', icon: 'BookOpen' },
 ];
 
 /**
@@ -113,6 +116,7 @@ export const NAVIGATION_ADMIN: NavigationItem[] = [
   { label: 'Documentos', href: '/admin/documents', icon: 'FolderOpen' },
   { label: 'Métricas ML', href: '/admin/metrics', icon: 'Activity' },
   { label: 'Auditoría', href: '/admin/audit', icon: 'ShieldCheck' },
+  { label: 'Manual', href: '/admin/manual', icon: 'BookOpen' },
 ];
 
 export type AuditAction = 'login' | 'logout' | 'create' | 'update' | 'delete' | 'view' | 'sign' | 'download' | 'share';

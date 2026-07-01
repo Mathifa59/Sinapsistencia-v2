@@ -8,13 +8,14 @@ import { BtnDirective } from '../../../shared/ui/button.directive';
 import { InputDirective, LabelDirective, TextareaDirective } from '../../../shared/ui/field.directives';
 import { BadgeDirective } from '../../../shared/ui/badge.directive';
 import { AvatarComponent } from '../../../shared/ui/avatar.component';
+import { ChangePasswordComponent } from '../../../shared/features/change-password/change-password.component';
 import { cn, getInitials } from '../../../shared/utils/cn';
 import { LEGAL_SPECIALTIES, MEDICAL_SPECIALTIES } from '../../../shared/constants';
 
 /** Réplica de app/lawyer/profile/page.tsx (ProfileHeader + datos + chips de especialidades). */
 @Component({
   selector: 'app-lawyer-profile',
-  imports: [ReactiveFormsModule, LucideAngularModule, BtnDirective, InputDirective, LabelDirective, TextareaDirective, BadgeDirective, AvatarComponent],
+  imports: [ReactiveFormsModule, LucideAngularModule, BtnDirective, InputDirective, LabelDirective, TextareaDirective, BadgeDirective, AvatarComponent, ChangePasswordComponent],
   template: `
     <div class="max-w-3xl mx-auto space-y-6">
       <div>
@@ -208,6 +209,8 @@ import { LEGAL_SPECIALTIES, MEDICAL_SPECIALTIES } from '../../../shared/constant
             </div>
           </div>
         </form>
+
+        <app-change-password />
       }
     </div>
   `,

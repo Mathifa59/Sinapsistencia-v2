@@ -73,9 +73,11 @@ public class RecommendationService {
 	}
 
 	@Transactional(readOnly = true)
-	public RecommendationsResponse recommendations(AuthenticatedUser user, String doctorIdParam) {
+	public RecommendationsResponse recommendations(AuthenticatedUser user, String doctorIdParam,
+			String caseIdParam) {
 		UUID doctorId = resolveDoctor(user, doctorIdParam);
-		return computeRecommendations(doctorId, null);
+		LegalCase legalCase = resolveCaseForDoctor(user, doctorId, caseIdParam);
+		return computeRecommendations(doctorId, legalCase);
 	}
 
 	/** POST: calcula recomendaciones (para una consulta opcional) y las PERSISTE con factores XAI. */
@@ -215,6 +217,21 @@ public class RecommendationService {
 		return new RecommendationsResponse(fallback,
 				Map.of("model", "fallback", "message", "ML service no disponible"),
 				RecommendationsResponse.ADVISORY_NOTE);
+	}
+
+	private LegalCase resolveCaseForDoctor(AuthenticatedUser user, UUID doctorId, String caseIdParam) {
+		if (caseIdParam == null || caseIdParam.isBlank()) {
+			return null;
+		}
+		LegalCase legalCase = caseRepository.findWithPeopleById(UUID.fromString(caseIdParam))
+				.orElseThrow(() -> new NotFoundException("Caso no encontrado"));
+		if (!legalCase.getDoctor().getId().equals(doctorId)) {
+			throw new ForbiddenException("No puedes generar recomendaciones para una consulta ajena");
+		}
+		if (user.role() == UserRole.DOCTOR && !doctorId.equals(user.id())) {
+			throw new ForbiddenException("No puedes generar recomendaciones para otra consulta");
+		}
+		return legalCase;
 	}
 
 	private UUID resolveDoctor(AuthenticatedUser user, String doctorIdParam) {

@@ -62,7 +62,9 @@
    interesarte" (relevant cases) filtrados por sus áreas médicas de interés.
 2. **Responder solicitudes (Aceptar/Rechazar)** — `PATCH /api/matching/contact-requests`.
    **Efecto en cascada (HU-18)**: si la solicitud tenía una consulta vinculada sin abogado,
-   al aceptar el backend asigna automáticamente al abogado y mueve la consulta a `en_revision`.
+   al aceptar el backend asigna automáticamente al abogado y mueve la consulta a `asignada`.
+   El abogado debe abrir el detalle y usar **Iniciar revisión** (`POST /api/legal-cases/{id}/start-review`)
+   para pasar a `en_revision` antes de emitir la respuesta legal.
 3. **Listar/filtrar solicitudes de contacto** — chips Todas/Pendiente/Aceptado/Rechazado.
    `GET /api/matching/contact-requests?lawyerId={self}` (solo ve las suyas).
 4. **Médicos disponibles (directorio)** — búsqueda + modal de detalle (solo lectura).

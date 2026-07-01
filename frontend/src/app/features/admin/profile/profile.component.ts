@@ -8,12 +8,13 @@ import { BtnDirective } from '../../../shared/ui/button.directive';
 import { InputDirective, LabelDirective } from '../../../shared/ui/field.directives';
 import { BadgeDirective } from '../../../shared/ui/badge.directive';
 import { AvatarComponent } from '../../../shared/ui/avatar.component';
+import { ChangePasswordComponent } from '../../../shared/features/change-password/change-password.component';
 import { getInitials } from '../../../shared/utils/cn';
 
 /** Réplica de app/admin/profile/page.tsx: solo nombre editable. */
 @Component({
   selector: 'app-admin-profile',
-  imports: [ReactiveFormsModule, LucideAngularModule, BtnDirective, InputDirective, LabelDirective, BadgeDirective, AvatarComponent],
+  imports: [ReactiveFormsModule, LucideAngularModule, BtnDirective, InputDirective, LabelDirective, BadgeDirective, AvatarComponent, ChangePasswordComponent],
   template: `
     <div class="max-w-3xl mx-auto space-y-6">
       <div>
@@ -110,6 +111,8 @@ import { getInitials } from '../../../shared/utils/cn';
             </div>
           </form>
         </div>
+
+        <app-change-password />
       }
     </div>
   `,

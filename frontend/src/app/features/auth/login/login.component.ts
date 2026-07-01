@@ -59,6 +59,9 @@ const DEMO_ROLES: { role: UserRole; label: string; color: string }[] = [
               @if (form.controls.password.invalid && form.controls.password.touched) {
                 <p class="text-xs text-red-600">La contraseña es requerida</p>
               }
+              <div class="text-right">
+                <a routerLink="/forgot-password" class="text-xs text-blue-600 hover:underline">¿Olvidaste tu contraseña?</a>
+              </div>
             </div>
 
             @if (error()) {

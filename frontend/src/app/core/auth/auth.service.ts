@@ -110,4 +110,16 @@ export class AuthService {
       this._hydrated.set(true);
     }
   }
+
+  async forgotPassword(email: string): Promise<{ message: string; resetToken?: string | null }> {
+    return this.api.post<{ message: string; resetToken?: string | null }>('/api/auth/forgot-password', { email });
+  }
+
+  async resetPassword(email: string, token: string, newPassword: string): Promise<void> {
+    await this.api.post('/api/auth/reset-password', { email, token, newPassword });
+  }
+
+  async changePassword(currentPassword: string, newPassword: string): Promise<void> {
+    await this.api.post('/api/auth/change-password', { currentPassword, newPassword });
+  }
 }
