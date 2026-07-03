@@ -9,6 +9,7 @@ import { ModalComponent, ModalHeaderDirective, ModalTitleDirective, ModalDescrip
 import { BtnDirective } from '../../../shared/ui/button.directive';
 import { InputDirective, LabelDirective, TextareaDirective, SelectDirective } from '../../../shared/ui/field.directives';
 import { DOCUMENT_TYPE_LABELS, type DocumentType } from '../../../shared/constants';
+import type { DocumentResponse } from '../../../core/api/generated/model/documentResponse';
 
 const DOCUMENT_TYPES: DocumentType[] = [
   'historia_clinica', 'consentimiento_informado', 'informe_medico', 'receta',
@@ -74,19 +75,37 @@ const DOCUMENT_TYPES: DocumentType[] = [
           <textarea appTextarea id="doc-content" rows="4" placeholder="Escribe el contenido del documento..." formControlName="initialContent"></textarea>
         </div>
 
+        <div class="space-y-1.5">
+          <label appLabel for="doc-file">Archivo adjunto <span class="text-slate-400 font-normal">(opcional · PDF, DOCX, PNG, JPG · máx 10 MB)</span></label>
+          <div class="flex items-center gap-3">
+            <label class="flex items-center gap-2 cursor-pointer rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
+              <lucide-icon name="paperclip" class="h-4 w-4 text-slate-400 shrink-0" />
+              <span>{{ selectedFile() ? selectedFile()!.name : 'Seleccionar archivo' }}</span>
+              <input id="doc-file" type="file" class="sr-only" accept=".pdf,.docx,image/png,image/jpeg" (change)="onFileChange($event)" />
+            </label>
+            @if (selectedFile()) {
+              <button type="button" class="text-slate-400 hover:text-slate-600" (click)="clearFile()">
+                <lucide-icon name="x" class="h-4 w-4" />
+              </button>
+            }
+          </div>
+        </div>
+
         @if (serverError()) {
           <p class="text-xs text-red-600 bg-red-50 border border-red-100 rounded-md px-3 py-2">{{ serverError() }}</p>
         }
 
         <div appModalFooter>
-          <button appBtn type="button" variant="outline" (click)="handleClose()" [disabled]="createMutation.isPending()">
+          <button appBtn type="button" variant="outline" (click)="handleClose()" [disabled]="isBusy()">
             Cancelar
           </button>
-          <button appBtn type="submit" variant="primary" class="gap-2" [disabled]="createMutation.isPending()">
-            @if (createMutation.isPending()) {
+          <button appBtn type="submit" variant="primary" class="gap-2" [disabled]="isBusy()">
+            @if (isBusy()) {
               <lucide-icon name="loader-2" class="h-4 w-4 animate-spin" />
+              {{ uploadMutation.isPending() ? 'Subiendo archivo…' : 'Creando…' }}
+            } @else {
+              Crear documento
             }
-            Crear documento
           </button>
         </div>
       </form>
@@ -106,6 +125,7 @@ export class DocumentFormModalComponent {
   protected readonly documentTypes = DOCUMENT_TYPES;
   protected readonly documentTypeLabels = DOCUMENT_TYPE_LABELS;
   protected readonly serverError = signal<string | null>(null);
+  protected readonly selectedFile = signal<File | null>(null);
 
   private readonly userId = computed(() => this.auth.user()?.id ?? '');
 
@@ -122,6 +142,13 @@ export class DocumentFormModalComponent {
     initialContent: [''],
   });
 
+  protected readonly uploadMutation = injectMutation(() => ({
+    mutationFn: ({ id, file }: { id: string; file: File }) =>
+      this.documentsApi.uploadFile(id, file),
+    onSuccess: () => this.finishAndClose(),
+    onError: (err: Error) => this.serverError.set(`Documento creado, pero falló la subida del archivo: ${err.message}`),
+  }));
+
   protected readonly createMutation = injectMutation(() => ({
     mutationFn: () => {
       const v = this.form.getRawValue();
@@ -132,18 +159,33 @@ export class DocumentFormModalComponent {
         initialContent: v.initialContent.trim() || undefined,
       });
     },
-    onSuccess: () => {
-      this.queryClient.invalidateQueries({ queryKey: ['documents'] });
-      this.form.reset({ type: 'informe_medico' });
-      this.opened.set(false);
-      this.closed.emit();
+    onSuccess: (doc: DocumentResponse) => {
+      const file = this.selectedFile();
+      if (file && doc.id) {
+        this.uploadMutation.mutate({ id: doc.id, file });
+      } else {
+        this.finishAndClose();
+      }
     },
     onError: (err: Error) => this.serverError.set(err.message),
   }));
 
+  protected readonly isBusy = computed(
+    () => this.createMutation.isPending() || this.uploadMutation.isPending(),
+  );
+
   show(): void {
     this.serverError.set(null);
     this.opened.set(true);
+  }
+
+  protected onFileChange(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.selectedFile.set(input.files?.[0] ?? null);
+  }
+
+  protected clearFile(): void {
+    this.selectedFile.set(null);
   }
 
   protected onSubmit(): void {
@@ -156,8 +198,18 @@ export class DocumentFormModalComponent {
   }
 
   protected handleClose(): void {
+    if (this.isBusy()) return;
     this.form.reset({ type: 'informe_medico' });
     this.serverError.set(null);
+    this.selectedFile.set(null);
+    this.opened.set(false);
+    this.closed.emit();
+  }
+
+  private finishAndClose(): void {
+    this.queryClient.invalidateQueries({ queryKey: ['documents'] });
+    this.form.reset({ type: 'informe_medico' });
+    this.selectedFile.set(null);
     this.opened.set(false);
     this.closed.emit();
   }

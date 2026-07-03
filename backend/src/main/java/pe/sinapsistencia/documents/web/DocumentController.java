@@ -3,6 +3,7 @@ package pe.sinapsistencia.documents.web;
 import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import pe.sinapsistencia.audit.infrastructure.Auditable;
 import pe.sinapsistencia.auth.security.AuthenticatedUser;
@@ -68,5 +70,14 @@ public class DocumentController {
 			@PathVariable UUID id,
 			@RequestBody UpdateDocumentRequest request) {
 		return ApiResponse.ok(documentService.update(user, id, request));
+	}
+
+	@PostMapping(value = "/{id}/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	@Auditable(action = "upload", resource = "document")
+	public ApiResponse<DocumentResponse> uploadFile(
+			@AuthenticationPrincipal AuthenticatedUser user,
+			@PathVariable UUID id,
+			@RequestParam("file") MultipartFile file) {
+		return ApiResponse.ok(documentService.uploadFile(user, id, file));
 	}
 }

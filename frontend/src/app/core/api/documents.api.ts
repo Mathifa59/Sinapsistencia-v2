@@ -34,4 +34,10 @@ export class DocumentsApi {
   update(id: string, body: UpdateDocumentRequest): Promise<DocumentResponse> {
     return this.api.put<DocumentResponse>(`/api/documents/${id}`, body);
   }
+
+  uploadFile(id: string, file: File): Promise<DocumentResponse> {
+    const form = new FormData();
+    form.append('file', file);
+    return this.api.postForm<DocumentResponse>(`/api/documents/${id}/upload`, form);
+  }
 }

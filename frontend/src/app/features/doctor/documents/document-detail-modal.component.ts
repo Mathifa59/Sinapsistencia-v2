@@ -57,6 +57,15 @@ import type { DocumentResponse } from '../../../core/api/generated/model/documen
                   <span class="italic text-slate-400">Sin contenido</span>
                 }
               </p>
+              @if (currentVersion()!.fileUrl) {
+                <div class="mt-3 pt-3 border-t border-slate-100">
+                  <a [href]="currentVersion()!.fileUrl!" target="_blank" rel="noopener noreferrer"
+                     class="inline-flex items-center gap-1.5 text-xs font-medium text-blue-600 hover:text-blue-800">
+                    <lucide-icon name="download" class="h-3.5 w-3.5" />
+                    Descargar archivo adjunto
+                  </a>
+                </div>
+              }
             </div>
           }
 

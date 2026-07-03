@@ -16,6 +16,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import pe.sinapsistencia.auth.domain.Profile;
 import pe.sinapsistencia.auth.infrastructure.ProfileRepository;
@@ -54,17 +55,20 @@ public class DocumentService {
 	private final DocumentSignatureRepository signatureRepository;
 	private final LegalCaseRepository caseRepository;
 	private final ProfileRepository profileRepository;
+	private final CloudinaryService cloudinaryService;
 
 	public DocumentService(DocumentRepository documentRepository,
 			DocumentVersionRepository versionRepository,
 			DocumentSignatureRepository signatureRepository,
 			LegalCaseRepository caseRepository,
-			ProfileRepository profileRepository) {
+			ProfileRepository profileRepository,
+			CloudinaryService cloudinaryService) {
 		this.documentRepository = documentRepository;
 		this.versionRepository = versionRepository;
 		this.signatureRepository = signatureRepository;
 		this.caseRepository = caseRepository;
 		this.profileRepository = profileRepository;
+		this.cloudinaryService = cloudinaryService;
 	}
 
 	@Transactional(readOnly = true)
@@ -187,6 +191,28 @@ public class DocumentService {
 		}
 
 		document = documentRepository.save(document);
+
+		return DocumentResponse.from(document,
+				versionRepository.findByDocumentIdOrderByVersionAsc(id),
+				signatureRepository.findByDocumentId(id));
+	}
+
+	@Transactional
+	public DocumentResponse uploadFile(AuthenticatedUser user, UUID id, MultipartFile file) {
+		Document document = documentRepository.findWithRelationsById(id)
+				.orElseThrow(() -> new NotFoundException("Documento no encontrado"));
+
+		assertCanModify(user, document);
+
+		DocumentVersion version = versionRepository
+				.findByDocumentIdOrderByVersionAsc(id)
+				.stream()
+				.reduce((first, second) -> second)
+				.orElseThrow(() -> new BadRequestException("El documento no tiene versiones"));
+
+		String url = cloudinaryService.upload(file, id);
+		version.setFileUrl(url);
+		versionRepository.save(version);
 
 		return DocumentResponse.from(document,
 				versionRepository.findByDocumentIdOrderByVersionAsc(id),
