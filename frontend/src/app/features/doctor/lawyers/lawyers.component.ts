@@ -94,16 +94,24 @@ import type { CasePriority } from '../../../shared/constants';
       }
 
       <div class="grid md:grid-cols-2 gap-4">
-        @for (lawyer of filteredLawyers(); track lawyer.id) {
+        @for (lawyer of filteredLawyers(); track lawyer.id; let i = $index) {
           @let lawyerUserId = lawyer.userId ?? lawyer.id;
           @let matchScore = getMatchScore(lawyerUserId);
           @let matchReasons = getMatchReasons(lawyerUserId);
           @let alreadyRequested = hasActiveRequest(lawyerUserId);
-          @let isHighMatch = matchScore !== undefined && matchScore >= 80;
+          @let isTopPick = i === 0 && matchScore !== undefined && matchScore > 0;
 
-          <div [class]="cn('bg-white rounded-lg border p-5 space-y-4', isHighMatch ? 'border-amber-300 ring-1 ring-amber-200 bg-amber-50/30' : 'border-slate-200')">
+          <div [class]="cn('rounded-lg border p-5 space-y-4', isTopPick ? 'bg-amber-50 border-amber-400 ring-2 ring-amber-300 shadow-md shadow-amber-100' : 'bg-white border-slate-200')">
+
+            @if (isTopPick) {
+              <div class="flex items-center gap-1.5 text-xs font-bold text-amber-700 bg-amber-100 border border-amber-300 rounded-full px-3 py-1 w-fit">
+                <lucide-icon name="trophy" class="h-3.5 w-3.5 text-amber-500" />
+                Mejor match para tu consulta
+              </div>
+            }
+
             <div class="flex items-start gap-4">
-              <div class="h-12 w-12 rounded-full bg-slate-900 flex items-center justify-center shrink-0 text-white font-bold text-sm">
+              <div [class]="cn('h-12 w-12 rounded-full flex items-center justify-center shrink-0 text-white font-bold text-sm', isTopPick ? 'bg-amber-600' : 'bg-slate-900')">
                 {{ getInitials(lawyer.fullName ?? '') }}
               </div>
               <div class="flex-1 min-w-0">
@@ -112,10 +120,10 @@ import type { CasePriority } from '../../../shared/constants';
                     <p class="font-semibold text-slate-900">{{ lawyer.fullName }}</p>
                     <p class="text-xs text-slate-500">CAB: {{ lawyer.cab }}</p>
                   </div>
-                  @if (matchScore !== undefined) {
-                    <div [class]="cn('flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full shrink-0', isHighMatch ? 'bg-amber-100 text-amber-800 border border-amber-300' : 'bg-blue-50 text-blue-700 border border-blue-100')">
-                      @if (isHighMatch) {
-                        <lucide-icon name="star" class="h-3 w-3 text-amber-500 fill-amber-500" />
+                  @if (matchScore !== undefined && matchScore > 0) {
+                    <div [class]="cn('flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full shrink-0', isTopPick ? 'bg-amber-200 text-amber-900 border border-amber-400' : 'bg-blue-50 text-blue-700 border border-blue-100')">
+                      @if (isTopPick) {
+                        <lucide-icon name="star" class="h-3 w-3 text-amber-600 fill-amber-500" />
                       }
                       <lucide-icon name="scale" class="h-3 w-3" />
                       {{ matchScore }}% match
@@ -142,7 +150,7 @@ import type { CasePriority } from '../../../shared/constants';
             </div>
 
             @if (matchReasons.length > 0) {
-              <div class="bg-slate-50 rounded-md p-3">
+              <div [class]="cn('rounded-md p-3', isTopPick ? 'bg-amber-100/60' : 'bg-slate-50')">
                 <p class="text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wider">Por qué es compatible</p>
                 <ul class="space-y-1">
                   @for (reason of matchReasons; track reason) {
@@ -265,8 +273,29 @@ export class DoctorLawyersComponent {
   protected readonly filteredLawyers = computed(() => {
     const term = this.search().trim().toLowerCase();
     const lawyers = this.lawyersQuery.data() ?? [];
-    if (!term) return lawyers;
-    return lawyers.filter(
+    const recs = this.recommendationsQuery.data()?.recommendations ?? [];
+    const hasRecs = recs.length > 0;
+
+    const scoreMap = new Map<string, number>();
+    for (const rec of recs) {
+      const id = rec.lawyer?.userId ?? rec.lawyer?.id;
+      if (id && rec.score != null) scoreMap.set(id, rec.score);
+    }
+
+    let result = lawyers.filter((l) => {
+      if (!hasRecs) return true;
+      const id = l.userId ?? l.id;
+      return id ? (scoreMap.get(id) ?? 0) > 0 : false;
+    });
+
+    result = [...result].sort((a, b) => {
+      const aScore = scoreMap.get(a.userId ?? a.id ?? '') ?? 0;
+      const bScore = scoreMap.get(b.userId ?? b.id ?? '') ?? 0;
+      return bScore - aScore;
+    });
+
+    if (!term) return result;
+    return result.filter(
       (l) =>
         (l.fullName ?? '').toLowerCase().includes(term) ||
         (l.specialties ?? []).some((s) => s.toLowerCase().includes(term)),

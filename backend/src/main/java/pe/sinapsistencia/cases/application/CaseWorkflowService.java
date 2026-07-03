@@ -38,7 +38,6 @@ import pe.sinapsistencia.documents.domain.Document;
 import pe.sinapsistencia.documents.infrastructure.DocumentRepository;
 import pe.sinapsistencia.matching.application.RecommendationService;
 import pe.sinapsistencia.matching.web.dto.RecommendationDto.RecommendationsResponse;
-import pe.sinapsistencia.ml.domain.MlClassification;
 import pe.sinapsistencia.ml.infrastructure.MlClassificationRepository;
 import pe.sinapsistencia.shared.exception.BadRequestException;
 import pe.sinapsistencia.shared.exception.ForbiddenException;
