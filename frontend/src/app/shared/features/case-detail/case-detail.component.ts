@@ -305,15 +305,29 @@ import {
             </div>
 
             <div class="bg-white rounded-lg border border-slate-200 p-5">
-              <h3 class="font-semibold text-slate-900 mb-4 flex items-center gap-2">
-                <lucide-icon name="git-branch" class="h-4 w-4 text-slate-400" />
-                Línea de tiempo
-              </h3>
+              <div class="flex items-center justify-between mb-4 gap-3 flex-wrap">
+                <h3 class="font-semibold text-slate-900 flex items-center gap-2">
+                  <lucide-icon name="git-branch" class="h-4 w-4 text-slate-400" />
+                  Línea de tiempo
+                </h3>
+                @if (timelineKinds().length > 0) {
+                  <select appSelect class="text-xs py-1 h-auto w-auto min-w-[140px]"
+                    [value]="timelineFilter()"
+                    (change)="timelineFilter.set($any($event.target).value)">
+                    <option value="">Todos los eventos</option>
+                    @for (kind of timelineKinds(); track kind) {
+                      <option [value]="kind">{{ kind }}</option>
+                    }
+                  </select>
+                }
+              </div>
               @if ((detail.timeline ?? []).length === 0) {
                 <p class="text-sm text-slate-400 italic text-center py-2">Sin eventos registrados</p>
+              } @else if (filteredTimeline().length === 0) {
+                <p class="text-sm text-slate-400 italic text-center py-2">Sin eventos para este filtro</p>
               } @else {
                 <div class="space-y-3">
-                  @for (entry of detail.timeline ?? []; track entry.id) {
+                  @for (entry of filteredTimeline(); track entry.id) {
                     <div class="relative pl-4 border-l-2 border-slate-200">
                       <p class="text-sm font-medium text-slate-800">{{ entry.title }}</p>
                       @if (entry.description) {
@@ -450,6 +464,7 @@ export class CaseDetailComponent {
   protected readonly eventError = signal<string | null>(null);
   protected readonly responseError = signal<string | null>(null);
   protected readonly reportLoading = signal(false);
+  protected readonly timelineFilter = signal<string>('');
 
   private readonly caseId = toSignal(
     this.route.paramMap.pipe(map((params) => params.get('id') ?? '')),
@@ -463,6 +478,18 @@ export class CaseDetailComponent {
   }));
 
   protected readonly caseData = computed(() => this.detailQuery.data()?.caseData);
+
+  protected readonly timelineKinds = computed(() => {
+    const entries = this.detailQuery.data()?.timeline ?? [];
+    return [...new Set(entries.map((e) => e.kind).filter((k): k is string => !!k))];
+  });
+
+  protected readonly filteredTimeline = computed(() => {
+    const entries = this.detailQuery.data()?.timeline ?? [];
+    const filter = this.timelineFilter();
+    return filter ? entries.filter((e) => e.kind === filter) : entries;
+  });
+
   protected readonly role = this.auth.role;
   protected readonly isDoctor = computed(() => this.role() === 'doctor');
   protected readonly isLawyer = computed(() => this.role() === 'lawyer');
