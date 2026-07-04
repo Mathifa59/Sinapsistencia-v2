@@ -1,0 +1,41 @@
+name: CI ML Service
+
+# Instala dependencias y valida la sintaxis del servicio ML (FastAPI / Python).
+# compileall verifica que todo el codigo compila sin necesitar los modelos
+# entrenados ni levantar el servidor.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'ml-service/**'
+      - '.github/workflows/ci-ml.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'ml-service/**'
+      - '.github/workflows/ci-ml.yml'
+
+jobs:
+  build:
+    name: Instalar y validar
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ml-service
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configurar Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: ml-service/requirements.txt
+
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt
+
+      - name: Validar sintaxis del codigo
+        run: python -m compileall app
