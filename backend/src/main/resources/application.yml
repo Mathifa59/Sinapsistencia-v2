@@ -56,7 +56,13 @@ app:
   ml:
     service-url: ${ML_SERVICE_URL:http://localhost:8000}
   n8n:
-    webhook-url: ${N8N_WEBHOOK_URL:http://localhost:5678}
+    # Vacio por defecto: sin n8n configurado no se intenta ninguna conexion
+    # (alertas de riesgo y correos se omiten con log.warn). Setea la URL en prod
+    # o en local si corres n8n (ej. http://localhost:5678).
+    webhook-url: ${N8N_WEBHOOK_URL:}
+  # URL publica del frontend (Vercel en prod) — usada para armar los enlaces de los correos.
+  frontend:
+    url: ${APP_FRONTEND_URL:http://localhost:4200}
   cloudinary:
     url: ${CLOUDINARY_URL:}
   cors:

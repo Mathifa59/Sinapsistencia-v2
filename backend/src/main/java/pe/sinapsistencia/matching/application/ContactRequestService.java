@@ -23,6 +23,7 @@ import pe.sinapsistencia.matching.domain.ContactRequest;
 import pe.sinapsistencia.matching.domain.ContactRequestStatus;
 import pe.sinapsistencia.matching.infrastructure.ContactRequestRepository;
 import pe.sinapsistencia.matching.web.dto.ContactRequestResponse;
+import pe.sinapsistencia.notifications.MailNotifier;
 import pe.sinapsistencia.profile.domain.DoctorProfile;
 import pe.sinapsistencia.profile.domain.LawyerProfile;
 import pe.sinapsistencia.profile.infrastructure.DoctorProfileRepository;
@@ -42,19 +43,22 @@ public class ContactRequestService {
 	private final CaseEventRepository eventRepository;
 	private final DoctorProfileRepository doctorProfileRepository;
 	private final LawyerProfileRepository lawyerProfileRepository;
+	private final MailNotifier mailNotifier;
 
 	public ContactRequestService(ContactRequestRepository contactRequestRepository,
 			ProfileRepository profileRepository,
 			LegalCaseRepository caseRepository,
 			CaseEventRepository eventRepository,
 			DoctorProfileRepository doctorProfileRepository,
-			LawyerProfileRepository lawyerProfileRepository) {
+			LawyerProfileRepository lawyerProfileRepository,
+			MailNotifier mailNotifier) {
 		this.contactRequestRepository = contactRequestRepository;
 		this.profileRepository = profileRepository;
 		this.caseRepository = caseRepository;
 		this.eventRepository = eventRepository;
 		this.doctorProfileRepository = doctorProfileRepository;
 		this.lawyerProfileRepository = lawyerProfileRepository;
+		this.mailNotifier = mailNotifier;
 	}
 
 	@Transactional(readOnly = true)
@@ -140,6 +144,11 @@ public class ContactRequestService {
 		}
 
 		request = contactRequestRepository.save(request);
+
+		// Aviso al abogado destinatario (fire-and-forget vía n8n).
+		mailNotifier.sendContactRequestReceived(lawyer.getEmail(), lawyer.getName(),
+				doctor.getName(), request.getCaseTitle(), message);
+
 		return enrich(List.of(request)).get(0);
 	}
 
@@ -178,6 +187,12 @@ public class ContactRequestService {
 			CaseWorkflowService.recordSystemEvent(eventRepository, legalCase, request.getToLawyer(),
 					"asignacion", "Abogado asignado tras aceptar la solicitud de contacto");
 		}
+
+		// Aviso al médico solicitante del resultado (fire-and-forget vía n8n).
+		mailNotifier.sendContactRequestAnswered(
+				request.getFromDoctor().getEmail(), request.getFromDoctor().getName(),
+				request.getToLawyer().getName(), request.getCaseTitle(),
+				request.getStatus() == ContactRequestStatus.ACEPTADO, responseMessage);
 
 		return enrich(List.of(request)).get(0);
 	}

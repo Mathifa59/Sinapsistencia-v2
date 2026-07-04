@@ -21,6 +21,7 @@ import pe.sinapsistencia.auth.web.dto.ForgotPasswordResponse;
 import pe.sinapsistencia.auth.web.dto.LoginResponse;
 import pe.sinapsistencia.auth.web.dto.RegisterRequest;
 import pe.sinapsistencia.auth.web.dto.UserDto;
+import pe.sinapsistencia.notifications.MailNotifier;
 import pe.sinapsistencia.profile.domain.DoctorProfile;
 import pe.sinapsistencia.profile.domain.LawyerProfile;
 import pe.sinapsistencia.profile.infrastructure.DoctorProfileRepository;
@@ -51,6 +52,7 @@ public class AuthService {
 	private final PasswordResetTokenRepository passwordResetTokenRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final JwtService jwtService;
+	private final MailNotifier mailNotifier;
 	private final SecureRandom secureRandom = new SecureRandom();
 
 	public AuthService(ProfileRepository profileRepository,
@@ -58,13 +60,15 @@ public class AuthService {
 			LawyerProfileRepository lawyerProfileRepository,
 			PasswordResetTokenRepository passwordResetTokenRepository,
 			PasswordEncoder passwordEncoder,
-			JwtService jwtService) {
+			JwtService jwtService,
+			MailNotifier mailNotifier) {
 		this.profileRepository = profileRepository;
 		this.doctorProfileRepository = doctorProfileRepository;
 		this.lawyerProfileRepository = lawyerProfileRepository;
 		this.passwordResetTokenRepository = passwordResetTokenRepository;
 		this.passwordEncoder = passwordEncoder;
 		this.jwtService = jwtService;
+		this.mailNotifier = mailNotifier;
 	}
 
 	/** Modo 1: login por email + password. */
@@ -165,6 +169,10 @@ public class AuthService {
 			lawyerProfile.setMedicalAreas(request.medicalAreas());
 			lawyerProfileRepository.save(lawyerProfile);
 		}
+
+		// Correo de bienvenida (fire-and-forget vía n8n; no bloquea el registro).
+		mailNotifier.sendWelcome(profile.getEmail(), profile.getName(),
+				role == UserRole.DOCTOR ? "Médico" : "Abogado");
 	}
 
 	/** HU-04: solicitud de restablecimiento (en prototipo devuelve token para demo). */
@@ -189,6 +197,13 @@ public class AuthService {
 				token,
 				Instant.now().plus(1, ChronoUnit.HOURS));
 		passwordResetTokenRepository.save(resetToken);
+
+		// Con n8n configurado el token viaja por correo y NO se expone en la respuesta.
+		// Sin n8n (dev local) se devuelve como fallback para no romper el flujo.
+		if (mailNotifier.isConfigured()) {
+			mailNotifier.sendPasswordReset(profile.getEmail(), profile.getName(), token);
+			return new ForgotPasswordResponse(message, null);
+		}
 
 		return new ForgotPasswordResponse(
 				message + " (prototipo: usa el token mostrado para continuar)",
