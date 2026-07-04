@@ -10,8 +10,8 @@ package pe.sinapsistencia.notifications;
  */
 final class MailTemplates {
 
-	private static final String BRAND = "#0f172a"; // slate-900 (paleta del tema)
-	private static final String ACCENT = "#6366f1"; // indigo-500
+	private static final String ACCENT = "#2563eb"; // blue-600 (color primario del frontend)
+	private static final String ACCENT_2 = "#06b6d4"; // cyan-500 (cierre del gradiente de marca)
 	private static final String MUTED = "#64748b"; // slate-500
 	private static final String BORDER = "#e2e8f0"; // slate-200
 
@@ -141,7 +141,7 @@ final class MailTemplates {
 				      <table role="presentation" width="560" cellpadding="0" cellspacing="0"
 				        style="max-width:560px;width:100%%;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(15,23,42,0.08);">
 				        <tr>
-				          <td style="background:%s;padding:28px 32px;">
+				          <td style="background:#0f172a;background:linear-gradient(135deg,#0f172a 0%%,#1e293b 100%%);padding:28px 32px;">
 				            <span style="font-size:20px;font-weight:700;color:#ffffff;letter-spacing:-0.02em;">Sinapsistencia</span>
 				            <span style="display:block;margin-top:2px;font-size:12px;color:#94a3b8;">Plataforma clínico-legal</span>
 				          </td>
@@ -165,17 +165,17 @@ final class MailTemplates {
 				  </table>
 				</body>
 				</html>
-				""".formatted(BRAND, esc(heading), innerBody, BORDER, MUTED);
+				""".formatted(esc(heading), innerBody, BORDER, MUTED);
 	}
 
 	private static String button(String label, String href) {
 		return """
 				<table role="presentation" cellpadding="0" cellspacing="0" style="margin:0;">
-				  <tr><td style="border-radius:10px;background:%s;">
-				    <a href="%s" style="display:inline-block;padding:13px 28px;font-size:15px;font-weight:600;color:#ffffff;text-decoration:none;border-radius:10px;">%s</a>
+				  <tr><td style="border-radius:10px;background:%1$s;background:linear-gradient(135deg,%1$s 0%%,%2$s 100%%);">
+				    <a href="%3$s" style="display:inline-block;padding:13px 28px;font-size:15px;font-weight:600;color:#ffffff;text-decoration:none;border-radius:10px;">%4$s</a>
 				  </td></tr>
 				</table>
-				""".formatted(ACCENT, esc(href), esc(label));
+				""".formatted(ACCENT, ACCENT_2, esc(href), esc(label));
 	}
 
 	private static String infoRow(String label, String value) {
