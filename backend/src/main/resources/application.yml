@@ -22,9 +22,10 @@ spring:
     baseline-on-migrate: true
 
   # Auto-arranca el Postgres de docker-compose.yml (raíz del monorepo) al correr la app en dev.
+  # En producción (Railway) establece SPRING_DOCKER_COMPOSE_ENABLED=false como env var.
   docker:
     compose:
-      enabled: true
+      enabled: ${SPRING_DOCKER_COMPOSE_ENABLED:false}
       file: ../docker-compose.yml
       lifecycle-management: start-only
 
