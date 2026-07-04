@@ -17,7 +17,7 @@ VALUES
     -- ═══════════════════════════════════════════════════════════════════════
 
     -- c001 · Carlos → Lucía (respondida / alta)
-    ('g0000000-0000-0000-0000-000000000001',
+    ('a9000000-0000-0000-0000-000000000001',
      'd0000000-0000-0000-0000-000000000001',
      'd0000000-0000-0000-0000-000000000002',
      'c0000000-0000-0000-0000-000000000001',
@@ -27,7 +27,7 @@ VALUES
      'Estimado Dr. Mendoza, acepto gustosamente asesorarle en este caso. He revisado la documentación inicial y el riesgo legal es manejable dado que el consentimiento informado está completo. Coordinamos reunión esta semana.'),
 
     -- c002 · Carlos → Lucía (cerrada)
-    ('g0000000-0000-0000-0000-000000000002',
+    ('a9000000-0000-0000-0000-000000000002',
      'd0000000-0000-0000-0000-000000000001',
      'd0000000-0000-0000-0000-000000000002',
      'c0000000-0000-0000-0000-000000000002',
@@ -37,7 +37,7 @@ VALUES
      'Dr. Mendoza, revisaré el expediente. La presentación atípica del cuadro clínico es un argumento sólido. Le prepararé un descargo con la cronología documentada.'),
 
     -- c005 · Valentina → Lucía (asignada / crítica)
-    ('g0000000-0000-0000-0000-000000000003',
+    ('a9000000-0000-0000-0000-000000000003',
      'd1000000-0000-0000-0000-000000000001',
      'd0000000-0000-0000-0000-000000000002',
      'c0000000-0000-0000-0000-000000000005',
@@ -47,7 +47,7 @@ VALUES
      'Dra. Rojas, entiendo la urgencia. La hemorragia post-parto es una complicación obstétrica reconocida. Con el consentimiento informado que menciona este riesgo y el protocolo activado, tenemos una posición sólida. Iniciamos revisión inmediata.'),
 
     -- c006 · Sebastián → Mateo (en_revision / alta)
-    ('g0000000-0000-0000-0000-000000000004',
+    ('a9000000-0000-0000-0000-000000000004',
      'd1000000-0000-0000-0000-000000000002',
      'd2000000-0000-0000-0000-000000000003',
      'c0000000-0000-0000-0000-000000000006',
@@ -57,7 +57,7 @@ VALUES
      'Dr. Paredes, he revisado el informe de incidente. El protocolo fue activado correctamente y el paciente se recuperó sin secuelas. Prepararé el análisis legal esta semana.'),
 
     -- c007 · Valentina → Daniela (respondida / alta)
-    ('g0000000-0000-0000-0000-000000000005',
+    ('a9000000-0000-0000-0000-000000000005',
      'd1000000-0000-0000-0000-000000000001',
      'd2000000-0000-0000-0000-000000000002',
      'c0000000-0000-0000-0000-000000000007',
@@ -67,7 +67,7 @@ VALUES
      'Dra. Rojas, revisé el caso. La indicación de vacuum estaba justificada según el partograma. Ya he redactado la respuesta para la familia. Se la envío para su revisión.'),
 
     -- c008 · Camila → Daniela (en_revision / media)
-    ('g0000000-0000-0000-0000-000000000006',
+    ('a9000000-0000-0000-0000-000000000006',
      'd1000000-0000-0000-0000-000000000003',
      'd2000000-0000-0000-0000-000000000002',
      'c0000000-0000-0000-0000-000000000008',
@@ -77,7 +77,7 @@ VALUES
      'Dra. Torres, entiendo la situación. Un error documental sin daño clínico es manejable. Proceda con la corrección formal con nota aclaratoria. Le prepararé el informe de corrección.'),
 
     -- c009 · Andrés → Joaquín (cerrada)
-    ('g0000000-0000-0000-0000-000000000007',
+    ('a9000000-0000-0000-0000-000000000007',
      'd1000000-0000-0000-0000-000000000004',
      'd2000000-0000-0000-0000-000000000001',
      'c0000000-0000-0000-0000-000000000009',
@@ -87,7 +87,7 @@ VALUES
      'Dr. Salazar, revisé el caso y los controles radiológicos. La angulación residual está dentro del rango aceptable para tratamiento conservador. Propongo una reunión de mediación con el paciente para cerrar el caso sin litigio.'),
 
     -- c011 · Fiorella → Patricia (asignada / baja)
-    ('g0000000-0000-0000-0000-000000000008',
+    ('a9000000-0000-0000-0000-000000000008',
      'd1000000-0000-0000-0000-000000000005',
      'd2000000-0000-0000-0000-000000000004',
      'c0000000-0000-0000-0000-000000000011',
@@ -97,7 +97,7 @@ VALUES
      'Dra. Campos, entiendo. Le recomiendo obtener el consentimiento retroactivo firmado y adjuntar una nota aclaratoria en el expediente. El riesgo es bajo dado que el paciente no reporta quejas.'),
 
     -- c013 · Carlos → Joaquín (en_revision / media)
-    ('g0000000-0000-0000-0000-000000000009',
+    ('a9000000-0000-0000-0000-000000000009',
      'd0000000-0000-0000-0000-000000000001',
      'd2000000-0000-0000-0000-000000000001',
      'c0000000-0000-0000-0000-000000000013',
@@ -107,7 +107,7 @@ VALUES
      'Dr. Mendoza, revisé la documentación. La demora es claramente atribuible al laboratorio externo. Le recomiendo obtener comunicación escrita del laboratorio reconociendo la demora, lo cual reforzará nuestra posición.'),
 
     -- c014 · Carlos → Lucía (cerrada)
-    ('g0000000-0000-0000-0000-000000000010',
+    ('a9000000-0000-0000-0000-000000000010',
      'd0000000-0000-0000-0000-000000000001',
      'd0000000-0000-0000-0000-000000000002',
      'c0000000-0000-0000-0000-000000000014',
@@ -121,7 +121,7 @@ VALUES
     -- ═══════════════════════════════════════════════════════════════════════
 
     -- c003 · Carlos → Paola Ramírez (pendiente cicatriz)
-    ('g0000000-0000-0000-0000-000000000011',
+    ('a9000000-0000-0000-0000-000000000011',
      'd0000000-0000-0000-0000-000000000001',
      'd3000000-0000-0000-0000-000000000002',
      'c0000000-0000-0000-0000-000000000003',
@@ -130,7 +130,7 @@ VALUES
      'pendiente', 65.00, NULL),
 
     -- c004 · Carlos → Diego Huamán (pendiente tiempo de espera)
-    ('g0000000-0000-0000-0000-000000000012',
+    ('a9000000-0000-0000-0000-000000000012',
      'd0000000-0000-0000-0000-000000000001',
      'd3000000-0000-0000-0000-000000000005',
      'c0000000-0000-0000-0000-000000000004',
@@ -139,7 +139,7 @@ VALUES
      'pendiente', 72.00, NULL),
 
     -- c010 · Andrés → Renato Salazar (pendiente negligencia urgencias)
-    ('g0000000-0000-0000-0000-000000000013',
+    ('a9000000-0000-0000-0000-000000000013',
      'd1000000-0000-0000-0000-000000000004',
      'd3000000-0000-0000-0000-000000000003',
      'c0000000-0000-0000-0000-000000000010',
@@ -148,7 +148,7 @@ VALUES
      'pendiente', 68.00, NULL),
 
     -- c012 · Fiorella → Mario Castillo (pendiente falta seguimiento)
-    ('g0000000-0000-0000-0000-000000000014',
+    ('a9000000-0000-0000-0000-000000000014',
      'd1000000-0000-0000-0000-000000000005',
      'd3000000-0000-0000-0000-000000000001',
      'c0000000-0000-0000-0000-000000000012',
@@ -161,7 +161,7 @@ VALUES
     -- ═══════════════════════════════════════════════════════════════════════
 
     -- Carlos → Jorge Paredes para c004 (rechazó, luego Carlos buscó a otro)
-    ('g0000000-0000-0000-0000-000000000015',
+    ('a9000000-0000-0000-0000-000000000015',
      'd0000000-0000-0000-0000-000000000001',
      'd3000000-0000-0000-0000-000000000007',
      'c0000000-0000-0000-0000-000000000004',
@@ -171,7 +171,7 @@ VALUES
      'Dr. Mendoza, lamentablemente en este momento no puedo asumir más casos de urgencias ya que mi carga actual es muy alta. Le recomiendo contactar a un colega que se especialice en este tipo de reclamos.'),
 
     -- Valentina → Carmen Vega para c005 (rechazó antes de Lucía aceptar)
-    ('g0000000-0000-0000-0000-000000000016',
+    ('a9000000-0000-0000-0000-000000000016',
      'd1000000-0000-0000-0000-000000000001',
      'd3000000-0000-0000-0000-000000000004',
      'c0000000-0000-0000-0000-000000000005',
