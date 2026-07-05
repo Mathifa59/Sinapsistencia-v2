@@ -67,3 +67,8 @@ app:
     url: ${CLOUDINARY_URL:}
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:4200}
+  # Correos de las cuentas demo (Dr. Carlos / Dra. Lucia). Por defecto los del
+  # seed; en prod se sobreescriben con correos reales para demostrar el envio.
+  demo:
+    doctor-email: ${DEMO_DOCTOR_EMAIL:doctor.demo@sinapsistencia.pe}
+    lawyer-email: ${DEMO_LAWYER_EMAIL:lawyer.demo@sinapsistencia.pe}
