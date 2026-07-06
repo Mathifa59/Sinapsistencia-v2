@@ -72,3 +72,5 @@ app:
   demo:
     doctor-email: ${DEMO_DOCTOR_EMAIL:doctor.demo@sinapsistencia.pe}
     lawyer-email: ${DEMO_LAWYER_EMAIL:lawyer.demo@sinapsistencia.pe}
+    # Si se define, el resto de abogados demo pasan a alias base+usuario@dominio.
+    mail-base: ${DEMO_MAIL_BASE:}
