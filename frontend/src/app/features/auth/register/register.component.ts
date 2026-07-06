@@ -18,9 +18,11 @@ type RegisterRole = 'doctor' | 'lawyer';
     <div class="min-h-screen bg-slate-50 flex items-center justify-center p-4">
       <div class="w-full max-w-lg">
         <div class="text-center mb-8">
-          <div class="inline-flex items-center justify-center h-12 w-12 rounded-xl bg-slate-900 mb-4">
-            <lucide-icon name="shield" class="h-6 w-6 text-white" />
-          </div>
+          <img
+            src="logo/sinapsistencia-color-icon-transparent.svg"
+            alt="Sinapsistencia"
+            class="h-12 w-12 mx-auto mb-4"
+          />
           <h1 class="text-2xl font-bold text-slate-900">Crear cuenta</h1>
           <p class="text-sm text-slate-500 mt-1">Regístrate como médico o abogado</p>
         </div>

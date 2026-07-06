@@ -3,12 +3,13 @@ import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { QueryClient, provideTanStackQuery } from '@tanstack/angular-query-experimental';
 import {
-  Activity, AlertTriangle, Archive, ArrowLeft, ArrowRight, Award, Bell, Briefcase,
-  Building2, Calendar, Camera, Check, CheckCircle, CheckCircle2, ChevronDown, ChevronRight,
-  Circle, Clock, Edit3, Eye, EyeOff, FileText, FileWarning, FolderOpen, Heart, Info,
-  LayoutDashboard, Loader2, LogOut, LucideAngularModule, Mail, Menu, Pen, Phone, Plus,
+  Activity, AlertTriangle, Archive, ArrowLeft, ArrowRight, Award, Bell, BookOpen, Briefcase,
+  Building2, Calendar, CalendarPlus, Camera, Check, CheckCircle, CheckCircle2, ChevronDown, ChevronRight,
+  Circle, Clock, Cpu, Download, Edit3, Eye, EyeOff, FileText, FileWarning, FolderOpen, GitBranch, Heart, Info,
+  Key, LayoutDashboard, Loader2, Lock, LockKeyhole, LogOut, LucideAngularModule, Mail, MailCheck, Menu,
+  MessageSquare, Paperclip, Pen, PenLine, Pencil, Phone, Play, Plus,
   RefreshCw, Save, Scale, Search, Send, Settings, Shield, ShieldAlert, ShieldCheck, Star,
-  Stethoscope, User, Users, X, XCircle, Zap,
+  Stethoscope, Trophy, User, Users, X, XCircle, Zap,
 } from 'lucide-angular';
 
 import { routes } from './app.routes';
@@ -32,12 +33,13 @@ export const appConfig: ApplicationConfig = {
     ),
     importProvidersFrom(
       LucideAngularModule.pick({
-        Activity, AlertTriangle, Archive, ArrowLeft, ArrowRight, Award, Bell, Briefcase,
-        Building2, Calendar, Camera, Check, CheckCircle, CheckCircle2, ChevronDown, ChevronRight,
-        Circle, Clock, Edit3, Eye, EyeOff, FileText, FileWarning, FolderOpen, Heart, Info,
-        LayoutDashboard, Loader2, LogOut, Mail, Menu, Pen, Phone, Plus,
+        Activity, AlertTriangle, Archive, ArrowLeft, ArrowRight, Award, Bell, BookOpen, Briefcase,
+        Building2, Calendar, CalendarPlus, Camera, Check, CheckCircle, CheckCircle2, ChevronDown, ChevronRight,
+        Circle, Clock, Cpu, Download, Edit3, Eye, EyeOff, FileText, FileWarning, FolderOpen, GitBranch, Heart, Info,
+        Key, LayoutDashboard, Loader2, Lock, LockKeyhole, LogOut, Mail, MailCheck, Menu,
+        MessageSquare, Paperclip, Pen, PenLine, Pencil, Phone, Play, Plus,
         RefreshCw, Save, Scale, Search, Send, Settings, Shield, ShieldAlert, ShieldCheck, Star,
-        Stethoscope, User, Users, X, XCircle, Zap,
+        Stethoscope, Trophy, User, Users, X, XCircle, Zap,
       }),
     ),
   ],

@@ -21,11 +21,12 @@ const DEMO_ROLES: { role: UserRole; label: string; color: string }[] = [
     <div class="min-h-screen bg-slate-50 flex items-center justify-center p-4">
       <div class="w-full max-w-sm">
         <div class="text-center mb-8">
-          <div class="inline-flex items-center justify-center h-12 w-12 rounded-xl bg-slate-900 mb-4">
-            <lucide-icon name="shield" class="h-6 w-6 text-white" />
-          </div>
-          <h1 class="text-2xl font-bold text-slate-900">Sinapsistencia</h1>
-          <p class="text-sm text-slate-500 mt-1">Ingresa a tu cuenta</p>
+          <img
+            src="logo/sinapsistencia-color-horizontal-transparent.svg"
+            alt="Sinapsistencia"
+            class="h-11 mx-auto mb-4"
+          />
+          <p class="text-sm text-slate-500">Ingresa a tu cuenta</p>
         </div>
 
         <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">

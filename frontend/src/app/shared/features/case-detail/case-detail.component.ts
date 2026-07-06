@@ -66,15 +66,17 @@ import {
       <div class="space-y-5 max-w-5xl">
         <app-ml-advisory-note />
 
-        <div class="flex flex-wrap items-center gap-3">
-          <a [routerLink]="backLink()">
-            <button appBtn variant="outline" size="icon" class="h-8 w-8">
-              <lucide-icon name="arrow-left" class="h-4 w-4" />
-            </button>
-          </a>
-          <div class="flex-1 min-w-0">
-            <h1 class="text-xl font-bold text-slate-900 truncate">{{ c.title }}</h1>
-            <p class="text-sm text-slate-500">{{ c.context?.contextCode ?? ('Consulta #' + (c.id ?? '').slice(0, 8).toUpperCase()) }}</p>
+        <div class="space-y-3">
+          <div class="flex items-start gap-3">
+            <a [routerLink]="backLink()" class="shrink-0">
+              <button appBtn variant="outline" size="icon" class="h-8 w-8">
+                <lucide-icon name="arrow-left" class="h-4 w-4" />
+              </button>
+            </a>
+            <div class="min-w-0 flex-1">
+              <h1 class="text-xl font-bold text-slate-900 break-words">{{ c.title }}</h1>
+              <p class="text-sm text-slate-500">{{ c.context?.contextCode ?? ('Consulta #' + (c.id ?? '').slice(0, 8).toUpperCase()) }}</p>
+            </div>
           </div>
           <div class="flex flex-wrap gap-2">
             <app-case-status-badge [status]="asStatus(c.status)" />

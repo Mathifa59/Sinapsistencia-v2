@@ -33,9 +33,16 @@ const NAV_ITEMS: Record<UserRole, NavigationItem[]> = {
       <aside [class]="asideClass()">
         <!-- Logo -->
         <div class="flex items-center justify-between h-16 px-6 border-b border-slate-700">
-          <div>
-            <span class="font-bold text-white text-lg tracking-tight">Sinapsistencia</span>
-            <p class="text-xs text-slate-400 mt-0.5">{{ portalLabel() }}</p>
+          <div class="flex items-center gap-2.5 min-w-0">
+            <img
+              src="logo/sinapsistencia-white-icon-transparent.svg"
+              alt="Sinapsistencia"
+              class="h-8 w-8 shrink-0"
+            />
+            <div class="min-w-0">
+              <span class="block font-bold text-white text-lg tracking-tight leading-none truncate">Sinapsistencia</span>
+              <p class="text-xs text-slate-400 mt-1 truncate">{{ portalLabel() }}</p>
+            </div>
           </div>
           <button
             type="button"
