@@ -7,6 +7,7 @@ import java.util.HexFormat;
 import java.util.Map;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,11 +41,12 @@ import pe.sinapsistencia.shared.exception.UnauthorizedException;
 @Service
 public class AuthService {
 
-	/** Cuentas demo seedeadas en V3__seed_demo.sql. */
-	private static final Map<String, String> DEMO_ACCOUNTS = Map.of(
-			"doctor", "doctor.demo@sinapsistencia.pe",
-			"lawyer", "lawyer.demo@sinapsistencia.pe",
-			"admin", "admin.demo@sinapsistencia.pe");
+	/**
+	 * Correos de las cuentas demo (login por rol). Se toman de la configuración
+	 * para que coincidan con los correos reales que aplica DemoAccountEmailConfigurer
+	 * en producción; por defecto son los del seed (V3__seed_demo.sql).
+	 */
+	private final Map<String, String> demoAccounts;
 
 	private final ProfileRepository profileRepository;
 	private final DoctorProfileRepository doctorProfileRepository;
@@ -61,7 +63,10 @@ public class AuthService {
 			PasswordResetTokenRepository passwordResetTokenRepository,
 			PasswordEncoder passwordEncoder,
 			JwtService jwtService,
-			MailNotifier mailNotifier) {
+			MailNotifier mailNotifier,
+			@Value("${app.demo.doctor-email:doctor.demo@sinapsistencia.pe}") String doctorEmail,
+			@Value("${app.demo.lawyer-email:lawyer.demo@sinapsistencia.pe}") String lawyerEmail,
+			@Value("${app.demo.admin-email:admin.demo@sinapsistencia.pe}") String adminEmail) {
 		this.profileRepository = profileRepository;
 		this.doctorProfileRepository = doctorProfileRepository;
 		this.lawyerProfileRepository = lawyerProfileRepository;
@@ -69,6 +74,10 @@ public class AuthService {
 		this.passwordEncoder = passwordEncoder;
 		this.jwtService = jwtService;
 		this.mailNotifier = mailNotifier;
+		this.demoAccounts = Map.of(
+				"doctor", doctorEmail,
+				"lawyer", lawyerEmail,
+				"admin", adminEmail);
 	}
 
 	/** Modo 1: login por email + password. */
@@ -93,7 +102,7 @@ public class AuthService {
 
 	/** Modo 2: login por rol demo (doctor/lawyer/admin). */
 	public LoginResponse loginByRole(String role) {
-		String demoEmail = DEMO_ACCOUNTS.get(role);
+		String demoEmail = demoAccounts.get(role);
 		if (demoEmail == null) {
 			throw new BadRequestException("Rol no válido");
 		}
