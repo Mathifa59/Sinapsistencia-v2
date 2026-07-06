@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 80" role="img" aria-labelledby="title desc">
+  <title id="title">Sinapsistencia logo horizontal</title>
+  <desc id="desc">Logotipo horizontal de Sinapsistencia con icono abstracto de sinapsis que une medicina y derecho.</desc>
+
+  <g transform="translate(4,0)">
+    <path d="M34 40 H46" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round" fill="none"/>
+    <circle cx="40" cy="40" r="4" fill="#FFFFFF"/>
+    <path fill="#FFFFFF" fill-rule="evenodd" d="
+      M 24 26
+      A 14 14 0 1 1 23.999 26
+      M 20 37
+      H 24
+      V 33
+      H 28
+      V 37
+      H 32
+      V 41
+      H 28
+      V 45
+      H 24
+      V 41
+      H 20
+      Z"/>
+    <path fill="#FFFFFF" fill-rule="evenodd" d="
+      M 56 26
+      A 14 14 0 1 1 55.999 26
+      M 47 30
+      H 65
+      V 34
+      H 47
+      Z
+      M 49 36
+      H 53
+      V 48
+      H 49
+      Z
+      M 55 36
+      H 59
+      V 48
+      H 55
+      Z
+      M 61 36
+      H 65
+      V 48
+      H 61
+      Z"/>
+  </g>
+  <text x="100" y="49" fill="#FFFFFF" font-family="Inter, sans-serif" font-size="34" font-weight="700" letter-spacing="0">Sinapsistencia</text>
+</svg>
