@@ -49,7 +49,7 @@ import { MEDICAL_SPECIALTIES } from '../../../shared/constants';
           }
         </div>
 
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div class="space-y-1.5">
             <label appLabel>Prioridad *</label>
             <select appSelect formControlName="priority">
@@ -71,7 +71,7 @@ import { MEDICAL_SPECIALTIES } from '../../../shared/constants';
           </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div class="space-y-1.5">
             <label appLabel for="case-event-type">Tipo de evento</label>
             <input appInput id="case-event-type" placeholder="Ej: Cirugía, consulta, diagnóstico" formControlName="eventType" />
@@ -99,7 +99,7 @@ import { MEDICAL_SPECIALTIES } from '../../../shared/constants';
             Contexto simulado (sin datos identificables — Ley 29733)
           </p>
 
-          <div class="grid grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div class="space-y-1.5">
               <label appLabel for="context-code">Código de referencia</label>
               <input appInput id="context-code" placeholder="Auto (Caso-XXXXXXXX)" formControlName="contextCode" />
@@ -110,7 +110,7 @@ import { MEDICAL_SPECIALTIES } from '../../../shared/constants';
             </div>
           </div>
 
-          <div class="grid grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div class="space-y-1.5">
               <label appLabel for="context-area">Área médica</label>
               <input appInput id="context-area" placeholder="Ej: Cirugía General" formControlName="medicalArea" />

@@ -379,7 +379,7 @@ import {
           <label appLabel>Descripción *</label>
           <textarea appTextarea rows="3" formControlName="description"></textarea>
         </div>
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div class="space-y-1.5">
             <label appLabel>Prioridad</label>
             <select appSelect formControlName="priority">

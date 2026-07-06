@@ -49,7 +49,7 @@ const DOCUMENT_TYPES: DocumentType[] = [
           }
         </div>
 
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div class="space-y-1.5">
             <label appLabel>Tipo de documento *</label>
             <select appSelect formControlName="type">

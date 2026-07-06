@@ -63,7 +63,7 @@ type RegisterRole = 'doctor' | 'lawyer';
               }
             </div>
 
-            <div class="grid grid-cols-2 gap-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div class="space-y-1.5">
                 <label appLabel for="password">Contraseña</label>
                 <input appInput id="password" type="password" placeholder="••••••••" formControlName="password" />
@@ -81,7 +81,7 @@ type RegisterRole = 'doctor' | 'lawyer';
             </div>
 
             @if (form.controls.role.value === 'doctor') {
-              <div class="grid grid-cols-2 gap-3">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div class="space-y-1.5">
                   <label appLabel for="specialty">Especialidad médica</label>
                   <select appSelect id="specialty" formControlName="specialty">

@@ -11,7 +11,7 @@ import { cn } from '../utils/cn';
     @if (open()) {
       <div class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm" (click)="close.emit()"></div>
       <div
-        class="fixed left-1/2 top-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 bg-white rounded-xl border border-slate-200 shadow-xl max-h-[90vh] overflow-y-auto p-6"
+        class="fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 bg-white rounded-xl border border-slate-200 shadow-xl max-h-[90vh] overflow-y-auto p-6"
         [class]="userClass()"
       >
         <ng-content />

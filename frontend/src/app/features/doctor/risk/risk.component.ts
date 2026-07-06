@@ -76,7 +76,7 @@ const FACTOR_LABELS: Record<string, string> = {
               }
             </div>
 
-            <div class="grid grid-cols-2 gap-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div class="space-y-1.5">
                 <label appLabel>Complejidad del procedimiento</label>
                 <select appSelect formControlName="procedure_complexity">

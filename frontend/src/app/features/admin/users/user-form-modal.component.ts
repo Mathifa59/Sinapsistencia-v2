@@ -38,7 +38,7 @@ const ROLES: UserRole[] = ['doctor', 'lawyer', 'admin'];
           }
         </div>
 
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div class="space-y-1.5">
             <label appLabel>Rol *</label>
             <select appSelect formControlName="role">
