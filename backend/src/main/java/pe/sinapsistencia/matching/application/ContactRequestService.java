@@ -220,6 +220,28 @@ public class ContactRequestService {
 		return enrich(List.of(request)).get(0);
 	}
 
+	/**
+	 * Admin: elimina definitivamente una solicitud (limpieza de datos de demo).
+	 * Si estaba aceptada y había asignado el abogado a la consulta, revierte esa
+	 * asignación (la consulta vuelve a estar disponible).
+	 */
+	@Transactional
+	public void adminDeleteContactRequest(String requestIdParam) {
+		ContactRequest request = contactRequestRepository.findById(UUID.fromString(requestIdParam))
+				.orElseThrow(() -> new NotFoundException("Solicitud no encontrada"));
+
+		LegalCase legalCase = request.getLegalCase();
+		if (request.getStatus() == ContactRequestStatus.ACEPTADO && legalCase != null
+				&& legalCase.getLawyer() != null
+				&& legalCase.getLawyer().getId().equals(request.getToLawyer().getId())) {
+			legalCase.setLawyer(null);
+			legalCase.setStatus(CaseStatus.CLASIFICADA);
+			caseRepository.save(legalCase);
+		}
+
+		contactRequestRepository.delete(request);
+	}
+
 	/** Adjunta perfiles profesionales a las solicitudes en 2 queries (sin N+1). */
 	private List<ContactRequestResponse> enrich(List<ContactRequest> requests) {
 		List<UUID> doctorIds = requests.stream().map(r -> r.getFromDoctor().getId()).distinct().toList();

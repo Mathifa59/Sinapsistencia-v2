@@ -113,9 +113,14 @@ public class MatchingController {
 
 	@DeleteMapping("/contact-requests/{id}")
 	@Auditable(action = "cancel", resource = "contact_request")
-	public ApiResponse<ContactRequestResponse> cancelContactRequest(
+	public ApiResponse<Object> cancelContactRequest(
 			@AuthenticationPrincipal AuthenticatedUser user,
 			@PathVariable String id) {
+		// Admin: elimina la solicitud (limpieza). Médico: cancela su solicitud pendiente.
+		if (user != null && user.role() == pe.sinapsistencia.auth.domain.UserRole.ADMIN) {
+			contactRequestService.adminDeleteContactRequest(id);
+			return ApiResponse.ok(java.util.Map.of("message", "Solicitud eliminada"));
+		}
 		return ApiResponse.ok(contactRequestService.cancelContactRequest(user, id));
 	}
 
