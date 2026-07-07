@@ -30,7 +30,7 @@ import type { UserRole, AuditAction } from '../../../shared/constants';
       </div>
 
       <div class="grid lg:grid-cols-2 gap-6">
-        <div class="bg-white rounded-lg border border-slate-200">
+        <div class="bg-white rounded-lg border border-slate-200 min-w-0">
           <div class="px-5 py-4 border-b border-slate-100">
             <h2 class="font-semibold text-slate-900">Usuarios del sistema</h2>
           </div>
@@ -70,7 +70,7 @@ import type { UserRole, AuditAction } from '../../../shared/constants';
           </table>
         </div>
 
-        <div class="bg-white rounded-lg border border-slate-200">
+        <div class="bg-white rounded-lg border border-slate-200 min-w-0">
           <div class="px-5 py-4 border-b border-slate-100">
             <h2 class="font-semibold text-slate-900">Auditoría reciente</h2>
           </div>

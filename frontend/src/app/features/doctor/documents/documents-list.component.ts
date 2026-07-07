@@ -48,7 +48,7 @@ import { DocumentDetailModalComponent } from './document-detail-modal.component'
         @for (doc of filteredDocs(); track doc.id) {
           <button
             type="button"
-            class="bg-white rounded-lg border border-slate-200 p-5 flex items-start gap-4 hover:border-slate-300 transition-colors text-left w-full"
+            class="bg-white rounded-lg border border-slate-200 p-5 flex items-start gap-4 hover:border-slate-300 transition-colors text-left w-full min-w-0"
             (click)="selected.set(doc)"
           >
             <div class="h-10 w-10 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
@@ -62,7 +62,7 @@ import { DocumentDetailModalComponent } from './document-detail-modal.component'
                 </div>
                 <app-document-status-badge [status]="asStatus(doc.status)" />
               </div>
-              <div class="flex items-center gap-4 mt-3 text-xs text-slate-400">
+              <div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-3 text-xs text-slate-400">
                 <span>Versiones: <span class="text-slate-600">{{ doc.versions?.length ?? 0 }}</span></span>
                 <span>Firmas: <span class="text-slate-600">{{ doc.signatures?.length ?? 0 }}</span></span>
                 <span>Actualizado: <span class="text-slate-600">{{ formatDate(doc.updatedAt ?? '') }}</span></span>

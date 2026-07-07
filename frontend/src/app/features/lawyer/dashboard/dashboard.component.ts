@@ -46,7 +46,7 @@ interface RelevantCasesResponse {
       </div>
 
       <div class="grid lg:grid-cols-2 gap-6">
-        <div class="bg-white rounded-lg border border-slate-200">
+        <div class="bg-white rounded-lg border border-slate-200 min-w-0">
           <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
             <h2 class="font-semibold text-slate-900">Solicitudes pendientes</h2>
             <a routerLink="/lawyer/requests" class="text-xs text-blue-600 hover:underline flex items-center gap-1">
@@ -89,7 +89,7 @@ interface RelevantCasesResponse {
           }
         </div>
 
-        <div class="bg-white rounded-lg border border-slate-200">
+        <div class="bg-white rounded-lg border border-slate-200 min-w-0">
           <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
             <h2 class="font-semibold text-slate-900">Casos en seguimiento</h2>
           </div>
@@ -124,7 +124,7 @@ interface RelevantCasesResponse {
         </div>
       </div>
 
-      <div class="bg-white rounded-lg border border-slate-200">
+      <div class="bg-white rounded-lg border border-slate-200 min-w-0">
         <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
           <div>
             <h2 class="font-semibold text-slate-900 flex items-center gap-2">

@@ -36,7 +36,7 @@ import type { CasePriority, CaseStatus, DocumentStatus } from '../../../shared/c
       </div>
 
       <div class="grid lg:grid-cols-2 gap-6">
-        <div class="bg-white rounded-lg border border-slate-200">
+        <div class="bg-white rounded-lg border border-slate-200 min-w-0">
           <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
             <h2 class="font-semibold text-slate-900">Consultas recientes</h2>
             <a routerLink="/doctor/cases" class="text-xs text-blue-600 hover:underline flex items-center gap-1">
@@ -62,7 +62,7 @@ import type { CasePriority, CaseStatus, DocumentStatus } from '../../../shared/c
           </div>
         </div>
 
-        <div class="bg-white rounded-lg border border-slate-200">
+        <div class="bg-white rounded-lg border border-slate-200 min-w-0">
           <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
             <h2 class="font-semibold text-slate-900">Documentos recientes</h2>
             <a routerLink="/doctor/documents" class="text-xs text-blue-600 hover:underline flex items-center gap-1">
