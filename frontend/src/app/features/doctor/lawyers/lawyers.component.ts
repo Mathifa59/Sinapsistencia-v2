@@ -99,6 +99,7 @@ import type { CasePriority } from '../../../shared/constants';
           @let matchScore = getMatchScore(lawyerUserId);
           @let matchReasons = getMatchReasons(lawyerUserId);
           @let alreadyRequested = hasActiveRequest(lawyerUserId);
+          @let pendingId = pendingRequestId(lawyerUserId);
           @let isTopPick = i === 0 && matchScore !== undefined && matchScore > 0;
 
           <div [class]="cn('rounded-lg border p-5 space-y-4', isTopPick ? 'bg-amber-50 border-amber-400 ring-2 ring-amber-300 shadow-md shadow-amber-100' : 'bg-white border-slate-200')">
@@ -181,6 +182,19 @@ import type { CasePriority } from '../../../shared/constants';
                 <lucide-icon name="send" class="h-4 w-4" />Solicitar contacto
               }
             </button>
+
+            @if (pendingId) {
+              <button
+                appBtn
+                variant="ghost"
+                size="sm"
+                class="w-full gap-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                (click)="cancelRequest(pendingId)"
+                [disabled]="cancelMutation.isPending()"
+              >
+                <lucide-icon name="x" class="h-4 w-4" />Cancelar solicitud
+              </button>
+            }
           </div>
         }
       </div>
@@ -334,6 +348,13 @@ export class DoctorLawyersComponent {
     );
   }
 
+  /** ID de la solicitud PENDIENTE con ese abogado (cancelable), si existe. */
+  protected pendingRequestId(lawyerUserId?: string): string | undefined {
+    return (this.contactRequestsQuery.data() ?? []).find(
+      (r) => r.toLawyerId === lawyerUserId && r.status === 'pendiente',
+    )?.id;
+  }
+
   protected readonly contactMutation = injectMutation(() => ({
     mutationFn: (payload: { toLawyerUserId: string; caseId: string; caseTitle: string }) =>
       this.matchingApi.createContactRequest({
@@ -352,6 +373,25 @@ export class DoctorLawyersComponent {
       this.contactError.set('No se pudo enviar la solicitud. Verifica que no exista una pendiente con ese abogado.');
     },
   }));
+
+  protected readonly cancelMutation = injectMutation(() => ({
+    mutationFn: (requestId: string) => this.matchingApi.cancelContactRequest(requestId),
+    onSuccess: () => {
+      this.contactSuccess.set(false);
+      this.contactError.set(null);
+      this.queryClient.invalidateQueries({ queryKey: ['matching', 'contact-requests'] });
+    },
+    onError: () => {
+      this.contactError.set('No se pudo cancelar la solicitud. Intenta de nuevo.');
+    },
+  }));
+
+  protected cancelRequest(requestId?: string): void {
+    if (!requestId) return;
+    this.contactSuccess.set(false);
+    this.contactError.set(null);
+    this.cancelMutation.mutate(requestId);
+  }
 
   protected sendContactRequest(lawyer: { id?: string; userId?: string; fullName?: string }): void {
     const caseId = this.selectedCaseId();

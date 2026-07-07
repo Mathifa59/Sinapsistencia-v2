@@ -197,6 +197,29 @@ public class ContactRequestService {
 		return enrich(List.of(request)).get(0);
 	}
 
+	/** HU-16: el médico cancela una solicitud propia aún pendiente (soft, sin correo). */
+	@Transactional
+	public ContactRequestResponse cancelContactRequest(AuthenticatedUser user, String requestIdParam) {
+		if (requestIdParam == null) {
+			throw new BadRequestException("requestId es requerido");
+		}
+
+		ContactRequest request = contactRequestRepository.findById(UUID.fromString(requestIdParam))
+				.orElseThrow(() -> new NotFoundException("Solicitud no encontrada"));
+
+		// Ownership: solo el médico que la envió (o admin) puede cancelarla.
+		if (user.role() != UserRole.ADMIN && !request.getFromDoctor().getId().equals(user.id())) {
+			throw new ForbiddenException("No tienes permisos para cancelar esta solicitud");
+		}
+		if (request.getStatus() != ContactRequestStatus.PENDIENTE) {
+			throw new BadRequestException("Solo se pueden cancelar solicitudes pendientes");
+		}
+
+		request.setStatus(ContactRequestStatus.CANCELADO);
+		request = contactRequestRepository.save(request);
+		return enrich(List.of(request)).get(0);
+	}
+
 	/** Adjunta perfiles profesionales a las solicitudes en 2 queries (sin N+1). */
 	private List<ContactRequestResponse> enrich(List<ContactRequest> requests) {
 		List<UUID> doctorIds = requests.stream().map(r -> r.getFromDoctor().getId()).distinct().toList();

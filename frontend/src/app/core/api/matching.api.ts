@@ -50,6 +50,11 @@ export class MatchingApi {
     return this.api.patch<ContactRequestResponse>('/api/matching/contact-requests', body);
   }
 
+  /** El médico cancela una solicitud propia aún pendiente. */
+  cancelContactRequest(id: string): Promise<ContactRequestResponse> {
+    return this.api.delete<ContactRequestResponse>(`/api/matching/contact-requests/${id}`);
+  }
+
   relevantCases(lawyerId?: string): Promise<Record<string, unknown>> {
     return this.api.get<Record<string, unknown>>('/api/matching/relevant-cases', { lawyerId });
   }
