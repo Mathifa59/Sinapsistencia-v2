@@ -17,7 +17,7 @@ import {
 
 const PRIORITY_ORDER: Record<string, number> = { critica: 0, alta: 1, media: 2, baja: 3 };
 
-/** Panel de consultas asignadas al abogado (HU-17, HU-34). */
+/** Panel de casos asignados al abogado (HU-17, HU-34). */
 @Component({
   selector: 'app-lawyer-cases',
   imports: [
@@ -32,8 +32,8 @@ const PRIORITY_ORDER: Record<string, number> = { critica: 0, alta: 1, media: 2, 
   template: `
     <div class="space-y-5">
       <div>
-        <h1 class="text-2xl font-bold text-slate-900">Mis Consultas</h1>
-        <p class="text-slate-500 text-sm mt-1">{{ sortedCases().length }} consultas asignadas</p>
+        <h1 class="text-2xl font-bold text-slate-900">Mis Casos</h1>
+        <p class="text-slate-500 text-sm mt-1">{{ sortedCases().length }} casos asignados</p>
       </div>
 
       <div class="flex flex-wrap gap-3">
@@ -59,7 +59,7 @@ const PRIORITY_ORDER: Record<string, number> = { critica: 0, alta: 1, media: 2, 
         <table class="w-full text-sm">
           <thead>
             <tr class="border-b border-slate-100 bg-slate-50">
-              <th class="text-left px-5 py-3 font-semibold text-slate-600">Consulta</th>
+              <th class="text-left px-5 py-3 font-semibold text-slate-600">Caso</th>
               <th class="text-left px-5 py-3 font-semibold text-slate-600 hidden md:table-cell">Médico</th>
               <th class="text-left px-5 py-3 font-semibold text-slate-600">Estado</th>
               <th class="text-left px-5 py-3 font-semibold text-slate-600 hidden sm:table-cell">Prioridad</th>
@@ -91,7 +91,7 @@ const PRIORITY_ORDER: Record<string, number> = { critica: 0, alta: 1, media: 2, 
               </tr>
             }
             @if (!casesQuery.isLoading() && sortedCases().length === 0) {
-              <tr><td colspan="6" class="px-5 py-10 text-center text-slate-400">No se encontraron consultas</td></tr>
+              <tr><td colspan="6" class="px-5 py-10 text-center text-slate-400">No se encontraron casos</td></tr>
             }
           </tbody>
         </table>

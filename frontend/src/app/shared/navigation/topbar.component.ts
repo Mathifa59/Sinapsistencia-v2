@@ -39,7 +39,7 @@ import {
           appBtn
           variant="ghost"
           size="icon"
-          class="text-slate-500 hover:text-slate-900"
+          class="text-slate-500 hover:text-slate-900 lg:hidden"
           (click)="ui.toggleSidebar()"
         >
           <lucide-icon name="menu" class="h-5 w-5" />

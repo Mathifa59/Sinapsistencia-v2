@@ -29,11 +29,11 @@ import { CaseFormModalComponent } from './case-form-modal.component';
     <div class="space-y-5">
       <div class="flex items-center justify-between">
         <div>
-          <h1 class="text-2xl font-bold text-slate-900">Mis Consultas</h1>
-          <p class="text-slate-500 text-sm mt-1">{{ casesQuery.data()?.total ?? 0 }} consultas registradas</p>
+          <h1 class="text-2xl font-bold text-slate-900">Mis Casos</h1>
+          <p class="text-slate-500 text-sm mt-1">{{ casesQuery.data()?.total ?? 0 }} casos registrados</p>
         </div>
         <button appBtn variant="primary" size="sm" class="gap-2" (click)="formModal.show()">
-          <lucide-icon name="plus" class="h-4 w-4" />Nueva consulta
+          <lucide-icon name="plus" class="h-4 w-4" />Nuevo caso
         </button>
       </div>
 
@@ -46,7 +46,7 @@ import { CaseFormModalComponent } from './case-form-modal.component';
         <table class="w-full text-sm">
           <thead>
             <tr class="border-b border-slate-100 bg-slate-50">
-              <th class="text-left px-5 py-3 font-semibold text-slate-600">Consulta</th>
+              <th class="text-left px-5 py-3 font-semibold text-slate-600">Caso</th>
               <th class="text-left px-5 py-3 font-semibold text-slate-600 hidden md:table-cell">Código</th>
               <th class="text-left px-5 py-3 font-semibold text-slate-600 hidden lg:table-cell">Abogado</th>
               <th class="text-left px-5 py-3 font-semibold text-slate-600">Estado</th>
@@ -86,7 +86,7 @@ import { CaseFormModalComponent } from './case-form-modal.component';
               </tr>
             }
             @if (!casesQuery.isLoading() && filteredCases().length === 0) {
-              <tr><td colspan="7" class="px-5 py-10 text-center text-slate-400">No se encontraron consultas</td></tr>
+              <tr><td colspan="7" class="px-5 py-10 text-center text-slate-400">No se encontraron casos</td></tr>
             }
           </tbody>
         </table>

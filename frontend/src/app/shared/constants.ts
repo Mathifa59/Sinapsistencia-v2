@@ -89,17 +89,17 @@ export interface NavigationItem {
 
 export const NAVIGATION_DOCTOR: NavigationItem[] = [
   { label: 'Dashboard', href: '/doctor/dashboard', icon: 'LayoutDashboard' },
-  { label: 'Mis Consultas', href: '/doctor/cases', icon: 'Briefcase' },
+  { label: 'Mis Casos', href: '/doctor/cases', icon: 'Briefcase' },
   { label: 'Documentos', href: '/doctor/documents', icon: 'FileText' },
   { label: 'Abogados', href: '/doctor/lawyers', icon: 'Scale' },
-  { label: 'Evaluación de Riesgo', href: '/doctor/risk', icon: 'AlertTriangle' },
+  { label: 'Simulador de Riesgo', href: '/doctor/risk', icon: 'AlertTriangle' },
   { label: 'Mi Perfil', href: '/doctor/profile', icon: 'User' },
   { label: 'Manual', href: '/doctor/manual', icon: 'BookOpen' },
 ];
 
 export const NAVIGATION_LAWYER: NavigationItem[] = [
   { label: 'Dashboard', href: '/lawyer/dashboard', icon: 'LayoutDashboard' },
-  { label: 'Mis Consultas', href: '/lawyer/cases', icon: 'Briefcase' },
+  { label: 'Mis Casos', href: '/lawyer/cases', icon: 'Briefcase' },
   { label: 'Solicitudes', href: '/lawyer/requests', icon: 'Bell' },
   { label: 'Médicos', href: '/lawyer/doctors', icon: 'Stethoscope' },
   { label: 'Mi Perfil', href: '/lawyer/profile', icon: 'User' },

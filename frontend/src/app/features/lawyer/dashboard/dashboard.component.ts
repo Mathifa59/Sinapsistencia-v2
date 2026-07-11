@@ -72,7 +72,7 @@ interface RelevantCasesResponse {
                   </div>
                   <p class="text-xs text-slate-600 line-clamp-2">{{ request.message }}</p>
                   @if (request.caseTitle) {
-                    <p class="text-xs font-medium text-slate-700">Consulta: {{ request.caseTitle }}</p>
+                    <p class="text-xs font-medium text-slate-700">Caso: {{ request.caseTitle }}</p>
                   }
                   <p class="text-xs text-slate-400">{{ formatDateTime(request.createdAt ?? '') }}</p>
                   <div class="flex gap-2">
@@ -114,7 +114,7 @@ interface RelevantCasesResponse {
                   }
                   @if (request.caseId) {
                     <a [routerLink]="['/lawyer/cases', request.caseId]" class="inline-flex items-center gap-1 text-xs text-emerald-600 hover:underline font-medium mt-2">
-                      Ir a consulta <lucide-icon name="arrow-right" class="h-3 w-3" />
+                      Ir al caso <lucide-icon name="arrow-right" class="h-3 w-3" />
                     </a>
                   }
                 </div>

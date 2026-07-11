@@ -49,8 +49,8 @@ const FACTOR_LABELS: Record<string, string> = {
   template: `
     <div class="max-w-4xl mx-auto space-y-6">
       <div>
-        <h1 class="text-2xl font-bold text-slate-900">Evaluación de Riesgo Médico-Legal</h1>
-        <p class="text-slate-500 text-sm mt-1">Analiza el nivel de riesgo legal de una consulta basándose en factores clínicos y procesales</p>
+        <h1 class="text-2xl font-bold text-slate-900">Simulador de Riesgo Médico-Legal</h1>
+        <p class="text-slate-500 text-sm mt-1">Explora cómo el modelo pondera cada factor. El análisis real ocurre automáticamente al crear un caso</p>
       </div>
 
       <app-ml-advisory-note />

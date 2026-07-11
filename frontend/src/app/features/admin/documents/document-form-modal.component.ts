@@ -59,11 +59,11 @@ const DOCUMENT_TYPES: DocumentType[] = [
           </div>
 
           <div class="space-y-1.5">
-            <label appLabel>Consulta asociada</label>
+            <label appLabel>Caso asociado</label>
             <select appSelect formControlName="caseId">
-              <option value="">Sin consulta</option>
+              <option value="">Sin caso</option>
               @for (c of casesQuery.data()?.data ?? []; track c.id) {
-                <option [value]="c.id">{{ c.title }}</option>
+                <option [value]="c.id">{{ c.context?.contextCode ? c.context?.contextCode + " — " : "" }}{{ c.title }}</option>
               }
             </select>
           </div>

@@ -11,11 +11,11 @@ interface ManualSection {
 
 const DOCTOR_SECTIONS: ManualSection[] = [
   {
-    title: 'Consultas clínico-legales',
+    title: 'Casos clínico-legales',
     icon: 'briefcase',
     items: [
-      'Registra nuevas consultas desde Mis Consultas con contexto simulado (Ley 29733).',
-      'Edita consultas en estado pendiente y ciérralas cuando recibas respuesta legal.',
+      'Registra nuevos casos desde Mis Casos con contexto simulado (Ley 29733).',
+      'Edita casos en estado pendiente y ciérralos cuando recibas respuesta legal.',
       'Consulta la clasificación ML, justificación de prioridad y línea de tiempo.',
       'Genera informes imprimibles y marca las respuestas legales como revisadas.',
     ],
@@ -24,7 +24,7 @@ const DOCTOR_SECTIONS: ManualSection[] = [
     title: 'Documentos y abogados',
     icon: 'file-text',
     items: [
-      'Gestiona documentos clínicos y adjúntalos a consultas.',
+      'Gestiona documentos clínicos y adjúntalos a casos.',
       'Busca abogados sugeridos por el sistema y envía solicitudes de contacto.',
       'Las recomendaciones ML son orientativas; la decisión final es humana.',
     ],
@@ -41,10 +41,10 @@ const DOCTOR_SECTIONS: ManualSection[] = [
 
 const LAWYER_SECTIONS: ManualSection[] = [
   {
-    title: 'Consultas asignadas',
+    title: 'Casos asignados',
     icon: 'briefcase',
     items: [
-      'Revisa tus consultas ordenadas por prioridad (crítica primero).',
+      'Revisa tus casos ordenados por prioridad (crítica primero).',
       'Filtra por estado y prioridad para gestionar tu carga de trabajo.',
       'Redacta respuestas legales con recomendaciones y observaciones.',
     ],
@@ -81,7 +81,7 @@ const ADMIN_SECTIONS: ManualSection[] = [
     title: 'Métricas y calidad',
     icon: 'activity',
     items: [
-      'Consulta la distribución de consultas por estado, prioridad y especialidad.',
+      'Consulta la distribución de casos por estado, prioridad y especialidad.',
       'Evalúa el rendimiento del clasificador y del motor de matching.',
     ],
   },

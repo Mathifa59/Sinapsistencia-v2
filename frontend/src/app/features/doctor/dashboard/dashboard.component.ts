@@ -29,18 +29,18 @@ import type { CasePriority, CaseStatus, DocumentStatus } from '../../../shared/c
       </div>
 
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <app-stat-card title="Consultas activas" [value]="activeCases().length" icon="briefcase" color="blue" description="En seguimiento" />
+        <app-stat-card title="Casos activos" [value]="activeCases().length" icon="briefcase" color="blue" description="En seguimiento" />
         <app-stat-card title="Docs. pendientes" [value]="pendingDocs().length" icon="file-text" color="amber" description="Sin firma o en borrador" />
         <app-stat-card title="Abogados sugeridos" [value]="recommendationsCount()" icon="scale" color="emerald" description="Compatibles con tu perfil" />
-        <app-stat-card title="Total de consultas" [value]="casesQuery.data()?.total ?? 0" icon="alert-triangle" color="slate" description="Histórico completo" />
+        <app-stat-card title="Total de casos" [value]="casesQuery.data()?.total ?? 0" icon="alert-triangle" color="slate" description="Histórico completo" />
       </div>
 
       <div class="grid lg:grid-cols-2 gap-6">
         <div class="bg-white rounded-lg border border-slate-200 min-w-0">
           <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-            <h2 class="font-semibold text-slate-900">Consultas recientes</h2>
+            <h2 class="font-semibold text-slate-900">Casos recientes</h2>
             <a routerLink="/doctor/cases" class="text-xs text-blue-600 hover:underline flex items-center gap-1">
-              Ver todas <lucide-icon name="arrow-right" class="h-3 w-3" />
+              Ver todos <lucide-icon name="arrow-right" class="h-3 w-3" />
             </a>
           </div>
           <div class="divide-y divide-slate-50">
@@ -57,7 +57,7 @@ import type { CasePriority, CaseStatus, DocumentStatus } from '../../../shared/c
               </a>
             }
             @if (recentCases().length === 0) {
-              <p class="px-5 py-8 text-center text-sm text-slate-400">No hay consultas</p>
+              <p class="px-5 py-8 text-center text-sm text-slate-400">No hay casos</p>
             }
           </div>
         </div>

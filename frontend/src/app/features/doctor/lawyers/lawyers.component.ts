@@ -34,7 +34,7 @@ import type { CasePriority } from '../../../shared/constants';
     <div class="space-y-5">
       <div>
         <h1 class="text-2xl font-bold text-slate-900">Abogados sugeridos</h1>
-        <p class="text-slate-500 text-sm mt-1">Elige la consulta a asignar y solicita contacto con un abogado compatible</p>
+        <p class="text-slate-500 text-sm mt-1">Elige el caso a asignar y solicita contacto con un abogado compatible</p>
       </div>
 
       <app-ml-advisory-note />
@@ -42,15 +42,15 @@ import type { CasePriority } from '../../../shared/constants';
       <div class="bg-white rounded-lg border border-slate-200 p-5 space-y-3">
         <div class="flex items-center gap-2">
           <lucide-icon name="briefcase" class="h-4 w-4 text-blue-600" />
-          <h2 class="font-semibold text-slate-900">Consulta a asignar</h2>
+          <h2 class="font-semibold text-slate-900">Caso a asignar</h2>
         </div>
 
         @if (openCasesQuery.isLoading()) {
-          <p class="text-sm text-slate-400">Cargando consultas...</p>
+          <p class="text-sm text-slate-400">Cargando casos...</p>
         } @else if (openCases().length === 0) {
           <div class="rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-            No tienes consultas pendientes de asignar. Crea una en
-            <a routerLink="/doctor/cases" class="font-medium underline">Mis Consultas</a>
+            No tienes casos pendientes de asignar. Crea uno en
+            <a routerLink="/doctor/cases" class="font-medium underline">Mis Casos</a>
             antes de buscar abogado.
           </div>
         } @else {
@@ -82,7 +82,7 @@ import type { CasePriority } from '../../../shared/constants';
 
       @if (!selectedCaseId() && openCases().length > 0) {
         <p class="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-4 py-3">
-          Selecciona una consulta para ver recomendaciones y enviar la solicitud de contacto.
+          Selecciona un caso para ver recomendaciones y enviar la solicitud de contacto.
         </p>
       }
 
@@ -93,6 +93,78 @@ import type { CasePriority } from '../../../shared/constants';
         </div>
       }
 
+      <!-- ── Pipeline de matching (TF-IDF + similitud coseno) ─────────────── -->
+      @if (selectedCaseId() && matchStage() < 4) {
+        <div class="relative overflow-hidden rounded-2xl bg-slate-900 p-5 text-white lg:p-6">
+          <div class="pointer-events-none absolute -top-20 -right-16 h-56 w-56 rounded-full bg-blue-600/25 blur-3xl"></div>
+          <div class="pointer-events-none absolute -bottom-24 -left-10 h-56 w-56 rounded-full bg-cyan-500/15 blur-3xl"></div>
+          <div class="relative">
+            <div class="mb-4 flex items-center gap-3">
+              <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 text-white">
+                <lucide-icon name="scale" class="h-4.5 w-4.5" />
+              </span>
+              <div>
+                <p class="font-semibold">Buscando al abogado más compatible</p>
+                <p class="font-mono text-[11px] text-slate-400">TF-IDF + similitud coseno · cos(θ) = (A·B) / (‖A‖·‖B‖)</p>
+              </div>
+            </div>
+
+            @if (selectedCase(); as sc) {
+              <div class="mb-4 flex flex-wrap gap-1.5">
+                @if (sc.context?.contextCode) {
+                  <span class="rounded-md bg-white/10 px-2 py-0.5 font-mono text-[11px] tracking-wider text-cyan-300 ring-1 ring-inset ring-white/10">{{ sc.context?.contextCode }}</span>
+                }
+                <span class="rounded-full bg-white/10 px-2.5 py-0.5 text-[11px] text-slate-200 ring-1 ring-inset ring-white/10">{{ sc.medicalSpecialty || sc.context?.medicalArea || 'Medicina General' }}</span>
+                <span class="rounded-full bg-white/10 px-2.5 py-0.5 text-[11px] capitalize text-slate-200 ring-1 ring-inset ring-white/10">Prioridad {{ sc.priority }}</span>
+              </div>
+            }
+
+            <div class="space-y-3">
+              <div class="flex items-start gap-3">
+                @if (matchStage() > 1) {
+                  <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-400/15 text-emerald-300 ring-1 ring-inset ring-emerald-400/30"><lucide-icon name="check-circle-2" class="h-3.5 w-3.5" /></span>
+                } @else {
+                  <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-400/15 text-blue-300 ring-1 ring-inset ring-blue-400/30"><lucide-icon name="loader-2" class="h-3.5 w-3.5 animate-spin" /></span>
+                }
+                <div [class]="matchStage() >= 1 ? 'opacity-100' : 'opacity-40'">
+                  <p class="text-sm font-medium">Vectorización TF-IDF del caso</p>
+                  <p class="text-[11px] text-slate-400">Los términos del caso se convierten en un vector ponderado por frecuencia</p>
+                </div>
+              </div>
+
+              <div class="flex items-start gap-3">
+                @if (matchStage() > 2) {
+                  <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-400/15 text-emerald-300 ring-1 ring-inset ring-emerald-400/30"><lucide-icon name="check-circle-2" class="h-3.5 w-3.5" /></span>
+                } @else if (matchStage() === 2) {
+                  <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-400/15 text-blue-300 ring-1 ring-inset ring-blue-400/30"><lucide-icon name="loader-2" class="h-3.5 w-3.5 animate-spin" /></span>
+                } @else {
+                  <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/5 text-slate-500 ring-1 ring-inset ring-white/10"><lucide-icon name="circle" class="h-3 w-3" /></span>
+                }
+                <div [class]="matchStage() >= 2 ? 'opacity-100' : 'opacity-40'">
+                  <p class="text-sm font-medium">Similitud coseno contra {{ (lawyersQuery.data() ?? []).length }} abogados</p>
+                  <p class="text-[11px] text-slate-400">El vector del caso se compara con las especialidades y áreas de cada perfil</p>
+                </div>
+              </div>
+
+              <div class="flex items-start gap-3">
+                @if (matchStage() > 3) {
+                  <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-400/15 text-emerald-300 ring-1 ring-inset ring-emerald-400/30"><lucide-icon name="check-circle-2" class="h-3.5 w-3.5" /></span>
+                } @else if (matchStage() === 3) {
+                  <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-400/15 text-blue-300 ring-1 ring-inset ring-blue-400/30"><lucide-icon name="loader-2" class="h-3.5 w-3.5 animate-spin" /></span>
+                } @else {
+                  <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/5 text-slate-500 ring-1 ring-inset ring-white/10"><lucide-icon name="circle" class="h-3 w-3" /></span>
+                }
+                <div [class]="matchStage() >= 3 ? 'opacity-100' : 'opacity-40'">
+                  <p class="text-sm font-medium">Ranking de compatibilidad</p>
+                  <p class="text-[11px] text-slate-400">Los puntajes se ordenan de mayor a menor para recomendar al mejor match</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+
+      @if (showLawyerCards()) {
       <div class="grid md:grid-cols-2 gap-4">
         @for (lawyer of filteredLawyers(); track lawyer.id; let i = $index) {
           @let lawyerUserId = lawyer.userId ?? lawyer.id;
@@ -107,7 +179,7 @@ import type { CasePriority } from '../../../shared/constants';
             @if (isTopPick) {
               <div class="flex items-center gap-1.5 text-xs font-bold text-amber-700 bg-amber-100 border border-amber-300 rounded-full px-3 py-1 w-fit">
                 <lucide-icon name="trophy" class="h-3.5 w-3.5 text-amber-500" />
-                Mejor match para tu consulta
+                Mejor match para tu caso
               </div>
             }
 
@@ -133,6 +205,18 @@ import type { CasePriority } from '../../../shared/constants';
                 </div>
               </div>
             </div>
+
+            @if (matchScore !== undefined && matchScore > 0) {
+              <div>
+                <div class="mb-1 flex items-center justify-between text-[11px]">
+                  <span class="font-medium text-slate-400">Compatibilidad con tu caso</span>
+                  <span class="font-bold text-slate-700">{{ matchScore }}%</span>
+                </div>
+                <div class="h-1.5 overflow-hidden rounded-full bg-slate-100">
+                  <div class="h-full rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 transition-all duration-700" [style.width.%]="matchScore"></div>
+                </div>
+              </div>
+            }
 
             <div>
               <div class="flex flex-wrap gap-1.5 mb-3">
@@ -198,10 +282,11 @@ import type { CasePriority } from '../../../shared/constants';
           </div>
         }
       </div>
+      }
 
       @if (contactSuccess()) {
         <p class="text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-md px-4 py-3">
-          Solicitud enviada. El abogado verá la consulta «{{ selectedCase()?.title }}» al aceptar.
+          Solicitud enviada. El abogado verá el caso «{{ selectedCase()?.title }}» al aceptar.
         </p>
       }
       @if (contactError()) {
@@ -223,6 +308,12 @@ export class DoctorLawyersComponent {
   protected readonly selectedCaseId = signal('');
   protected readonly contactSuccess = signal(false);
   protected readonly contactError = signal<string | null>(null);
+
+  /** Etapa de la animación del matching: 1 vectorización · 2 coseno · 3 ranking · 4 listo. */
+  protected readonly matchStage = signal(0);
+  protected readonly showLawyerCards = computed(() => !this.selectedCaseId() || this.matchStage() >= 4);
+  private matchTimers: ReturnType<typeof setTimeout>[] = [];
+  private lastAnimatedCase = '';
   protected readonly getInitials = getInitials;
   protected readonly cn = cn;
   protected readonly asPriority = (p?: string) => (p ?? 'media') as CasePriority;
@@ -265,6 +356,23 @@ export class DoctorLawyersComponent {
         this.selectedCaseId.set(cases[0].id ?? '');
       }
     });
+
+    // Cada vez que cambia el caso seleccionado, corre la animación del matching.
+    effect(() => {
+      const caseId = this.selectedCaseId();
+      if (!caseId || caseId === this.lastAnimatedCase) return;
+      this.lastAnimatedCase = caseId;
+      this.runMatchAnimation();
+    });
+  }
+
+  private runMatchAnimation(): void {
+    this.matchTimers.forEach(clearTimeout);
+    this.matchTimers = [];
+    this.matchStage.set(1);
+    this.matchTimers.push(setTimeout(() => this.matchStage.set(2), 1000));
+    this.matchTimers.push(setTimeout(() => this.matchStage.set(3), 2100));
+    this.matchTimers.push(setTimeout(() => this.matchStage.set(4), 2900));
   }
 
   protected readonly lawyersQuery = injectQuery(() => ({
@@ -361,7 +469,7 @@ export class DoctorLawyersComponent {
         fromDoctorId: this.userId(),
         toLawyerId: payload.toLawyerUserId,
         caseId: payload.caseId,
-        message: `Hola, me gustaría contactarte para revisar la consulta «${payload.caseTitle}».`,
+        message: `Hola, me gustaría contactarte para revisar el caso «${payload.caseTitle}».`,
       }),
     onSuccess: () => {
       this.contactSuccess.set(true);
@@ -403,7 +511,7 @@ export class DoctorLawyersComponent {
     this.contactMutation.mutate({
       toLawyerUserId,
       caseId,
-      caseTitle: selected.title ?? 'Consulta',
+      caseTitle: selected.title ?? 'Caso',
     });
   }
 }

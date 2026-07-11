@@ -9,8 +9,6 @@ import { AuthService } from '../../../core/auth/auth.service';
 import { CasesApi, type CaseReportDto } from '../../../core/api/cases.api';
 import { BtnDirective } from '../../ui/button.directive';
 import { InputDirective, LabelDirective, TextareaDirective, SelectDirective } from '../../ui/field.directives';
-import { CaseStatusBadgeComponent, CasePriorityBadgeComponent } from '../../ui/status-badges.component';
-import { MlAdvisoryNoteComponent } from '../../ui/ml-advisory-note.component';
 import {
   ModalComponent,
   ModalHeaderDirective,
@@ -18,7 +16,7 @@ import {
   ModalDescriptionDirective,
   ModalFooterDirective,
 } from '../../ui/modal.component';
-import { formatDate, formatDateTime } from '../../utils/cn';
+import { formatDate, formatDateTime, getInitials } from '../../utils/cn';
 import {
   CASE_STATUS_LABELS,
   CASE_PRIORITY_LABELS,
@@ -27,7 +25,25 @@ import {
   type CaseStatus,
 } from '../../constants';
 
-/** Detalle completo de consulta compartido entre médico y abogado. */
+/** Punto de color del chip de estado (sobre el hero oscuro). */
+const STATUS_DOTS: Record<CaseStatus, string> = {
+  pendiente: 'bg-slate-400',
+  clasificada: 'bg-blue-400',
+  asignada: 'bg-cyan-400',
+  en_revision: 'bg-amber-400 animate-pulse',
+  respondida: 'bg-emerald-400',
+  cerrada: 'bg-slate-500',
+};
+
+/** Punto de color del chip de prioridad (sobre el hero oscuro). */
+const PRIORITY_DOTS: Record<CasePriority, string> = {
+  baja: 'bg-emerald-400',
+  media: 'bg-sky-400',
+  alta: 'bg-amber-400',
+  critica: 'bg-red-400',
+};
+
+/** Detalle completo de caso compartido entre médico y abogado. */
 @Component({
   selector: 'app-case-detail',
   imports: [
@@ -39,9 +55,6 @@ import {
     LabelDirective,
     TextareaDirective,
     SelectDirective,
-    CaseStatusBadgeComponent,
-    CasePriorityBadgeComponent,
-    MlAdvisoryNoteComponent,
     ModalComponent,
     ModalHeaderDirective,
     ModalTitleDirective,
@@ -52,178 +65,275 @@ import {
     @if (detailQuery.isLoading()) {
       <div class="flex items-center justify-center py-20 text-slate-400">
         <lucide-icon name="loader-2" class="h-6 w-6 animate-spin mr-2" />
-        <span>Cargando consulta...</span>
+        <span>Cargando caso...</span>
       </div>
     } @else if (detailQuery.isError() || !caseData()) {
       <div class="flex flex-col items-center justify-center py-20 text-slate-400">
         <lucide-icon name="alert-triangle" class="h-10 w-10 mb-3" />
-        <p class="font-medium">Consulta no encontrada</p>
-        <a [routerLink]="backLink()" class="text-blue-600 text-sm mt-2 hover:underline">Volver a consultas</a>
+        <p class="font-medium">Caso no encontrado</p>
+        <a [routerLink]="backLink()" class="text-blue-600 text-sm mt-2 hover:underline">Volver a casos</a>
       </div>
     } @else {
       @let c = caseData()!;
       @let detail = detailQuery.data()!;
-      <div class="space-y-5 max-w-5xl">
-        <app-ml-advisory-note />
+      <div class="space-y-5">
+        <!-- ── Hero del caso ─────────────────────────────────────────────── -->
+        <div class="relative overflow-hidden rounded-2xl bg-slate-900 text-white shadow-xl shadow-slate-900/10">
+          <div class="pointer-events-none absolute -top-24 -right-20 h-72 w-72 rounded-full bg-blue-600/25 blur-3xl"></div>
+          <div class="pointer-events-none absolute -bottom-32 left-1/4 h-72 w-72 rounded-full bg-cyan-500/15 blur-3xl"></div>
 
-        <div class="space-y-3">
-          <div class="flex items-start gap-3">
-            <a [routerLink]="backLink()" class="shrink-0">
-              <button appBtn variant="outline" size="icon" class="h-8 w-8">
-                <lucide-icon name="arrow-left" class="h-4 w-4" />
-              </button>
-            </a>
-            <div class="min-w-0 flex-1">
-              <h1 class="text-xl font-bold text-slate-900 break-words">{{ c.title }}</h1>
-              <p class="text-sm text-slate-500">{{ c.context?.contextCode ?? ('Consulta #' + (c.id ?? '').slice(0, 8).toUpperCase()) }}</p>
+          <div class="relative p-5 lg:p-7">
+            <div class="flex items-start gap-4">
+              <a
+                [routerLink]="backLink()"
+                class="group mt-1 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/10 ring-1 ring-inset ring-white/15 transition hover:bg-white/20"
+              >
+                <lucide-icon name="arrow-left" class="h-4 w-4 text-slate-200 transition-transform group-hover:-translate-x-0.5" />
+              </a>
+              <div class="min-w-0 flex-1">
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="rounded-md bg-white/10 px-2 py-0.5 font-mono text-[11px] tracking-widest text-cyan-300 ring-1 ring-inset ring-white/10">
+                    {{ caseCode(c) }}
+                  </span>
+                  <span class="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-slate-100 ring-1 ring-inset ring-white/15">
+                    <span class="h-1.5 w-1.5 rounded-full" [class]="statusDots[asStatus(c.status)]"></span>
+                    {{ statusLabels[asStatus(c.status)] }}
+                  </span>
+                  <span class="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-slate-100 ring-1 ring-inset ring-white/15">
+                    <span class="h-1.5 w-1.5 rounded-full" [class]="priorityDots[asPriority(c.priority)]"></span>
+                    Prioridad {{ priorityLabels[asPriority(c.priority)] }}
+                  </span>
+                </div>
+                <h1 class="mt-3 text-2xl font-bold tracking-tight break-words lg:text-3xl">{{ c.title }}</h1>
+                <div class="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-xs text-slate-400">
+                  @if (c.medicalSpecialty || c.context?.medicalArea) {
+                    <span class="flex items-center gap-1.5">
+                      <lucide-icon name="stethoscope" class="h-3.5 w-3.5" />
+                      {{ c.medicalSpecialty || c.context?.medicalArea }}
+                    </span>
+                  }
+                  <span class="flex items-center gap-1.5">
+                    <lucide-icon name="calendar" class="h-3.5 w-3.5" />
+                    Creado {{ formatDate(c.createdAt ?? '') }}
+                  </span>
+                  <span class="flex items-center gap-1.5">
+                    <lucide-icon name="clock" class="h-3.5 w-3.5" />
+                    Actualizado {{ formatDateTime(c.updatedAt ?? '') }}
+                  </span>
+                  @if (c.lawyer) {
+                    <span class="flex items-center gap-1.5 text-cyan-300/90">
+                      <lucide-icon name="scale" class="h-3.5 w-3.5" />
+                      {{ c.lawyer.fullName }}
+                    </span>
+                  }
+                </div>
+              </div>
             </div>
-          </div>
-          <div class="flex flex-wrap gap-2">
-            <app-case-status-badge [status]="asStatus(c.status)" />
-            <app-case-priority-badge [priority]="asPriority(c.priority)" />
+
+            @if (isDoctor() || (isLawyer() && isAssignedLawyer() && c.status === 'asignada')) {
+              <div class="mt-5 flex flex-wrap items-center gap-2 border-t border-white/10 pt-4">
+                @if (isDoctor()) {
+                  @if (canEditCase()) {
+                    <button type="button" [class]="heroGhostBtn" (click)="openEditModal()">
+                      <lucide-icon name="pencil" class="h-3.5 w-3.5" />Editar caso
+                    </button>
+                  }
+                  <button type="button" [class]="heroGhostBtn" (click)="openEventModal()">
+                    <lucide-icon name="calendar-plus" class="h-3.5 w-3.5" />Registrar evento
+                  </button>
+                  <button type="button" [class]="heroGhostBtn" (click)="generateReport()" [disabled]="reportLoading()">
+                    @if (reportLoading()) {
+                      <lucide-icon name="loader-2" class="h-3.5 w-3.5 animate-spin" />
+                    } @else {
+                      <lucide-icon name="file-text" class="h-3.5 w-3.5" />
+                    }
+                    Generar informe
+                  </button>
+                  @if (c.status === 'respondida') {
+                    <button type="button" [class]="heroGhostBtn" (click)="handleClose()">
+                      <lucide-icon name="archive" class="h-3.5 w-3.5" />Cerrar caso
+                    </button>
+                  }
+                  @if (!c.lawyer) {
+                    <a [routerLink]="['/doctor/lawyers']" [queryParams]="{ caseId: c.id }" [class]="heroPrimaryBtn">
+                      <lucide-icon name="scale" class="h-3.5 w-3.5" />Buscar abogado
+                    </a>
+                  }
+                }
+                @if (isLawyer() && isAssignedLawyer() && c.status === 'asignada') {
+                  <button type="button" [class]="heroPrimaryBtn" (click)="startReview()" [disabled]="startReviewMutation.isPending()">
+                    @if (startReviewMutation.isPending()) {
+                      <lucide-icon name="loader-2" class="h-3.5 w-3.5 animate-spin" />
+                    } @else {
+                      <lucide-icon name="play" class="h-3.5 w-3.5" />
+                    }
+                    Iniciar revisión
+                  </button>
+                }
+              </div>
+            }
           </div>
         </div>
 
-        @if (isDoctor()) {
-          <div class="flex flex-wrap gap-2">
-            @if (canEditCase()) {
-              <button appBtn variant="outline" size="sm" class="gap-1.5" (click)="openEditModal()">
-                <lucide-icon name="pencil" class="h-3.5 w-3.5" />Editar consulta
-              </button>
-            }
-            @if (c.status === 'respondida') {
-              <button appBtn variant="outline" size="sm" class="gap-1.5" (click)="handleClose()">
-                <lucide-icon name="archive" class="h-3.5 w-3.5" />Cerrar consulta
-              </button>
-            }
-            <button appBtn variant="outline" size="sm" class="gap-1.5" (click)="openEventModal()">
-              <lucide-icon name="calendar-plus" class="h-3.5 w-3.5" />Registrar evento
-            </button>
-            <button appBtn variant="outline" size="sm" class="gap-1.5" (click)="generateReport()" [disabled]="reportLoading()">
-              @if (reportLoading()) {
-                <lucide-icon name="loader-2" class="h-3.5 w-3.5 animate-spin" />
-              } @else {
-                <lucide-icon name="file-text" class="h-3.5 w-3.5" />
+        <!-- ── Contenido ─────────────────────────────────────────────────── -->
+        <div class="grid gap-5 lg:grid-cols-3">
+          <div class="space-y-5 lg:col-span-2 min-w-0">
+            <!-- Descripción -->
+            <div class="rounded-xl border border-slate-200 bg-white p-5">
+              <h2 class="mb-3 flex items-center gap-2.5 font-semibold text-slate-900">
+                <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
+                  <lucide-icon name="file-text" class="h-4 w-4" />
+                </span>
+                Descripción del caso
+              </h2>
+              <p class="text-sm leading-relaxed text-slate-600">{{ c.description }}</p>
+              @if (c.priorityJustification) {
+                <div class="mt-4 rounded-lg border-l-2 border-amber-400 bg-amber-50/70 px-4 py-3">
+                  <p class="mb-1 text-[11px] font-semibold uppercase tracking-wider text-amber-700">Justificación de prioridad</p>
+                  <p class="text-sm leading-relaxed text-amber-900/80">{{ c.priorityJustification }}</p>
+                </div>
               }
-              Generar informe
-            </button>
-            @if (!c.lawyer) {
-              <a [routerLink]="['/doctor/lawyers']" [queryParams]="{ caseId: c.id }">
-                <button appBtn variant="primary" size="sm" class="gap-1.5">
-                  <lucide-icon name="scale" class="h-3.5 w-3.5" />Buscar abogado
-                </button>
-              </a>
-            }
-          </div>
-        }
-
-        @if (isLawyer() && isAssignedLawyer() && c.status === 'asignada') {
-          <div class="flex flex-wrap gap-2">
-            <button appBtn variant="primary" size="sm" class="gap-1.5" (click)="startReview()" [disabled]="startReviewMutation.isPending()">
-              @if (startReviewMutation.isPending()) {
-                <lucide-icon name="loader-2" class="h-3.5 w-3.5 animate-spin" />
-              } @else {
-                <lucide-icon name="play" class="h-3.5 w-3.5" />
-              }
-              Iniciar revisión
-            </button>
-          </div>
-        }
-
-        <div class="grid lg:grid-cols-3 gap-5">
-          <div class="lg:col-span-2 space-y-4">
-            <div class="bg-white rounded-lg border border-slate-200 p-5">
-              <h2 class="font-semibold text-slate-900 mb-3">Descripción de la consulta</h2>
-              <p class="text-sm text-slate-600 leading-relaxed">{{ c.description }}</p>
               @if (c.notes) {
-                <div class="mt-4 pt-4 border-t border-slate-100">
-                  <p class="text-xs font-semibold text-slate-500 mb-1 uppercase tracking-wider">Notas internas</p>
+                <div class="mt-4 border-t border-slate-100 pt-4">
+                  <p class="mb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Notas internas</p>
                   <p class="text-sm text-slate-600">{{ c.notes }}</p>
                 </div>
               }
             </div>
 
+            <!-- Clasificación del modelo -->
             @if (detail.classification) {
               @let cls = detail.classification;
-              <div class="bg-white rounded-lg border border-slate-200 p-5">
-                <h2 class="font-semibold text-slate-900 mb-3 flex items-center gap-2">
-                  <lucide-icon name="cpu" class="h-4 w-4 text-blue-500" />
-                  Clasificación ML
-                </h2>
-                <div class="grid sm:grid-cols-2 gap-3 text-sm">
-                  @if (cls.caseType) {
-                    <div><span class="text-slate-400 text-xs uppercase">Tipo de caso</span><p class="font-medium text-slate-800">{{ cls.caseType }}</p></div>
-                  }
-                  @if (cls.urgency) {
-                    <div><span class="text-slate-400 text-xs uppercase">Urgencia</span><p class="font-medium text-slate-800">{{ cls.urgency }}</p></div>
-                  }
-                  @if (cls.complexity) {
-                    <div><span class="text-slate-400 text-xs uppercase">Complejidad</span><p class="font-medium text-slate-800">{{ cls.complexity }}</p></div>
-                  }
-                  @if (cls.suggestedSpecialty) {
-                    <div><span class="text-slate-400 text-xs uppercase">Especialidad sugerida</span><p class="font-medium text-slate-800">{{ cls.suggestedSpecialty }}</p></div>
-                  }
-                  @if (cls.confidence != null) {
-                    <div><span class="text-slate-400 text-xs uppercase">Confianza</span><p class="font-medium text-slate-800">{{ Math.round(cls.confidence * 100) }}%</p></div>
-                  }
+              <div class="rounded-xl border border-slate-200 bg-white p-5">
+                <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+                  <h2 class="flex items-center gap-2.5 font-semibold text-slate-900">
+                    <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 text-white">
+                      <lucide-icon name="cpu" class="h-4 w-4" />
+                    </span>
+                    Clasificación del modelo
+                  </h2>
                   @if (cls.modelVersion) {
-                    <div><span class="text-slate-400 text-xs uppercase">Modelo</span><p class="font-medium text-slate-800">v{{ cls.modelVersion }}</p></div>
+                    <span class="rounded-full bg-slate-100 px-2.5 py-0.5 font-mono text-[11px] text-slate-500">IA · v{{ cls.modelVersion }}</span>
                   }
                 </div>
+                <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
+                  @if (cls.caseType) {
+                    <div class="rounded-lg border border-slate-100 bg-slate-50 px-3 py-2.5">
+                      <p class="text-[11px] uppercase tracking-wider text-slate-400">Tipo de caso</p>
+                      <p class="mt-0.5 text-sm font-semibold capitalize text-slate-800">{{ cls.caseType }}</p>
+                    </div>
+                  }
+                  @if (cls.urgency) {
+                    <div class="rounded-lg border border-slate-100 bg-slate-50 px-3 py-2.5">
+                      <p class="text-[11px] uppercase tracking-wider text-slate-400">Urgencia</p>
+                      <p class="mt-0.5 text-sm font-semibold capitalize text-slate-800">{{ cls.urgency }}</p>
+                    </div>
+                  }
+                  @if (cls.complexity) {
+                    <div class="rounded-lg border border-slate-100 bg-slate-50 px-3 py-2.5">
+                      <p class="text-[11px] uppercase tracking-wider text-slate-400">Complejidad</p>
+                      <p class="mt-0.5 text-sm font-semibold capitalize text-slate-800">{{ cls.complexity }}</p>
+                    </div>
+                  }
+                  @if (cls.suggestedSpecialty) {
+                    <div class="rounded-lg border border-slate-100 bg-slate-50 px-3 py-2.5">
+                      <p class="text-[11px] uppercase tracking-wider text-slate-400">Especialidad sugerida</p>
+                      <p class="mt-0.5 text-sm font-semibold text-slate-800">{{ cls.suggestedSpecialty }}</p>
+                    </div>
+                  }
+                </div>
+                @if (cls.confidence != null) {
+                  <div class="mt-4">
+                    <div class="mb-1.5 flex items-center justify-between text-xs">
+                      <span class="font-medium text-slate-500">Confianza del modelo</span>
+                      <span class="font-bold text-slate-800">{{ Math.round(cls.confidence * 100) }}%</span>
+                    </div>
+                    <div class="h-2 overflow-hidden rounded-full bg-slate-100">
+                      <div
+                        class="h-full rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 transition-all"
+                        [style.width.%]="Math.round(cls.confidence * 100)"
+                      ></div>
+                    </div>
+                  </div>
+                }
+                <p class="mt-4 flex items-start gap-1.5 border-t border-slate-100 pt-3 text-[11px] leading-relaxed text-slate-400">
+                  <lucide-icon name="info" class="mt-px h-3.5 w-3.5 shrink-0" />
+                  {{ advisoryNote }}
+                </p>
               </div>
             }
 
-            @if (c.priorityJustification) {
-              <div class="bg-white rounded-lg border border-slate-200 p-5">
-                <h2 class="font-semibold text-slate-900 mb-2">Justificación de prioridad</h2>
-                <p class="text-sm text-slate-600 leading-relaxed">{{ c.priorityJustification }}</p>
+            <!-- Respuestas legales -->
+            <div class="rounded-xl border border-slate-200 bg-white p-5">
+              <div class="mb-4 flex items-center justify-between gap-2">
+                <h2 class="flex items-center gap-2.5 font-semibold text-slate-900">
+                  <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
+                    <lucide-icon name="message-square" class="h-4 w-4" />
+                  </span>
+                  Respuestas legales
+                </h2>
+                @if ((detail.responses ?? []).length > 0) {
+                  <span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-semibold text-slate-500">
+                    {{ (detail.responses ?? []).length }}
+                  </span>
+                }
               </div>
-            }
-
-            <div class="bg-white rounded-lg border border-slate-200 p-5">
-              <h2 class="font-semibold text-slate-900 mb-4 flex items-center gap-2">
-                <lucide-icon name="message-square" class="h-4 w-4 text-slate-400" />
-                Respuestas legales
-              </h2>
               @if ((detail.responses ?? []).length === 0) {
-                <p class="text-sm text-slate-400 italic text-center py-4">Aún no hay respuestas legales</p>
+                <div class="rounded-lg border border-dashed border-slate-200 py-8 text-center">
+                  <lucide-icon name="message-square" class="mx-auto mb-2 h-8 w-8 text-slate-300" />
+                  <p class="text-sm text-slate-400">Aún no hay respuestas legales</p>
+                </div>
               } @else {
                 <div class="space-y-4">
                   @for (resp of detail.responses ?? []; track resp.id) {
-                    <div class="border border-slate-100 rounded-lg p-4 space-y-2">
-                      <div class="flex items-start justify-between gap-2">
-                        <div>
-                          <p class="font-medium text-slate-800 text-sm">{{ resp.lawyerName ?? 'Abogado' }}</p>
-                          <p class="text-xs text-slate-400">{{ formatDateTime(resp.createdAt ?? '') }}</p>
+                    <div class="overflow-hidden rounded-xl border border-slate-200">
+                      <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 bg-slate-50/70 px-4 py-3">
+                        <div class="flex items-center gap-3">
+                          <div class="flex h-9 w-9 items-center justify-center rounded-full bg-slate-900 text-xs font-bold text-white">
+                            {{ getInitials(resp.lawyerName ?? 'AB') }}
+                          </div>
+                          <div>
+                            <p class="text-sm font-semibold text-slate-800">{{ resp.lawyerName ?? 'Abogado' }}</p>
+                            <p class="text-[11px] text-slate-400">{{ formatDateTime(resp.createdAt ?? '') }}</p>
+                          </div>
                         </div>
                         @if (resp.isReviewed) {
-                          <span class="text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-full">Revisada</span>
+                          <span class="inline-flex items-center gap-1 rounded-full border border-emerald-100 bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700">
+                            <lucide-icon name="check-circle-2" class="h-3.5 w-3.5" />Revisada
+                          </span>
                         } @else if (isDoctor()) {
                           <button appBtn variant="outline" size="sm" class="text-xs" (click)="reviewResponse(resp.id!)" [disabled]="reviewMutation.isPending()">
                             Marcar como revisada
                           </button>
                         }
                       </div>
-                      <p class="text-sm text-slate-600">{{ resp.content }}</p>
-                      @if (resp.recommendations) {
-                        <div class="bg-blue-50 rounded-md px-3 py-2 text-sm text-blue-800">
-                          <p class="text-xs font-semibold uppercase mb-1">Recomendaciones</p>
-                          {{ resp.recommendations }}
-                        </div>
-                      }
-                      @if (resp.observations) {
-                        <p class="text-xs text-slate-500"><span class="font-semibold">Observaciones:</span> {{ resp.observations }}</p>
-                      }
+                      <div class="space-y-3 px-4 py-3.5">
+                        <p class="text-sm leading-relaxed text-slate-600">{{ resp.content }}</p>
+                        @if (resp.recommendations) {
+                          <div class="rounded-lg border-l-2 border-blue-400 bg-blue-50/70 px-3.5 py-2.5">
+                            <p class="mb-1 flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider text-blue-700">
+                              <lucide-icon name="zap" class="h-3 w-3" />Recomendaciones
+                            </p>
+                            <p class="text-sm text-blue-900/80">{{ resp.recommendations }}</p>
+                          </div>
+                        }
+                        @if (resp.observations) {
+                          <p class="text-xs text-slate-500"><span class="font-semibold">Observaciones:</span> {{ resp.observations }}</p>
+                        }
+                      </div>
                     </div>
                   }
                 </div>
               }
             </div>
 
+            <!-- Agregar respuesta (abogado) -->
             @if (isLawyer() && isAssignedLawyer() && c.status === 'en_revision') {
-              <div class="bg-white rounded-lg border border-slate-200 p-5">
-                <h2 class="font-semibold text-slate-900 mb-4 flex items-center gap-2">
-                  <lucide-icon name="pen-line" class="h-4 w-4 text-slate-400" />
+              <div class="rounded-xl border border-slate-200 bg-white p-5">
+                <h2 class="mb-4 flex items-center gap-2.5 font-semibold text-slate-900">
+                  <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 text-white">
+                    <lucide-icon name="pen-line" class="h-4 w-4" />
+                  </span>
                   Agregar respuesta legal
                 </h2>
                 <form [formGroup]="responseForm" (ngSubmit)="submitResponse()" class="space-y-3">
@@ -255,33 +365,50 @@ import {
             }
           </div>
 
-          <div class="space-y-4">
+          <!-- ── Columna lateral ─────────────────────────────────────────── -->
+          <div class="space-y-5 min-w-0">
             @if (c.context) {
-              <div class="bg-white rounded-lg border border-slate-200 p-5">
-                <h3 class="font-semibold text-slate-900 mb-3 flex items-center gap-2">
-                  <lucide-icon name="shield" class="h-4 w-4 text-slate-400" />
+              <div class="rounded-xl border border-slate-200 bg-white p-5">
+                <h3 class="mb-3 flex items-center gap-2.5 font-semibold text-slate-900">
+                  <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
+                    <lucide-icon name="shield" class="h-4 w-4" />
+                  </span>
                   Contexto simulado
                 </h3>
-                <div class="space-y-1.5 text-sm">
+                <div class="space-y-2 text-sm">
                   @if (c.context.contextCode) {
-                    <p class="font-medium text-slate-800">{{ c.context.contextCode }}</p>
+                    <span class="inline-block rounded-md bg-slate-100 px-2 py-0.5 font-mono text-xs tracking-wider text-slate-600">
+                      {{ c.context.contextCode }}
+                    </span>
                   }
                   @if (c.context.medicalArea) {
-                    <p class="text-slate-500">Área: {{ c.context.medicalArea }}</p>
+                    <div class="flex items-center gap-2">
+                      <lucide-icon name="activity" class="h-3.5 w-3.5 shrink-0 text-slate-400" />
+                      <span class="text-slate-500">Área:</span>
+                      <span class="font-medium text-slate-700">{{ c.context.medicalArea }}</span>
+                    </div>
                   }
                   @if (c.context.ageReference) {
-                    <p class="text-slate-500">Edad de referencia: {{ c.context.ageReference }}</p>
+                    <div class="flex items-center gap-2">
+                      <lucide-icon name="user" class="h-3.5 w-3.5 shrink-0 text-slate-400" />
+                      <span class="text-slate-500">Edad de referencia:</span>
+                      <span class="font-medium text-slate-700">{{ c.context.ageReference }}</span>
+                    </div>
                   }
                   @if (c.context.eventDate) {
-                    <p class="text-slate-500">Fecha del evento: {{ formatDate(c.context.eventDate) }}</p>
+                    <div class="flex items-center gap-2">
+                      <lucide-icon name="calendar" class="h-3.5 w-3.5 shrink-0 text-slate-400" />
+                      <span class="text-slate-500">Fecha del evento:</span>
+                      <span class="font-medium text-slate-700">{{ formatDate(c.context.eventDate) }}</span>
+                    </div>
                   }
                   @if (c.context.summary) {
-                    <p class="text-slate-600 mt-2">{{ c.context.summary }}</p>
+                    <p class="border-t border-slate-100 pt-3 leading-relaxed text-slate-600">{{ c.context.summary }}</p>
                   }
                   @if (c.context.relevantFactors?.length) {
-                    <div class="flex flex-wrap gap-1.5 mt-2">
+                    <div class="flex flex-wrap gap-1.5 pt-1">
                       @for (factor of c.context.relevantFactors; track factor) {
-                        <span class="text-xs bg-slate-100 text-slate-600 rounded-full px-2 py-0.5">{{ factor }}</span>
+                        <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">{{ factor }}</span>
                       }
                     </div>
                   }
@@ -289,31 +416,53 @@ import {
               </div>
             }
 
-            <div class="bg-white rounded-lg border border-slate-200 p-5">
-              <h3 class="font-semibold text-slate-900 mb-3 flex items-center gap-2">
-                <lucide-icon name="scale" class="h-4 w-4 text-slate-400" />
+            <div class="rounded-xl border border-slate-200 bg-white p-5">
+              <h3 class="mb-3 flex items-center gap-2.5 font-semibold text-slate-900">
+                <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
+                  <lucide-icon name="scale" class="h-4 w-4" />
+                </span>
                 Abogado asignado
               </h3>
               @if (c.lawyer) {
-                <div class="space-y-1.5 text-sm">
-                  <p class="font-medium text-slate-800">{{ c.lawyer.fullName }}</p>
-                  @if (c.lawyer.email) {
-                    <p class="text-slate-500">{{ c.lawyer.email }}</p>
-                  }
+                <div class="flex items-center gap-3">
+                  <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 text-sm font-bold text-white">
+                    {{ getInitials(c.lawyer.fullName ?? '') }}
+                  </div>
+                  <div class="min-w-0">
+                    <p class="truncate text-sm font-semibold text-slate-800">{{ c.lawyer.fullName }}</p>
+                    @if (c.lawyer.email) {
+                      <p class="truncate text-xs text-slate-500">{{ c.lawyer.email }}</p>
+                    }
+                  </div>
                 </div>
               } @else {
-                <p class="text-sm text-slate-400 italic">Sin abogado asignado</p>
+                <div class="rounded-lg border border-dashed border-slate-200 py-5 text-center">
+                  <lucide-icon name="scale" class="mx-auto mb-1.5 h-6 w-6 text-slate-300" />
+                  <p class="text-sm text-slate-400">Sin abogado asignado</p>
+                  @if (isDoctor()) {
+                    <a
+                      [routerLink]="['/doctor/lawyers']"
+                      [queryParams]="{ caseId: c.id }"
+                      class="mt-1 inline-block text-xs font-medium text-blue-600 hover:underline"
+                    >
+                      Buscar abogado →
+                    </a>
+                  }
+                </div>
               }
             </div>
 
-            <div class="bg-white rounded-lg border border-slate-200 p-5">
-              <div class="flex items-center justify-between mb-4 gap-3 flex-wrap">
-                <h3 class="font-semibold text-slate-900 flex items-center gap-2">
-                  <lucide-icon name="git-branch" class="h-4 w-4 text-slate-400" />
+            <!-- Línea de tiempo -->
+            <div class="rounded-xl border border-slate-200 bg-white p-5">
+              <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+                <h3 class="flex items-center gap-2.5 font-semibold text-slate-900">
+                  <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
+                    <lucide-icon name="git-branch" class="h-4 w-4" />
+                  </span>
                   Línea de tiempo
                 </h3>
                 @if (timelineKinds().length > 0) {
-                  <select appSelect class="text-xs py-1 h-auto w-auto min-w-[140px]"
+                  <select appSelect class="h-auto w-auto min-w-[130px] rounded-lg py-1 text-xs"
                     [value]="timelineFilter()"
                     (change)="timelineFilter.set($any($event.target).value)">
                     <option value="">Todos los eventos</option>
@@ -324,42 +473,47 @@ import {
                 }
               </div>
               @if ((detail.timeline ?? []).length === 0) {
-                <p class="text-sm text-slate-400 italic text-center py-2">Sin eventos registrados</p>
+                <div class="rounded-lg border border-dashed border-slate-200 py-6 text-center">
+                  <lucide-icon name="git-branch" class="mx-auto mb-1.5 h-6 w-6 text-slate-300" />
+                  <p class="text-sm text-slate-400">Sin eventos registrados</p>
+                </div>
               } @else if (filteredTimeline().length === 0) {
-                <p class="text-sm text-slate-400 italic text-center py-2">Sin eventos para este filtro</p>
+                <p class="py-2 text-center text-sm italic text-slate-400">Sin eventos para este filtro</p>
               } @else {
-                <div class="space-y-3">
-                  @for (entry of filteredTimeline(); track entry.id) {
-                    <div class="relative pl-4 border-l-2 border-slate-200">
-                      <p class="text-sm font-medium text-slate-800">{{ entry.title }}</p>
-                      @if (entry.description) {
-                        <p class="text-xs text-slate-500 mt-0.5">{{ entry.description }}</p>
-                      }
-                      <p class="text-xs text-slate-400 mt-1">
-                        {{ formatDateTime(entry.occurredAt ?? '') }}
-                        @if (entry.actorName) { · {{ entry.actorName }} }
-                      </p>
-                    </div>
-                  }
+                <div class="relative">
+                  <div class="absolute bottom-2 left-[13px] top-2 w-px bg-gradient-to-b from-blue-400 via-slate-200 to-transparent"></div>
+                  <div class="space-y-5">
+                    @for (entry of filteredTimeline(); track entry.id; let first = $first) {
+                      <div class="relative flex gap-3.5">
+                        <div
+                          class="relative z-10 mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full ring-4 ring-white"
+                          [class]="first ? 'bg-gradient-to-br from-blue-500 to-cyan-500 text-white shadow-md shadow-blue-200' : 'bg-slate-100 text-slate-500'"
+                        >
+                          <lucide-icon [name]="timelineIcon(entry.kind)" class="h-3.5 w-3.5" />
+                        </div>
+                        <div class="min-w-0 flex-1 pb-0.5">
+                          <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                            <p class="text-sm font-semibold text-slate-800">{{ entry.title }}</p>
+                            @if (entry.kind) {
+                              <span class="rounded-full bg-slate-100 px-2 py-px text-[10px] font-medium uppercase tracking-wide text-slate-500">
+                                {{ entry.kind }}
+                              </span>
+                            }
+                          </div>
+                          @if (entry.description) {
+                            <p class="mt-1 text-xs leading-relaxed text-slate-500">{{ entry.description }}</p>
+                          }
+                          <p class="mt-1.5 flex items-center gap-1 text-[11px] text-slate-400">
+                            <lucide-icon name="clock" class="h-3 w-3" />
+                            {{ formatDateTime(entry.occurredAt ?? '') }}
+                            @if (entry.actorName) { <span>· {{ entry.actorName }}</span> }
+                          </p>
+                        </div>
+                      </div>
+                    }
+                  </div>
                 </div>
               }
-            </div>
-
-            <div class="bg-white rounded-lg border border-slate-200 p-5">
-              <h3 class="font-semibold text-slate-900 mb-3 flex items-center gap-2">
-                <lucide-icon name="calendar" class="h-4 w-4 text-slate-400" />
-                Fechas
-              </h3>
-              <div class="space-y-2 text-sm">
-                <div>
-                  <p class="text-xs text-slate-400 uppercase tracking-wider">Creado</p>
-                  <p class="text-slate-700">{{ formatDate(c.createdAt ?? '') }}</p>
-                </div>
-                <div>
-                  <p class="text-xs text-slate-400 uppercase tracking-wider">Actualizado</p>
-                  <p class="text-slate-700">{{ formatDateTime(c.updatedAt ?? '') }}</p>
-                </div>
-              </div>
             </div>
           </div>
         </div>
@@ -369,8 +523,8 @@ import {
     <!-- Modal editar -->
     <app-modal [open]="editModalOpen()" (close)="editModalOpen.set(false)" class="max-w-lg">
       <div appModalHeader>
-        <h2 appModalTitle>Editar consulta</h2>
-        <p appModalDescription>Modifica los datos mientras la consulta no tenga abogado asignado.</p>
+        <h2 appModalTitle>Editar caso</h2>
+        <p appModalDescription>Modifica los datos mientras el caso no tenga abogado asignado.</p>
       </div>
       <form [formGroup]="editForm" (ngSubmit)="submitEdit()" class="space-y-4">
         <div class="space-y-1.5">
@@ -419,7 +573,7 @@ import {
     <app-modal [open]="eventModalOpen()" (close)="eventModalOpen.set(false)" class="max-w-md">
       <div appModalHeader>
         <h2 appModalTitle>Registrar evento</h2>
-        <p appModalDescription>Agrega un hito a la línea de tiempo de la consulta.</p>
+        <p appModalDescription>Agrega un hito a la línea de tiempo del caso.</p>
       </div>
       <form [formGroup]="eventForm" (ngSubmit)="submitEvent()" class="space-y-4">
         <div class="space-y-1.5">
@@ -457,8 +611,27 @@ export class CaseDetailComponent {
   protected readonly Math = Math;
   protected readonly formatDate = formatDate;
   protected readonly formatDateTime = formatDateTime;
+  protected readonly getInitials = getInitials;
   protected readonly asStatus = (s?: string) => (s ?? 'pendiente') as CaseStatus;
   protected readonly asPriority = (p?: string) => (p ?? 'media') as CasePriority;
+
+  protected readonly statusDots = STATUS_DOTS;
+  protected readonly priorityDots = PRIORITY_DOTS;
+  protected readonly statusLabels = CASE_STATUS_LABELS;
+  protected readonly priorityLabels = CASE_PRIORITY_LABELS;
+
+  /** Nota ética HU-43 — vive al pie de la tarjeta de clasificación ML. */
+  protected readonly advisoryNote =
+    'Las recomendaciones del sistema son un apoyo a la decisión, no una decisión definitiva: ' +
+    'la elección del profesional y la revisión humana por el abogado son siempre necesarias.';
+
+  /** Botones del hero (fondo oscuro). */
+  protected readonly heroGhostBtn =
+    'inline-flex items-center gap-1.5 rounded-lg bg-white/10 px-3.5 py-2 text-xs font-semibold text-slate-100 ' +
+    'ring-1 ring-inset ring-white/15 transition hover:bg-white/20 disabled:opacity-50';
+  protected readonly heroPrimaryBtn =
+    'inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 px-4 py-2 text-xs ' +
+    'font-semibold text-white shadow-lg shadow-blue-950/40 transition hover:from-blue-400 hover:to-cyan-400 disabled:opacity-50';
 
   protected readonly editModalOpen = signal(false);
   protected readonly eventModalOpen = signal(false);
@@ -515,6 +688,23 @@ export class CaseDetailComponent {
     return status === 'pendiente' || status === 'clasificada';
   });
 
+  /** Código visible del caso (contexto o fragmento del id). */
+  protected caseCode(c: { context?: { contextCode?: string } | null; id?: string }): string {
+    return c.context?.contextCode ?? 'CASO #' + (c.id ?? '').slice(0, 8).toUpperCase();
+  }
+
+  /** Icono del hito según su tipo (best-effort sobre el texto del kind). */
+  protected timelineIcon(kind?: string): string {
+    const k = (kind ?? '').toLowerCase();
+    if (k.includes('asigna')) return 'scale';
+    if (k.includes('respuesta') || k.includes('legal')) return 'message-square';
+    if (k.includes('cierre') || k.includes('cerrad')) return 'archive';
+    if (k.includes('revis')) return 'search';
+    if (k.includes('registro') || k.includes('creac') || k.includes('consulta')) return 'file-text';
+    if (k.includes('sistema')) return 'zap';
+    return 'calendar';
+  }
+
   protected readonly editForm = this.fb.nonNullable.group({
     title: ['', [Validators.required, Validators.minLength(3)]],
     description: ['', [Validators.required, Validators.minLength(10)]],
@@ -551,7 +741,7 @@ export class CaseDetailComponent {
       this.editModalOpen.set(false);
       this.editError.set(null);
     },
-    onError: () => this.editError.set('No se pudo guardar la consulta.'),
+    onError: () => this.editError.set('No se pudo guardar el caso.'),
   }));
 
   protected readonly eventMutation = injectMutation(() => ({
@@ -651,7 +841,7 @@ export class CaseDetailComponent {
   }
 
   protected handleClose(): void {
-    const reason = window.prompt('Indica el motivo del cierre de la consulta:');
+    const reason = window.prompt('Indica el motivo del cierre del caso:');
     if (!reason?.trim()) return;
     this.casesApi.close(this.caseId(), reason.trim()).then(() => {
       this.queryClient.invalidateQueries({ queryKey: ['cases'] });
@@ -671,12 +861,12 @@ export class CaseDetailComponent {
   private openPrintWindow(report: CaseReportDto): void {
     const c = report.caseData;
     const html = `
-      <!DOCTYPE html><html><head><meta charset="utf-8"><title>Informe — ${c?.title ?? 'Consulta'}</title>
+      <!DOCTYPE html><html><head><meta charset="utf-8"><title>Informe — ${c?.title ?? 'Caso'}</title>
       <style>body{font-family:system-ui,sans-serif;padding:2rem;color:#1e293b;max-width:800px;margin:0 auto}
       h1{font-size:1.5rem;margin-bottom:0.25rem}h2{font-size:1rem;margin-top:1.5rem;border-bottom:1px solid #e2e8f0;padding-bottom:0.25rem}
       p,li{font-size:0.875rem;line-height:1.6}.meta{color:#64748b;font-size:0.75rem}.badge{display:inline-block;padding:2px 8px;border-radius:4px;background:#f1f5f9;font-size:0.75rem}
       </style></head><body>
-      <h1>${c?.title ?? 'Consulta'}</h1>
+      <h1>${c?.title ?? 'Caso'}</h1>
       <p class="meta">Generado: ${formatDateTime(report.generatedAt ?? new Date().toISOString())}</p>
       <p><span class="badge">${CASE_STATUS_LABELS[this.asStatus(c?.status)]}</span>
       <span class="badge">${CASE_PRIORITY_LABELS[this.asPriority(c?.priority)]}</span></p>
