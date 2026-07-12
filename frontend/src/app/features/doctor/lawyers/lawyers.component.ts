@@ -37,7 +37,6 @@ import type { CasePriority } from '../../../shared/constants';
         <p class="text-slate-500 text-sm mt-1">Elige el caso a asignar y solicita contacto con un abogado compatible</p>
       </div>
 
-      <app-ml-advisory-note />
 
       <div class="bg-white rounded-lg border border-slate-200 p-5 space-y-3">
         <div class="flex items-center gap-2">
@@ -193,15 +192,6 @@ import type { CasePriority } from '../../../shared/constants';
                     <p class="font-semibold text-slate-900">{{ lawyer.fullName }}</p>
                     <p class="text-xs text-slate-500">CAB: {{ lawyer.cab }}</p>
                   </div>
-                  @if (matchScore !== undefined && matchScore > 0) {
-                    <div [class]="cn('flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full shrink-0', isTopPick ? 'bg-amber-200 text-amber-900 border border-amber-400' : 'bg-blue-50 text-blue-700 border border-blue-100')">
-                      @if (isTopPick) {
-                        <lucide-icon name="star" class="h-3 w-3 text-amber-600 fill-amber-500" />
-                      }
-                      <lucide-icon name="scale" class="h-3 w-3" />
-                      {{ matchScore }}% match
-                    </div>
-                  }
                 </div>
               </div>
             </div>
@@ -292,6 +282,8 @@ import type { CasePriority } from '../../../shared/constants';
       @if (contactError()) {
         <p class="text-sm text-red-700 bg-red-50 border border-red-200 rounded-md px-4 py-3">{{ contactError() }}</p>
       }
+
+      <app-ml-advisory-note />
     </div>
   `,
 })

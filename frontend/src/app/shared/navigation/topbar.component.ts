@@ -50,11 +50,6 @@ import {
       </div>
 
       <div class="flex items-center gap-3">
-        <button appBtn variant="ghost" size="icon" class="relative text-slate-500">
-          <lucide-icon name="bell" class="h-5 w-5" />
-          <span class="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-blue-600"></span>
-        </button>
-
         @if (user(); as currentUser) {
           <button
             type="button"

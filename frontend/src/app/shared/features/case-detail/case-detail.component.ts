@@ -1,4 +1,4 @@
-import { Component, computed, inject, Injector, signal } from '@angular/core';
+import { Component, computed, inject, Injector, signal, viewChild } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -8,6 +8,7 @@ import { map } from 'rxjs';
 import { AuthService } from '../../../core/auth/auth.service';
 import { CasesApi, type CaseReportDto } from '../../../core/api/cases.api';
 import { BtnDirective } from '../../ui/button.directive';
+import { ReasonModalComponent } from '../../ui/reason-modal.component';
 import { InputDirective, LabelDirective, TextareaDirective, SelectDirective } from '../../ui/field.directives';
 import {
   ModalComponent,
@@ -51,6 +52,7 @@ const PRIORITY_DOTS: Record<CasePriority, string> = {
     RouterLink,
     LucideAngularModule,
     BtnDirective,
+    ReasonModalComponent,
     InputDirective,
     LabelDirective,
     TextareaDirective,
@@ -597,6 +599,15 @@ const PRIORITY_DOTS: Record<CasePriority, string> = {
         </div>
       </form>
     </app-modal>
+
+    <app-reason-modal
+      title="Cerrar caso"
+      description="El caso pasará a estado cerrado y el motivo quedará registrado en su historial."
+      label="Motivo del cierre *"
+      placeholder="Ej: Caso resuelto con respuesta legal satisfactoria"
+      confirmLabel="Cerrar caso"
+      (confirmed)="confirmClose($event)"
+    />
   `,
 })
 export class CaseDetailComponent {
@@ -840,10 +851,14 @@ export class CaseDetailComponent {
     this.startReviewMutation.mutate();
   }
 
+  protected readonly closeModal = viewChild.required(ReasonModalComponent);
+
   protected handleClose(): void {
-    const reason = window.prompt('Indica el motivo del cierre del caso:');
-    if (!reason?.trim()) return;
-    this.casesApi.close(this.caseId(), reason.trim()).then(() => {
+    this.closeModal().show();
+  }
+
+  protected confirmClose(reason: string): void {
+    this.casesApi.close(this.caseId(), reason).then(() => {
       this.queryClient.invalidateQueries({ queryKey: ['cases'] });
     });
   }

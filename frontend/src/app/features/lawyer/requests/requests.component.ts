@@ -1,10 +1,11 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, viewChild } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { injectMutation, injectQuery, injectQueryClient } from '@tanstack/angular-query-experimental';
 import { LucideAngularModule } from 'lucide-angular';
 import { AuthService } from '../../../core/auth/auth.service';
 import { MatchingApi } from '../../../core/api/matching.api';
 import { BtnDirective } from '../../../shared/ui/button.directive';
+import { ReasonModalComponent } from '../../../shared/ui/reason-modal.component';
 import { ContactRequestStatusBadgeComponent } from '../../../shared/ui/status-badges.component';
 import { cn, formatDate, getInitials } from '../../../shared/utils/cn';
 import { CONTACT_REQUEST_STATUS_LABELS, type ContactRequestStatus } from '../../../shared/constants';
@@ -16,7 +17,7 @@ const FILTERS: RequestFilter[] = ['todas', 'pendiente', 'aceptado', 'rechazado']
 /** Réplica de app/lawyer/requests/page.tsx. */
 @Component({
   selector: 'app-lawyer-requests',
-  imports: [RouterLink, LucideAngularModule, BtnDirective, ContactRequestStatusBadgeComponent],
+  imports: [RouterLink, LucideAngularModule, BtnDirective, ReasonModalComponent, ContactRequestStatusBadgeComponent],
   template: `
     <div class="space-y-5">
       <div>
@@ -102,6 +103,15 @@ const FILTERS: RequestFilter[] = ['todas', 'pendiente', 'aceptado', 'rechazado']
         }
       </div>
     </div>
+
+    <app-reason-modal
+      title="Rechazar solicitud"
+      description="El médico recibirá tu motivo como respuesta a la solicitud."
+      label="Motivo del rechazo *"
+      placeholder="Ej: Mi carga actual no me permite asumir nuevos casos"
+      confirmLabel="Rechazar solicitud"
+      (confirmed)="confirmReject($event)"
+    />
   `,
 })
 export class LawyerRequestsComponent {
@@ -145,13 +155,21 @@ export class LawyerRequestsComponent {
     },
   }));
 
+  protected readonly rejectModal = viewChild.required(ReasonModalComponent);
+  private rejectTargetId = '';
+
   protected respond(requestId: string, status: string): void {
     if (status === 'rechazado') {
-      const reason = window.prompt('Indica el motivo del rechazo:');
-      if (!reason?.trim()) return;
-      this.respondMutation.mutate({ requestId, status, responseMessage: reason.trim() });
+      this.rejectTargetId = requestId;
+      this.rejectModal().show();
       return;
     }
     this.respondMutation.mutate({ requestId, status });
+  }
+
+  protected confirmReject(reason: string): void {
+    if (!this.rejectTargetId) return;
+    this.respondMutation.mutate({ requestId: this.rejectTargetId, status: 'rechazado', responseMessage: reason });
+    this.rejectTargetId = '';
   }
 }

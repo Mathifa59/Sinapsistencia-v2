@@ -6,12 +6,10 @@ import { LucideAngularModule } from 'lucide-angular';
   selector: 'app-ml-advisory-note',
   imports: [LucideAngularModule],
   template: `
-    <div class="flex items-start gap-2.5 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-      <lucide-icon name="info" class="h-4 w-4 shrink-0 mt-0.5 text-amber-600" />
-      <p class="leading-relaxed">
-        {{ note }}
-      </p>
-    </div>
+    <p class="flex items-start gap-1.5 text-[11px] leading-relaxed text-slate-400">
+      <lucide-icon name="info" class="mt-px h-3.5 w-3.5 shrink-0" />
+      {{ note }}
+    </p>
   `,
 })
 export class MlAdvisoryNoteComponent {

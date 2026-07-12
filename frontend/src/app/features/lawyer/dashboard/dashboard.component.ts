@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, viewChild } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { injectMutation, injectQuery, injectQueryClient } from '@tanstack/angular-query-experimental';
 import { LucideAngularModule } from 'lucide-angular';
@@ -6,6 +6,7 @@ import { AuthService } from '../../../core/auth/auth.service';
 import { MatchingApi } from '../../../core/api/matching.api';
 import { StatCardComponent } from '../../../shared/ui/stat-card.component';
 import { BtnDirective } from '../../../shared/ui/button.directive';
+import { ReasonModalComponent } from '../../../shared/ui/reason-modal.component';
 import { ContactRequestStatusBadgeComponent, CasePriorityBadgeComponent } from '../../../shared/ui/status-badges.component';
 import { BadgeDirective } from '../../../shared/ui/badge.directive';
 import { formatDateTime } from '../../../shared/utils/cn';
@@ -30,7 +31,7 @@ interface RelevantCasesResponse {
 /** Réplica de app/lawyer/dashboard/page.tsx. */
 @Component({
   selector: 'app-lawyer-dashboard',
-  imports: [RouterLink, LucideAngularModule, StatCardComponent, BtnDirective, ContactRequestStatusBadgeComponent, CasePriorityBadgeComponent, BadgeDirective],
+  imports: [RouterLink, LucideAngularModule, StatCardComponent, BtnDirective, ReasonModalComponent, ContactRequestStatusBadgeComponent, CasePriorityBadgeComponent, BadgeDirective],
   template: `
     <div class="space-y-6">
       <div>
@@ -171,6 +172,15 @@ interface RelevantCasesResponse {
         }
       </div>
     </div>
+
+    <app-reason-modal
+      title="Rechazar solicitud"
+      description="El médico recibirá tu motivo como respuesta a la solicitud."
+      label="Motivo del rechazo *"
+      placeholder="Ej: Mi carga actual no me permite asumir nuevos casos"
+      confirmLabel="Rechazar solicitud"
+      (confirmed)="confirmReject($event)"
+    />
   `,
 })
 export class LawyerDashboardComponent {
@@ -219,13 +229,21 @@ export class LawyerDashboardComponent {
     },
   }));
 
+  protected readonly rejectModal = viewChild.required(ReasonModalComponent);
+  private rejectTargetId = '';
+
   protected respond(requestId: string, status: string): void {
     if (status === 'rechazado') {
-      const reason = window.prompt('Indica el motivo del rechazo:');
-      if (!reason?.trim()) return;
-      this.respondMutation.mutate({ requestId, status, responseMessage: reason.trim() });
+      this.rejectTargetId = requestId;
+      this.rejectModal().show();
       return;
     }
     this.respondMutation.mutate({ requestId, status });
+  }
+
+  protected confirmReject(reason: string): void {
+    if (!this.rejectTargetId) return;
+    this.respondMutation.mutate({ requestId: this.rejectTargetId, status: 'rechazado', responseMessage: reason });
+    this.rejectTargetId = '';
   }
 }
