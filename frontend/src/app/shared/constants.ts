@@ -92,7 +92,6 @@ export const NAVIGATION_DOCTOR: NavigationItem[] = [
   { label: 'Mis Casos', href: '/doctor/cases', icon: 'Briefcase' },
   { label: 'Documentos', href: '/doctor/documents', icon: 'FileText' },
   { label: 'Abogados', href: '/doctor/lawyers', icon: 'Scale' },
-  { label: 'Simulador de Riesgo', href: '/doctor/risk', icon: 'AlertTriangle' },
   { label: 'Mi Perfil', href: '/doctor/profile', icon: 'User' },
   { label: 'Manual', href: '/doctor/manual', icon: 'BookOpen' },
 ];

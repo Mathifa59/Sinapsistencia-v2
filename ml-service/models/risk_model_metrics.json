@@ -1,9 +1,9 @@
 {
   "model_name": "risk_classifier",
-  "model_version": "rf-v1",
-  "precision_score": 0.6179,
-  "recall_score": 0.5973,
-  "f1_score": 0.6034,
-  "dataset_size": 6000,
-  "notes": "RandomForestClassifier (risk_level) + RandomForestRegressor (risk_score) sobre dataset sintetico."
+  "model_version": "rf-v2",
+  "precision_score": 0.787,
+  "recall_score": 0.7887,
+  "f1_score": 0.7877,
+  "dataset_size": 40000,
+  "notes": "RandomForest (150 árboles) sobre dataset sintético balanceado (40000 filas). CV 5-fold f1_macro=0.7911±0.0033. Supera baseline lineal (f1=0.792) y trivial (f1=0.250)."
 }

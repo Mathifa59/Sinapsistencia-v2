@@ -1,0 +1,150 @@
+{
+  "model_version": "rf-v2",
+  "dataset_size": 40000,
+  "class_distribution": {
+    "moderado": 10000,
+    "alto": 10000,
+    "critico": 10000,
+    "bajo": 10000
+  },
+  "classifier": {
+    "accuracy": 0.7887,
+    "precision_macro": 0.787,
+    "recall_macro": 0.7887,
+    "f1_macro": 0.7877,
+    "cv5_f1_macro_mean": 0.7911,
+    "cv5_f1_macro_std": 0.0033,
+    "per_class": {
+      "bajo": {
+        "precision": 0.8358283433133733,
+        "recall": 0.8375,
+        "f1-score": 0.8366633366633367,
+        "support": 2000.0
+      },
+      "moderado": {
+        "precision": 0.68448098663926,
+        "recall": 0.666,
+        "f1-score": 0.675114039533705,
+        "support": 2000.0
+      },
+      "alto": {
+        "precision": 0.7440446021287379,
+        "recall": 0.734,
+        "f1-score": 0.7389881701485024,
+        "support": 2000.0
+      },
+      "critico": {
+        "precision": 0.88348579682234,
+        "recall": 0.9175,
+        "f1-score": 0.9001716948736816,
+        "support": 2000.0
+      },
+      "accuracy": 0.78875,
+      "macro avg": {
+        "precision": 0.7869599322259277,
+        "recall": 0.78875,
+        "f1-score": 0.7877343103048065,
+        "support": 8000.0
+      },
+      "weighted avg": {
+        "precision": 0.7869599322259279,
+        "recall": 0.78875,
+        "f1-score": 0.7877343103048065,
+        "support": 8000.0
+      }
+    },
+    "confusion_matrix": {
+      "labels": [
+        "bajo",
+        "moderado",
+        "alto",
+        "critico"
+      ],
+      "matrix": [
+        [
+          1675,
+          325,
+          0,
+          0
+        ],
+        [
+          328,
+          1332,
+          340,
+          0
+        ],
+        [
+          1,
+          289,
+          1468,
+          242
+        ],
+        [
+          0,
+          0,
+          165,
+          1835
+        ]
+      ]
+    }
+  },
+  "regressor_score": {
+    "r2": 0.9277,
+    "mae": 0.0541
+  },
+  "baselines_f1_macro": {
+    "dummy_stratified": 0.2501,
+    "logistic_regression": 0.7918,
+    "random_forest": 0.7877
+  },
+  "top_feature_importances": [
+    {
+      "feature": "procedure_complexity",
+      "importance": 0.174
+    },
+    {
+      "feature": "priority",
+      "importance": 0.1574
+    },
+    {
+      "feature": "informed_consent",
+      "importance": 0.155
+    },
+    {
+      "feature": "documentation_complete",
+      "importance": 0.1373
+    },
+    {
+      "feature": "has_prior_complaints",
+      "importance": 0.1052
+    },
+    {
+      "feature": "time_since_incident_days",
+      "importance": 0.0546
+    },
+    {
+      "feature": "specialty_Medicina General",
+      "importance": 0.0502
+    },
+    {
+      "feature": "specialty_Ginecología y Obstetricia",
+      "importance": 0.0351
+    },
+    {
+      "feature": "specialty_Dermatología",
+      "importance": 0.0302
+    },
+    {
+      "feature": "specialty_Cirugía General",
+      "importance": 0.0295
+    },
+    {
+      "feature": "specialty_Traumatología",
+      "importance": 0.0127
+    },
+    {
+      "feature": "specialty_Anestesiología",
+      "importance": 0.0111
+    }
+  ]
+}
