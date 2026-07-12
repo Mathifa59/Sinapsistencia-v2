@@ -145,16 +145,34 @@ prioridad (0.16), consentimiento (0.16), documentación (0.14), quejas previas
 
 ---
 
-## 6. Matching médico-abogado — TF-IDF + coseno
+## 6. Matching médico-abogado — score compuesto (contenido + desempeño)
 
-- Se construye un **documento textual** por abogado (especialidades + áreas
-  médicas + bio) y otro por caso (especialidad + área + descripción).
-- Se vectorizan con **TF-IDF** y se calcula la **similitud coseno**
-  `cos(θ) = (A·B) / (‖A‖·‖B‖)` entre el caso y cada abogado.
-- Los abogados se **ordenan por similitud** y se recomienda el de mayor puntaje;
-  el porcentaje de compatibilidad que ve el médico es esa similitud escalada.
-- La UI muestra el pipeline (vectorización → coseno → ranking) y **por qué** cada
-  abogado es compatible (áreas coincidentes).
+El matching **no es solo textual**: combina pertinencia temática con señales de
+calidad verificables del abogado (`tfidf-cosine+perf-v2`).
+
+```
+score = 0.70 · similitud_coseno(TF-IDF)  +  0.30 · desempeño
+
+desempeño = 0.50 · (rating/5)
+          + 0.30 · log(1+casos_resueltos)/log(1+60)     ← saturado
+          + 0.20 · min(años_experiencia/20, 1)
+```
+
+- **Contenido (70 %)** — se construye un documento textual por abogado
+  (especialidades + áreas médicas + bio) y otro por caso (especialidad + área +
+  tipo de evento); se vectorizan con **TF-IDF** y se compara con **similitud
+  coseno** `cos(θ) = (A·B)/(‖A‖·‖B‖)`. Mide *de qué sabe* el abogado.
+- **Desempeño (30 %)** — rating, casos resueltos (log-saturado: pasar de 5 a 15
+  casos pesa más que de 45 a 55) y experiencia. Mide *qué tan bien lo hace* y
+  evita que una bio larga/repetitiva gane solo por texto: a igual pertinencia,
+  se recomienda al de mejor trayectoria.
+- **Disponibilidad** — no pondera: es un **filtro duro** previo en el backend
+  (abogados no disponibles o inactivos nunca entran al ranking).
+- **Fallback determinístico** — si el servicio ML no responde, el backend calcula
+  un score de respaldo por coincidencia de área + rating + casos resueltos
+  (sin componentes aleatorios), y lo marca como `fallback`.
+- La UI muestra el pipeline (vectorización → coseno → ranking compuesto), la
+  barra de compatibilidad y **por qué** cada abogado es compatible.
 
 ---
 
@@ -175,6 +193,25 @@ prioridad (0.16), consentimiento (0.16), documentación (0.14), quejas previas
    aún al clasificador de riesgo (sí al matching). Es la mejora de mayor impacto.
 
 ## 8. Hoja de ruta
+
+### 8.1 Ciclo de retroalimentación (trabajo futuro prioritario)
+
+Hoy el sistema **recomienda pero no aprende** de sus recomendaciones. El diseño
+propuesto cierra el ciclo:
+
+1. **Señal explícita** — al cerrar el caso, el médico califica la asesoría
+   recibida (1–5) y si la recomendación fue pertinente (sí/no).
+2. **Señal implícita** — el sistema ya persiste cada recomendación
+   (`match_recommendations`) y cada resultado (solicitud aceptada/rechazada,
+   caso cerrado): la tasa de aceptación por abogado y el desenlace del caso son
+   etiquetas naturales.
+3. **Uso de las señales** — (a) recalibrar los pesos del score compuesto,
+   (b) alimentar un componente de **filtrado colaborativo** (el campo
+   `collaborative_score` del contrato ya está reservado para esto), y
+   (c) construir el primer dataset REAL de riesgo: cada caso cerrado con su
+   desenlace es una fila etiquetada que reemplaza progresivamente al sintético.
+
+### 8.2 Otras mejoras
 
 - Incorporar **NLP sobre la descripción** del caso (embeddings) al clasificador.
 - **Validación con datos reales anonimizados** y recalibración de umbrales.

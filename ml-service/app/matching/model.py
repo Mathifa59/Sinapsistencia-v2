@@ -1,7 +1,17 @@
 """
-Matching medico-abogado por contenido (HU-31/32): TF-IDF + similitud coseno
-entre el perfil del medico (especialidad, sub-especialidades, hospital) y el
-corpus de perfiles de abogados (especialidades legales, areas medicas, bio).
+Matching medico-abogado (HU-31/32): score COMPUESTO.
+
+  score = W_CONTENT * similitud_coseno(TF-IDF)  +  W_PERFORMANCE * desempeno
+
+- Contenido (70%): TF-IDF + similitud coseno entre el perfil del medico
+  (especialidad, sub-especialidades, hospital) y el corpus de abogados
+  (especialidades legales, areas medicas, bio). Mide PERTINENCIA tematica.
+- Desempeno (30%): senales de calidad del abogado — rating (50%), casos
+  resueltos (30%, saturado logaritmicamente) y experiencia (20%). Evita que
+  una bio larga/repetitiva gane solo por texto: a igual pertinencia, se
+  recomienda al de mejor trayectoria verificable.
+- La DISPONIBILIDAD no pondera: es un filtro duro previo en el backend
+  (abogados no disponibles o inactivos nunca entran al ranking).
 
 El corpus vive en lawyers_corpus.json. Sus `lawyer_id` deben coincidir con
 `profiles.id` / `lawyer_profiles.user_id` en la base de datos para que
@@ -9,6 +19,7 @@ MatchingService pueda resolver el perfil completo del abogado.
 """
 
 import json
+import math
 import unicodedata
 from pathlib import Path
 from typing import Optional
@@ -19,7 +30,18 @@ from sklearn.metrics.pairwise import cosine_similarity
 from app.schemas import DoctorProfile, FeatureImportance, LawyerRecommendation
 
 CORPUS_PATH = Path(__file__).parent / "lawyers_corpus.json"
-MODEL_VERSION = "tfidf-cosine-v1"
+MODEL_VERSION = "tfidf-cosine+perf-v2"
+
+# Pesos del score compuesto (documentados en docs/modelo-ml.md).
+W_CONTENT = 0.70
+W_PERFORMANCE = 0.30
+# Sub-pesos del desempeno.
+W_RATING = 0.50
+W_CASES = 0.30
+W_EXPERIENCE = 0.20
+# Puntos de saturacion (a partir de aqui ya no suma mas).
+CASES_SATURATION = 60
+EXPERIENCE_SATURATION_YEARS = 20
 
 # Stopwords minimas en espanol (sklearn no incluye una lista nativa) para que
 # articulos/preposiciones no dominen la explicacion de feature_importance.
@@ -48,6 +70,20 @@ def _doctor_text(profile: DoctorProfile) -> str:
         " ".join(profile.sub_specialties or []),
         profile.hospital or "",
     ])
+
+
+def _performance_score(lawyer: dict) -> float:
+    """Desempeno verificable del abogado, normalizado a [0, 1].
+
+    rating/5 (lineal) + casos resueltos (log-saturado: pasar de 5 a 15 casos
+    pesa mas que pasar de 45 a 55) + experiencia (saturada a 20 anos).
+    """
+    rating_norm = min(float(lawyer.get("rating", 0.0)) / 5.0, 1.0)
+    cases = max(int(lawyer.get("resolved_cases", 0)), 0)
+    cases_norm = min(math.log1p(cases) / math.log1p(CASES_SATURATION), 1.0)
+    years = max(int(lawyer.get("years_experience", 0)), 0)
+    experience_norm = min(years / EXPERIENCE_SATURATION_YEARS, 1.0)
+    return W_RATING * rating_norm + W_CASES * cases_norm + W_EXPERIENCE * experience_norm
 
 
 class MatchingModel:
@@ -101,20 +137,24 @@ class MatchingModel:
 
         similarities = cosine_similarity(doctor_vec, self.lawyer_matrix)[0]
 
-        ranked = sorted(
-            zip(self.lawyers, similarities, range(len(self.lawyers))),
-            key=lambda x: x[1],
-            reverse=True,
-        )[:top_k]
+        # Score compuesto: pertinencia tematica (coseno) + desempeno verificable.
+        scored = []
+        for lawyer, sim, idx in zip(self.lawyers, similarities, range(len(self.lawyers))):
+            perf = _performance_score(lawyer)
+            final = W_CONTENT * float(sim) + W_PERFORMANCE * perf
+            scored.append((lawyer, float(sim), perf, final, idx))
+
+        ranked = sorted(scored, key=lambda x: x[3], reverse=True)[:top_k]
 
         recommendations = []
-        for lawyer, sim, idx in ranked:
+        for lawyer, sim, perf, final, idx in ranked:
             matched = self._matched_specialties(profile, lawyer)
             lawyer_vec = self.lawyer_matrix[idx]
             recommendations.append(LawyerRecommendation(
                 lawyer_id=lawyer["lawyer_id"],
-                score=round(float(sim), 4),
-                content_score=round(float(sim), 4),
+                score=round(final, 4),
+                content_score=round(sim, 4),
+                performance_score=round(perf, 4),
                 collaborative_score=0.0,
                 matched_specialties=matched,
                 model_used=MODEL_VERSION,

@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -54,7 +53,6 @@ public class RecommendationService {
 	private final LegalCaseRepository caseRepository;
 	private final MlProxyService mlProxyService;
 	private final ObjectMapper objectMapper;
-	private final Random random = new Random();
 
 	public RecommendationService(DoctorProfileRepository doctorProfileRepository,
 			LawyerProfileRepository lawyerProfileRepository,
@@ -196,6 +194,9 @@ public class RecommendationService {
 		}
 
 		// ── Fallback cold-start: matching por specialty ↔ medical_areas ──
+		// Score determinístico (sin azar): base por coincidencia de área + señales
+		// de desempeño (rating y casos resueltos), mismo espíritu que el score
+		// compuesto del ML service.
 		String specialtyLower = specialty.toLowerCase();
 		List<RecommendationDto> fallback = lawyers.stream()
 				.filter(l -> l.getMedicalAreas().stream().anyMatch(area ->
@@ -204,19 +205,33 @@ public class RecommendationService {
 						"rec-" + doctorId + "-" + l.getUser().getId(),
 						doctorId.toString(),
 						LawyerCardDto.from(l),
-						70 + random.nextInt(20),
+						fallbackScore(l),
 						0,
 						0,
 						List.of(),
 						"fallback",
 						objectMapper.createArrayNode(),
-						List.of("Coincidencia por área médica (sin ML service)"),
+						List.of("Coincidencia por área médica (sin ML service)",
+								String.format("Valoración %.1f/5 · %d casos resueltos",
+										l.getRating() == null ? 0.0 : l.getRating().doubleValue(),
+										l.getResolvedCases())),
 						Instant.now().toString()))
+				.sorted((a, b) -> Integer.compare(b.score(), a.score()))
 				.toList();
 
 		return new RecommendationsResponse(fallback,
 				Map.of("model", "fallback", "message", "ML service no disponible"),
 				RecommendationsResponse.ADVISORY_NOTE);
+	}
+
+	/**
+	 * Score de respaldo determinístico: 60 base por coincidencia de área +
+	 * hasta 25 por rating + hasta 15 por casos resueltos (saturado en 50).
+	 */
+	private static int fallbackScore(LawyerProfile lawyer) {
+		double rating = lawyer.getRating() == null ? 0.0 : lawyer.getRating().doubleValue();
+		double score = 60 + (rating / 5.0) * 25 + Math.min(lawyer.getResolvedCases(), 50) / 50.0 * 15;
+		return (int) Math.round(Math.min(score, 100));
 	}
 
 	private LegalCase resolveCaseForDoctor(AuthenticatedUser user, UUID doctorId, String caseIdParam) {

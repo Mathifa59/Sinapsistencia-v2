@@ -152,6 +152,22 @@ type RegisterRole = 'doctor' | 'lawyer';
               </div>
             }
 
+            <div class="rounded-lg border border-slate-200 bg-slate-50/70 px-4 py-3">
+              <label class="flex items-start gap-2.5 text-xs text-slate-600 leading-relaxed">
+                <input type="checkbox" formControlName="acceptPrivacy"
+                  class="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
+                <span>
+                  Acepto la <span class="font-semibold text-slate-800">política de privacidad</span> y el
+                  tratamiento de mis datos personales conforme a la
+                  <span class="font-semibold text-slate-800">Ley N.º 29733</span> de Protección de Datos
+                  Personales. Mi consentimiento quedará registrado con fecha y versión.
+                </span>
+              </label>
+              @if (form.controls.acceptPrivacy.invalid && form.controls.acceptPrivacy.touched) {
+                <p class="mt-1.5 text-xs text-red-600">Debes aceptar la política de privacidad para continuar</p>
+              }
+            </div>
+
             @if (error()) {
               <p class="text-xs text-red-600 bg-red-50 border border-red-100 rounded-md px-3 py-2">
                 {{ error() }}
@@ -203,6 +219,7 @@ export class RegisterComponent {
       cmp: [''],
       hospital: [''],
       cab: [''],
+      acceptPrivacy: [false, Validators.requiredTrue],
     },
     { validators: [passwordsMatch] },
   );
@@ -251,6 +268,7 @@ export class RegisterComponent {
         email,
         password,
         role,
+        acceptPrivacyPolicy: true,
         ...(role === 'doctor'
           ? { specialty, cmp: cmp || undefined, hospital: hospital || undefined }
           : { cab: cab || undefined, legalSpecialties: this.selectedLegalSpecialties(), medicalAreas: this.selectedMedicalAreas() }),

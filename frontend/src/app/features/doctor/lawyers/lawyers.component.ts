@@ -105,7 +105,7 @@ import type { CasePriority } from '../../../shared/constants';
               </span>
               <div>
                 <p class="font-semibold">Buscando al abogado más compatible</p>
-                <p class="font-mono text-[11px] text-slate-400">TF-IDF + similitud coseno · cos(θ) = (A·B) / (‖A‖·‖B‖)</p>
+                <p class="font-mono text-[11px] text-slate-400">score = 0.7·cos(θ) + 0.3·desempeño · cos(θ) = (A·B) / (‖A‖·‖B‖)</p>
               </div>
             </div>
 
@@ -155,8 +155,8 @@ import type { CasePriority } from '../../../shared/constants';
                   <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/5 text-slate-500 ring-1 ring-inset ring-white/10"><lucide-icon name="circle" class="h-3 w-3" /></span>
                 }
                 <div [class]="matchStage() >= 3 ? 'opacity-100' : 'opacity-40'">
-                  <p class="text-sm font-medium">Ranking de compatibilidad</p>
-                  <p class="text-[11px] text-slate-400">Los puntajes se ordenan de mayor a menor para recomendar al mejor match</p>
+                  <p class="text-sm font-medium">Ranking por score compuesto</p>
+                  <p class="text-[11px] text-slate-400">Similitud (70%) + desempeño verificable: rating, casos resueltos y experiencia (30%)</p>
                 </div>
               </div>
             </div>

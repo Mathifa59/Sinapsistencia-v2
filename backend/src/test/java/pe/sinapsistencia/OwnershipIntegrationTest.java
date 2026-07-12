@@ -205,7 +205,7 @@ class OwnershipIntegrationTest {
 
 	private void registerUser(String role, String email, String extraJson) throws Exception {
 		String base = "{\"name\":\"Test User\",\"email\":\"" + email
-				+ "\",\"password\":\"Password123\",\"role\":\"" + role + "\"";
+				+ "\",\"password\":\"Password123\",\"role\":\"" + role + "\",\"acceptPrivacyPolicy\":true";
 		String body = base + "," + extraJson.substring(1);
 		mockMvc.perform(post("/api/auth/register")
 				.contentType(MediaType.APPLICATION_JSON).content(body))

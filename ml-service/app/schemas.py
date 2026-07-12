@@ -63,6 +63,7 @@ class LawyerRecommendation(BaseModel):
     lawyer_id: str
     score: float
     content_score: float
+    performance_score: float = 0.0
     collaborative_score: float
     matched_specialties: list[str]
     model_used: str

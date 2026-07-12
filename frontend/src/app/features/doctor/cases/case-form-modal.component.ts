@@ -33,6 +33,24 @@ const RISK_LEVELS: Record<RiskResult['riskLevel'], { label: string; chip: string
   critico: { label: 'Riesgo Crítico', chip: 'bg-red-400/15 text-red-300 ring-red-400/30', bar: 'from-red-500 to-orange-400', icon: 'x-circle' },
 };
 
+/**
+ * Detección heurística de posibles datos personales en texto libre (Ley 29733).
+ * No bloquea por sí sola: exige confirmación explícita del médico si hay hallazgos.
+ */
+const PII_PATTERNS: { label: string; regex: RegExp }[] = [
+  { label: 'Posible DNI (número de 8 dígitos)', regex: /\b\d{8}\b/ },
+  { label: 'Posible teléfono (celular peruano o +51)', regex: /\b9\d{8}\b|\+51\s?\d{8,9}/ },
+  { label: 'Correo electrónico', regex: /[\w.+-]+@[\w-]+\.[\w.]+/ },
+  {
+    label: 'Posible nombre propio (tras "paciente", "Sr.", "Sra.", etc.)',
+    regex: /\b(paciente|sr\.?|sra\.?|señor|señora|don|doña)\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+/,
+  },
+];
+
+function detectPii(text: string): string[] {
+  return PII_PATTERNS.filter((p) => p.regex.test(text)).map((p) => p.label);
+}
+
 const FACTOR_LABELS: Record<string, string> = {
   specialty_risk: 'Riesgo por especialidad',
   procedure_complexity: 'Complejidad del procedimiento',
@@ -192,6 +210,28 @@ const FACTOR_LABELS: Record<string, string> = {
               <input appInput id="context-factors" placeholder="Separados por coma: ej. cirugía electiva, consentimiento firmado" formControlName="relevantFactors" />
             </div>
           </div>
+
+          @if (piiFindings().length > 0) {
+            <div class="space-y-2 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3">
+              <p class="flex items-center gap-1.5 text-xs font-semibold text-amber-800">
+                <lucide-icon name="shield-alert" class="h-4 w-4" />
+                Posibles datos personales detectados (Ley N.º 29733)
+              </p>
+              <ul class="list-disc space-y-0.5 pl-5 text-xs text-amber-800">
+                @for (f of piiFindings(); track f) {
+                  <li>{{ f }}</li>
+                }
+              </ul>
+              <p class="text-xs text-amber-700">
+                Anonimiza el texto (usa el contexto simulado) o confirma que no se trata de datos reales.
+              </p>
+              <label class="flex items-start gap-2 text-xs font-medium text-amber-900">
+                <input type="checkbox" [checked]="piiConfirmed()" (change)="piiConfirmed.set($any($event.target).checked)"
+                  class="mt-0.5 h-4 w-4 rounded border-amber-300 text-amber-600 focus:ring-amber-500" />
+                Confirmo que el texto no contiene datos personales reales de pacientes
+              </label>
+            </div>
+          }
 
           @if (serverError()) {
             <p class="text-xs text-red-600 bg-red-50 border border-red-100 rounded-md px-3 py-2">{{ serverError() }}</p>
@@ -401,6 +441,19 @@ export class CaseFormModalComponent {
   protected readonly createdPriority = signal<string>('media');
   private timers: ReturnType<typeof setTimeout>[] = [];
 
+  /** Ley 29733: hallazgos de posibles datos personales en los campos libres. */
+  protected readonly piiFindings = signal<string[]>([]);
+  protected readonly piiConfirmed = signal(false);
+
+  constructor() {
+    this.form.valueChanges.subscribe((v) => {
+      const text = [v.title, v.description, v.notes, v.summary].filter(Boolean).join(' ');
+      const findings = detectPii(text);
+      this.piiFindings.set(findings);
+      if (findings.length === 0) this.piiConfirmed.set(false);
+    });
+  }
+
   protected readonly form = this.fb.nonNullable.group({
     title: ['', [Validators.required, Validators.minLength(3)]],
     description: ['', [Validators.required, Validators.minLength(10)]],
@@ -524,6 +577,11 @@ export class CaseFormModalComponent {
       this.form.markAllAsTouched();
       return;
     }
+    if (this.piiFindings().length > 0 && !this.piiConfirmed()) {
+      this.serverError.set(
+        'Se detectaron posibles datos personales. Anonimiza el texto o marca la confirmación (Ley 29733).');
+      return;
+    }
     this.createMutation.mutate();
   }
 
@@ -540,6 +598,8 @@ export class CaseFormModalComponent {
     this.stage.set(0);
     this.risk.set(null);
     this.inputs.set(null);
+    this.piiFindings.set([]);
+    this.piiConfirmed.set(false);
     if (close) {
       this.opened.set(false);
       this.closed.emit();

@@ -30,6 +30,8 @@ export interface RegisterPayload {
   cab?: string;
   legalSpecialties?: string[];
   medicalAreas?: string[];
+  /** Consentimiento de tratamiento de datos (Ley 29733) — requerido. */
+  acceptPrivacyPolicy: boolean;
 }
 
 /**

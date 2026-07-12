@@ -14,9 +14,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import pe.sinapsistencia.auth.domain.PasswordResetToken;
 import pe.sinapsistencia.auth.domain.Profile;
+import pe.sinapsistencia.auth.domain.UserConsent;
 import pe.sinapsistencia.auth.domain.UserRole;
 import pe.sinapsistencia.auth.infrastructure.PasswordResetTokenRepository;
 import pe.sinapsistencia.auth.infrastructure.ProfileRepository;
+import pe.sinapsistencia.auth.infrastructure.UserConsentRepository;
 import pe.sinapsistencia.auth.security.JwtService;
 import pe.sinapsistencia.auth.web.dto.ForgotPasswordResponse;
 import pe.sinapsistencia.auth.web.dto.LoginResponse;
@@ -52,18 +54,22 @@ public class AuthService {
 	private final DoctorProfileRepository doctorProfileRepository;
 	private final LawyerProfileRepository lawyerProfileRepository;
 	private final PasswordResetTokenRepository passwordResetTokenRepository;
+	private final UserConsentRepository userConsentRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final JwtService jwtService;
 	private final MailNotifier mailNotifier;
+	private final LoginAttemptService loginAttemptService;
 	private final SecureRandom secureRandom = new SecureRandom();
 
 	public AuthService(ProfileRepository profileRepository,
 			DoctorProfileRepository doctorProfileRepository,
 			LawyerProfileRepository lawyerProfileRepository,
 			PasswordResetTokenRepository passwordResetTokenRepository,
+			UserConsentRepository userConsentRepository,
 			PasswordEncoder passwordEncoder,
 			JwtService jwtService,
 			MailNotifier mailNotifier,
+			LoginAttemptService loginAttemptService,
 			@Value("${app.demo.doctor-email:doctor.demo@sinapsistencia.pe}") String doctorEmail,
 			@Value("${app.demo.lawyer-email:lawyer.demo@sinapsistencia.pe}") String lawyerEmail,
 			@Value("${app.demo.admin-email:admin.demo@sinapsistencia.pe}") String adminEmail) {
@@ -71,25 +77,28 @@ public class AuthService {
 		this.doctorProfileRepository = doctorProfileRepository;
 		this.lawyerProfileRepository = lawyerProfileRepository;
 		this.passwordResetTokenRepository = passwordResetTokenRepository;
+		this.userConsentRepository = userConsentRepository;
 		this.passwordEncoder = passwordEncoder;
 		this.jwtService = jwtService;
 		this.mailNotifier = mailNotifier;
+		this.loginAttemptService = loginAttemptService;
 		this.demoAccounts = Map.of(
 				"doctor", doctorEmail,
 				"lawyer", lawyerEmail,
 				"admin", adminEmail);
 	}
 
-	/** Modo 1: login por email + password. */
+	/** Modo 1: login por email + password (con protección de fuerza bruta, 429). */
 	public LoginResponse login(String email, String password) {
 		if (email == null || email.isBlank() || password == null || password.isBlank()) {
 			throw new BadRequestException("Email y contraseña son requeridos");
 		}
 
-		Profile profile = profileRepository.findByEmail(email)
-				.orElseThrow(() -> new UnauthorizedException("Credenciales incorrectas"));
+		loginAttemptService.assertNotBlocked(email);
 
-		if (!passwordEncoder.matches(password, profile.getPasswordHash())) {
+		Profile profile = profileRepository.findByEmail(email).orElse(null);
+		if (profile == null || !passwordEncoder.matches(password, profile.getPasswordHash())) {
+			loginAttemptService.recordFailure(email);
 			throw new UnauthorizedException("Credenciales incorrectas");
 		}
 
@@ -97,6 +106,7 @@ public class AuthService {
 			throw new ForbiddenException("Tu cuenta ha sido desactivada");
 		}
 
+		loginAttemptService.reset(email);
 		return new LoginResponse(UserDto.from(profile), jwtService.generateToken(profile));
 	}
 
@@ -154,6 +164,12 @@ public class AuthService {
 			}
 		}
 
+		// Ley 29733: el consentimiento es requisito y queda registrado con versión y fecha.
+		if (!Boolean.TRUE.equals(request.acceptPrivacyPolicy())) {
+			throw new BadRequestException(
+					"Debes aceptar la política de privacidad y el tratamiento de datos personales (Ley 29733)");
+		}
+
 		if (profileRepository.existsByEmail(request.email())) {
 			throw new ConflictException("El correo electrónico ya está registrado");
 		}
@@ -162,6 +178,9 @@ public class AuthService {
 		Profile profile = new Profile(request.email(), request.name(), role,
 				passwordEncoder.encode(request.password()));
 		profile = profileRepository.save(profile);
+
+		userConsentRepository.save(new UserConsent(profile,
+				UserConsent.TYPE_PRIVACY_POLICY, UserConsent.CURRENT_POLICY_VERSION));
 
 		if (role == UserRole.DOCTOR) {
 			DoctorProfile doctorProfile = new DoctorProfile(
