@@ -157,8 +157,27 @@ public class RecommendationService {
 			profilePayload.put("sub_specialties", subSpecialties);
 			profilePayload.put("hospital", doctorProfile.getHospital());
 			profilePayload.put("years_experience", doctorProfile.getYearsExperience());
+			// #4: el TEXTO del caso entra al vector TF-IDF (no solo la especialidad).
+			profilePayload.put("case_text", buildCaseText(legalCase));
 
-			JsonNode mlData = mlProxyService.recommendations(doctorId.toString(), profilePayload, 10);
+			// #3: corpus VIVO — la lista real de abogados de la BD viaja en cada
+			// matching (incluye a los registrados por la app y ratings actuales).
+			List<Map<String, Object>> lawyerCorpus = lawyers.stream()
+					.<Map<String, Object>>map(l -> {
+						Map<String, Object> item = new LinkedHashMap<>();
+						item.put("lawyer_id", l.getUser().getId().toString());
+						item.put("name", l.getUser().getName());
+						item.put("specialties", l.getSpecialties());
+						item.put("medical_areas", l.getMedicalAreas());
+						item.put("bio", l.getBio() == null ? "" : l.getBio());
+						item.put("rating", l.getRating() == null ? 0.0 : l.getRating().doubleValue());
+						item.put("resolved_cases", l.getResolvedCases());
+						item.put("years_experience", l.getYearsExperience());
+						return item;
+					})
+					.toList();
+
+			JsonNode mlData = mlProxyService.recommendations(doctorId.toString(), profilePayload, 10, lawyerCorpus);
 
 			List<RecommendationDto> recommendations = new ArrayList<>();
 			if (mlData != null && mlData.has("recommendations")) {
@@ -258,6 +277,19 @@ public class RecommendationService {
 			throw new ForbiddenException("No puedes pedir recomendaciones para otro médico");
 		}
 		return requested;
+	}
+
+	/** Texto del caso para el vector TF-IDF: título + descripción + tipo de evento + especialidad. */
+	private static String buildCaseText(LegalCase legalCase) {
+		if (legalCase == null) {
+			return "";
+		}
+		StringBuilder sb = new StringBuilder();
+		if (legalCase.getTitle() != null) sb.append(legalCase.getTitle()).append(' ');
+		if (legalCase.getDescription() != null) sb.append(legalCase.getDescription()).append(' ');
+		if (legalCase.getEventType() != null) sb.append(legalCase.getEventType()).append(' ');
+		if (legalCase.getMedicalSpecialty() != null) sb.append(legalCase.getMedicalSpecialty());
+		return sb.toString().strip();
 	}
 
 	private static List<String> toStringList(JsonNode node) {

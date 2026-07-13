@@ -227,7 +227,7 @@ const PRIORITY_DOTS: Record<CasePriority, string> = {
                   }
                   @if (cls.urgency) {
                     <div class="rounded-lg border border-slate-100 bg-slate-50 px-3 py-2.5">
-                      <p class="text-[11px] uppercase tracking-wider text-slate-400">Urgencia</p>
+                      <p class="text-[11px] uppercase tracking-wider text-slate-400">Prioridad sugerida</p>
                       <p class="mt-0.5 text-sm font-semibold capitalize text-slate-800">{{ cls.urgency }}</p>
                     </div>
                   }
@@ -244,6 +244,25 @@ const PRIORITY_DOTS: Record<CasePriority, string> = {
                     </div>
                   }
                 </div>
+                @if (cls.riskScore != null) {
+                  <div class="mt-4">
+                    <div class="mb-1.5 flex items-center justify-between text-xs">
+                      <span class="font-medium text-slate-500">Score de riesgo (Random Forest)</span>
+                      <span class="font-bold text-slate-800">
+                        {{ Math.round((cls.riskScore ?? 0) * 100) }}%
+                        @if (cls.riskLevel) {
+                          <span class="font-normal capitalize text-slate-400">· nivel {{ cls.riskLevel }}</span>
+                        }
+                      </span>
+                    </div>
+                    <div class="h-2 overflow-hidden rounded-full bg-slate-100">
+                      <div
+                        class="h-full rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 transition-all"
+                        [style.width.%]="Math.round((cls.riskScore ?? 0) * 100)"
+                      ></div>
+                    </div>
+                  </div>
+                }
                 @if (cls.confidence != null) {
                   <div class="mt-4">
                     <div class="mb-1.5 flex items-center justify-between text-xs">

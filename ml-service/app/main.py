@@ -63,8 +63,13 @@ def risk_assessment(req: RiskAssessmentRequest):
 @app.post("/api/v1/recommendations", response_model=RecommendationsResponse)
 def recommendations(req: RecommendationsRequest):
     model = get_matching_model()
-    recs = model.recommend(req.doctor_profile, req.top_k)
+    live_corpus = [l.model_dump() for l in req.lawyers] if req.lawyers else None
+    recs = model.recommend(req.doctor_profile, req.top_k, lawyers=live_corpus)
     return RecommendationsResponse(
         recommendations=recs,
-        model_info={"model": "tfidf-cosine-v1", "trained_at": "build-time"},
+        model_info={
+            "model": "tfidf-cosine+perf-v2",
+            "corpus": "live" if live_corpus else "static-fallback",
+            "corpus_size": len(live_corpus) if live_corpus else len(model.lawyers),
+        },
     )

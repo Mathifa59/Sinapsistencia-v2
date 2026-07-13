@@ -63,6 +63,16 @@ public class LegalCase {
 	@Column(name = "perceived_urgency", length = 20)
 	private CasePriority perceivedUrgency;
 
+	// Factores de riesgo del caso: alimentan al Random Forest al clasificar (V11).
+	@Column(name = "documentation_complete", nullable = false)
+	private boolean documentationComplete = true;
+
+	@Column(name = "informed_consent", nullable = false)
+	private boolean informedConsent = true;
+
+	@Column(name = "has_prior_complaints", nullable = false)
+	private boolean hasPriorComplaints = false;
+
 	@Column
 	private String notes;
 
@@ -81,6 +91,30 @@ public class LegalCase {
 		this.title = title;
 		this.description = description;
 		this.doctor = doctor;
+	}
+
+	public boolean isDocumentationComplete() {
+		return documentationComplete;
+	}
+
+	public void setDocumentationComplete(boolean documentationComplete) {
+		this.documentationComplete = documentationComplete;
+	}
+
+	public boolean isInformedConsent() {
+		return informedConsent;
+	}
+
+	public void setInformedConsent(boolean informedConsent) {
+		this.informedConsent = informedConsent;
+	}
+
+	public boolean isHasPriorComplaints() {
+		return hasPriorComplaints;
+	}
+
+	public void setHasPriorComplaints(boolean hasPriorComplaints) {
+		this.hasPriorComplaints = hasPriorComplaints;
 	}
 
 	public UUID getId() {

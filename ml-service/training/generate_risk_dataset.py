@@ -41,16 +41,10 @@ SPECIALTIES = [
     "Anestesiología",
 ]
 
-# Riesgo base por especialidad: procedimientos invasivos / alta criticidad
-# concentran más reclamos médico-legales (referencias en el charter del proyecto).
-SPECIALTY_BASELINE = {
-    "Ginecología y Obstetricia": 0.50, "Anestesiología": 0.48, "Cirugía General": 0.45,
-    "Neurología": 0.42, "Traumatología": 0.40, "Oncología": 0.40, "Cardiología": 0.38,
-    "Urología": 0.35, "Pediatría": 0.33, "Gastroenterología": 0.30, "Nefrología": 0.30,
-    "Psiquiatría": 0.30, "Neumología": 0.28, "Hematología": 0.28, "Infectología": 0.27,
-    "Oftalmología": 0.25, "Endocrinología": 0.24, "Reumatología": 0.22,
-    "Medicina General": 0.20, "Dermatología": 0.18,
-}
+# Riesgo base por especialidad: FUENTE UNICA en app/risk/baselines.py
+import sys as _sys
+_sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from app.risk.baselines import SPECIALTY_BASELINE  # noqa: E402
 
 # Frecuencia de muestreo por especialidad: las de mayor volumen asistencial
 # aparecen más (distribución realista, no uniforme).

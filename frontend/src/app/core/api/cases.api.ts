@@ -59,9 +59,16 @@ export interface TimelineEntryDto {
   actorName?: string | null;
 }
 
+/** Campos del RF persistido (V11) aún no regenerados en el cliente OpenAPI. */
+export type MlClassificationExtended = MlClassificationDto & {
+  riskScore?: number | null;
+  riskLevel?: string | null;
+  riskFactorsJson?: string | null;
+};
+
 export interface CaseDetailDto {
   caseData: CaseResponse;
-  classification?: MlClassificationDto | null;
+  classification?: MlClassificationExtended | null;
   responses?: LegalResponseDto[];
   events?: CaseEventDto[];
   timeline?: TimelineEntryDto[];

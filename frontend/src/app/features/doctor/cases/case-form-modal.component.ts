@@ -4,7 +4,6 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { injectMutation, injectQueryClient } from '@tanstack/angular-query-experimental';
 import { LucideAngularModule } from 'lucide-angular';
 import { CasesApi } from '../../../core/api/cases.api';
-import { MlApi } from '../../../core/api/ml.api';
 import { ModalComponent, ModalHeaderDirective, ModalTitleDirective, ModalDescriptionDirective, ModalFooterDirective } from '../../../shared/ui/modal.component';
 import { BtnDirective } from '../../../shared/ui/button.directive';
 import { InputDirective, LabelDirective, TextareaDirective, SelectDirective } from '../../../shared/ui/field.directives';
@@ -88,7 +87,7 @@ const FACTOR_LABELS: Record<string, string> = {
       @if (phase() === 'form') {
         <div appModalHeader>
           <h2 appModalTitle>Nuevo caso</h2>
-          <p appModalDescription>Registra un nuevo caso clínico-legal. Al crearlo, el sistema analizará su riesgo automáticamente.</p>
+          <p appModalDescription>Registra un nuevo caso clínico-legal. El modelo analizará su riesgo y sugerirá la prioridad automáticamente.</p>
         </div>
 
         <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4">
@@ -110,13 +109,14 @@ const FACTOR_LABELS: Record<string, string> = {
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div class="space-y-1.5">
-              <label appLabel>Prioridad *</label>
-              <select appSelect formControlName="priority">
+              <label appLabel>Urgencia percibida *</label>
+              <select appSelect formControlName="perceivedUrgency">
                 <option value="baja">Baja</option>
                 <option value="media">Media</option>
                 <option value="alta">Alta</option>
                 <option value="critica">Crítica</option>
               </select>
+              <p class="text-[11px] text-slate-400">La prioridad final la sugiere el modelo según el riesgo.</p>
             </div>
 
             <div class="space-y-1.5">
@@ -130,22 +130,9 @@ const FACTOR_LABELS: Record<string, string> = {
             </div>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div class="space-y-1.5">
-              <label appLabel for="case-event-type">Tipo de evento</label>
-              <input appInput id="case-event-type" placeholder="Ej: Cirugía, consulta, diagnóstico" formControlName="eventType" />
-            </div>
-
-            <div class="space-y-1.5">
-              <label appLabel>Urgencia percibida</label>
-              <select appSelect formControlName="perceivedUrgency">
-                <option value="">Sin especificar</option>
-                <option value="baja">Baja</option>
-                <option value="media">Media</option>
-                <option value="alta">Alta</option>
-                <option value="critica">Crítica</option>
-              </select>
-            </div>
+          <div class="space-y-1.5">
+            <label appLabel for="case-event-type">Tipo de evento</label>
+            <input appInput id="case-event-type" placeholder="Ej: Cirugía, consulta, diagnóstico" formControlName="eventType" />
           </div>
 
           <!-- Factores que alimentan el modelo de riesgo -->
@@ -350,6 +337,11 @@ const FACTOR_LABELS: Record<string, string> = {
                       [class]="levels[r.riskLevel].bar"
                       [style.width.%]="Math.round(r.riskScore * 100)"></div>
                   </div>
+                  <p class="mt-2 text-[11px] text-slate-400">
+                    Prioridad del caso sugerida por el modelo:
+                    <span class="font-semibold capitalize text-slate-200">{{ createdPriority() }}</span>
+                    · puedes ajustarla editando el caso (revisión humana).
+                  </p>
 
                   @if (topFactors(r).length > 0) {
                     <p class="mb-2 mt-4 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Factores que más pesaron</p>
@@ -410,7 +402,6 @@ const FACTOR_LABELS: Record<string, string> = {
 export class CaseFormModalComponent {
   private readonly fb = inject(FormBuilder);
   private readonly casesApi = inject(CasesApi);
-  private readonly mlApi = inject(MlApi);
   private readonly router = inject(Router);
   private readonly queryClient = injectQueryClient();
 
@@ -457,10 +448,9 @@ export class CaseFormModalComponent {
   protected readonly form = this.fb.nonNullable.group({
     title: ['', [Validators.required, Validators.minLength(3)]],
     description: ['', [Validators.required, Validators.minLength(10)]],
-    priority: ['media', Validators.required],
     medicalSpecialty: [''],
     eventType: [''],
-    perceivedUrgency: [''],
+    perceivedUrgency: ['media', Validators.required],
     notes: [''],
     documentationComplete: [true],
     informedConsent: [true],
@@ -489,38 +479,44 @@ export class CaseFormModalComponent {
           }
         : undefined;
 
-      return this.casesApi.create({
+      const body = {
         title: v.title.trim(),
         description: v.description.trim(),
-        priority: v.priority,
+        priority: v.perceivedUrgency,
         medicalSpecialty: v.medicalSpecialty || undefined,
         eventType: v.eventType.trim() || undefined,
-        perceivedUrgency: v.perceivedUrgency || undefined,
+        perceivedUrgency: v.perceivedUrgency,
+        documentationComplete: v.documentationComplete,
+        informedConsent: v.informedConsent,
+        hasPriorComplaints: v.hasPriorComplaints,
         notes: v.notes.trim() || undefined,
         context,
-      });
+      };
+      return this.casesApi.create(body as Parameters<typeof this.casesApi.create>[0]);
     },
     onSuccess: (created) => {
       this.queryClient.invalidateQueries({ queryKey: ['cases'] });
       this.createdId.set(created.id ?? '');
-      this.createdPriority.set(created.priority ?? this.form.getRawValue().priority);
+      this.createdPriority.set(created.priority ?? this.form.getRawValue().perceivedUrgency);
       this.startAnalysis();
     },
     onError: (err: Error) => this.serverError.set(err.message),
   }));
 
-  /** Pipeline de análisis: variables reales del formulario → RF real (/api/ml/risk). */
+  /** Pipeline de análisis: el backend ya clasificó con el RF al crear; aquí
+   * solo se anima la lectura del resultado PERSISTIDO (una sola fuente de verdad). */
   private startAnalysis(): void {
     const v = this.form.getRawValue();
+    const urgency = v.perceivedUrgency || 'media';
     const daysSince = v.eventDate
       ? Math.max(0, Math.floor((Date.now() - new Date(v.eventDate).getTime()) / 86_400_000))
       : null;
-    const complexity = v.priority === 'critica' || v.priority === 'alta' ? 'alta' : v.priority === 'media' ? 'media' : 'baja';
+    const complexity = urgency === 'critica' || urgency === 'alta' ? 'alta' : urgency === 'media' ? 'media' : 'baja';
 
     this.inputs.set({
       specialty: v.medicalSpecialty || v.medicalArea.trim() || 'Medicina General',
       complexity,
-      priority: v.priority,
+      priority: urgency,
       documentation: v.documentationComplete,
       consent: v.informedConsent,
       priorComplaints: v.hasPriorComplaints,
@@ -541,18 +537,29 @@ export class CaseFormModalComponent {
       }, wait));
     };
 
-    this.mlApi
-      .risk({
-        specialty: v.medicalSpecialty || v.medicalArea.trim() || 'Medicina General',
-        procedure_complexity: complexity,
-        priority: v.priority,
-        documentation_complete: v.documentationComplete,
-        informed_consent: v.informedConsent,
-        has_prior_complaints: v.hasPriorComplaints,
-        time_since_incident_days: daysSince ?? undefined,
-        description: v.description || '',
+    this.casesApi
+      .getDetail(this.createdId())
+      .then((detail) => {
+        this.createdPriority.set(detail.caseData?.priority ?? urgency);
+        const cls = detail.classification;
+        if (cls?.riskScore != null && cls.riskLevel) {
+          let factors: RiskFactor[] = [];
+          try {
+            factors = JSON.parse(cls.riskFactorsJson ?? '[]');
+          } catch {
+            factors = [];
+          }
+          finish({
+            riskScore: Number(cls.riskScore),
+            riskLevel: cls.riskLevel as RiskResult['riskLevel'],
+            riskFactors: factors,
+            recommendations: [],
+            modelVersion: cls.modelVersion ?? 'rf',
+          });
+        } else {
+          finish(null);
+        }
       })
-      .then((res) => finish(res as unknown as RiskResult))
       .catch(() => finish(null));
   }
 
@@ -592,7 +599,7 @@ export class CaseFormModalComponent {
   private resetAll(close = true): void {
     this.timers.forEach(clearTimeout);
     this.timers = [];
-    this.form.reset({ priority: 'media', documentationComplete: true, informedConsent: true, hasPriorComplaints: false });
+    this.form.reset({ perceivedUrgency: 'media', documentationComplete: true, informedConsent: true, hasPriorComplaints: false });
     this.serverError.set(null);
     this.phase.set('form');
     this.stage.set(0);

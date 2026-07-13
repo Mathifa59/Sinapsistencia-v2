@@ -69,6 +69,7 @@ def _doctor_text(profile: DoctorProfile) -> str:
         profile.specialty or "",
         " ".join(profile.sub_specialties or []),
         profile.hospital or "",
+        profile.case_text or "",
     ])
 
 
@@ -88,12 +89,18 @@ def _performance_score(lawyer: dict) -> float:
 
 class MatchingModel:
     def __init__(self, corpus_path: Path = CORPUS_PATH):
+        # Corpus estatico de FALLBACK (dev standalone / si el backend no envia la lista).
         self.lawyers: list[dict] = json.loads(corpus_path.read_text(encoding="utf-8"))
-        corpus_texts = [_normalize(_lawyer_text(l)) for l in self.lawyers]
+        self.vectorizer, self.lawyer_matrix = self._fit(self.lawyers)
 
-        self.vectorizer = TfidfVectorizer(stop_words=SPANISH_STOPWORDS)
-        self.lawyer_matrix = self.vectorizer.fit_transform(corpus_texts)
-        self.feature_names = self.vectorizer.get_feature_names_out()
+    @staticmethod
+    def _fit(lawyers: list[dict]):
+        """Vectoriza un corpus de abogados. Barato (decenas de perfiles): se puede
+        ejecutar por request cuando llega el corpus VIVO desde la BD."""
+        corpus_texts = [_normalize(_lawyer_text(l)) for l in lawyers]
+        vectorizer = TfidfVectorizer(stop_words=SPANISH_STOPWORDS)
+        matrix = vectorizer.fit_transform(corpus_texts)
+        return vectorizer, matrix
 
     def _matched_specialties(self, profile: DoctorProfile, lawyer: dict) -> list[str]:
         doctor_areas = {_normalize(s) for s in [profile.specialty or "", *(profile.sub_specialties or [])]}
@@ -103,7 +110,7 @@ class MatchingModel:
                 matched.append(area)
         return matched
 
-    def _top_terms(self, doctor_vec, lawyer_vec, top_n: int = 3) -> list[FeatureImportance]:
+    def _top_terms(self, doctor_vec, lawyer_vec, feature_names, top_n: int = 3) -> list[FeatureImportance]:
         # Contribucion termino-a-termino al producto punto (proxy de "por que" hicieron match).
         doctor_arr = doctor_vec.toarray()[0]
         lawyer_arr = lawyer_vec.toarray()[0]
@@ -115,9 +122,9 @@ class MatchingModel:
             if contributions[idx] <= 0:
                 continue
             terms.append(FeatureImportance(
-                feature=self.feature_names[idx],
+                feature=feature_names[idx],
                 importance=round(float(contributions[idx]), 4),
-                description=f"Coincidencia en el termino '{self.feature_names[idx]}'",
+                description=f"Coincidencia en el termino '{feature_names[idx]}'",
             ))
         return terms
 
@@ -131,15 +138,25 @@ class MatchingModel:
             reasons.append(f"{lawyer['resolved_cases']} casos resueltos")
         return reasons
 
-    def recommend(self, profile: DoctorProfile, top_k: int = 10) -> list[LawyerRecommendation]:
-        doctor_text = _normalize(_doctor_text(profile))
-        doctor_vec = self.vectorizer.transform([doctor_text])
+    def recommend(self, profile: DoctorProfile, top_k: int = 10,
+                  lawyers: list[dict] | None = None) -> list[LawyerRecommendation]:
+        # Corpus VIVO si el backend lo envia; si no, fallback al estatico.
+        if lawyers:
+            corpus = lawyers
+            vectorizer, matrix = self._fit(lawyers)
+        else:
+            corpus = self.lawyers
+            vectorizer, matrix = self.vectorizer, self.lawyer_matrix
+        feature_names = vectorizer.get_feature_names_out()
 
-        similarities = cosine_similarity(doctor_vec, self.lawyer_matrix)[0]
+        doctor_text = _normalize(_doctor_text(profile))
+        doctor_vec = vectorizer.transform([doctor_text])
+
+        similarities = cosine_similarity(doctor_vec, matrix)[0]
 
         # Score compuesto: pertinencia tematica (coseno) + desempeno verificable.
         scored = []
-        for lawyer, sim, idx in zip(self.lawyers, similarities, range(len(self.lawyers))):
+        for lawyer, sim, idx in zip(corpus, similarities, range(len(corpus))):
             perf = _performance_score(lawyer)
             final = W_CONTENT * float(sim) + W_PERFORMANCE * perf
             scored.append((lawyer, float(sim), perf, final, idx))
@@ -149,7 +166,7 @@ class MatchingModel:
         recommendations = []
         for lawyer, sim, perf, final, idx in ranked:
             matched = self._matched_specialties(profile, lawyer)
-            lawyer_vec = self.lawyer_matrix[idx]
+            lawyer_vec = matrix[idx]
             recommendations.append(LawyerRecommendation(
                 lawyer_id=lawyer["lawyer_id"],
                 score=round(final, 4),
@@ -158,7 +175,7 @@ class MatchingModel:
                 collaborative_score=0.0,
                 matched_specialties=matched,
                 model_used=MODEL_VERSION,
-                feature_importance=self._top_terms(doctor_vec, lawyer_vec),
+                feature_importance=self._top_terms(doctor_vec, lawyer_vec, feature_names),
                 reasons=self._reasons(lawyer, matched),
             ))
         return recommendations

@@ -50,6 +50,17 @@ public class MlClassification {
 	@Column(name = "model_version", length = 50)
 	private String modelVersion;
 
+	// Resultado real del Random Forest (V11): una sola fuente de verdad.
+	@Column(name = "risk_score", precision = 5, scale = 4)
+	private BigDecimal riskScore;
+
+	@Column(name = "risk_level", length = 20)
+	private String riskLevel;
+
+	/** Desglose por factor en JSON: name, weight, value, contribution, description. */
+	@Column(name = "risk_factors", columnDefinition = "text")
+	private String riskFactors;
+
 	@Column(name = "response_time_ms")
 	private Integer responseTimeMs;
 
@@ -62,6 +73,30 @@ public class MlClassification {
 
 	public MlClassification(LegalCase legalCase) {
 		this.legalCase = legalCase;
+	}
+
+	public BigDecimal getRiskScore() {
+		return riskScore;
+	}
+
+	public void setRiskScore(BigDecimal riskScore) {
+		this.riskScore = riskScore;
+	}
+
+	public String getRiskLevel() {
+		return riskLevel;
+	}
+
+	public void setRiskLevel(String riskLevel) {
+		this.riskLevel = riskLevel;
+	}
+
+	public String getRiskFactors() {
+		return riskFactors;
+	}
+
+	public void setRiskFactors(String riskFactors) {
+		this.riskFactors = riskFactors;
 	}
 
 	public UUID getId() {

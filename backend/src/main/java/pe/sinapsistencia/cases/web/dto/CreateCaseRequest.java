@@ -15,6 +15,9 @@ public record CreateCaseRequest(
 		String eventType,
 		String perceivedUrgency,
 		String notes,
+		Boolean documentationComplete,
+		Boolean informedConsent,
+		Boolean hasPriorComplaints,
 		ContextPayload context) {
 
 	/** Contexto clínico-legal simulado, sin datos identificables (Ley 29733). */

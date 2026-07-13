@@ -89,7 +89,7 @@ public class MailNotifier {
 		extra.put("caseTitle", caseTitle == null ? "" : caseTitle);
 		dispatch("contact_request_received", toLawyerEmail, lawyerName,
 				"Nueva solicitud de contacto — Sinapsistencia",
-				MailTemplates.contactRequestReceived(lawyerName, doctorName, caseTitle, message, frontendUrl + "/"),
+				MailTemplates.contactRequestReceived(lawyerName, doctorName, caseTitle, message, frontendUrl + "/lawyer/requests"),
 				extra);
 	}
 
@@ -106,7 +106,7 @@ public class MailNotifier {
 				: "Respuesta a tu solicitud de contacto — Sinapsistencia";
 		dispatch("contact_request_answered", toDoctorEmail, doctorName, subject,
 				MailTemplates.contactRequestAnswered(doctorName, lawyerName, caseTitle, accepted,
-						responseMessage, frontendUrl + "/"),
+						responseMessage, frontendUrl + "/doctor/cases"),
 				extra);
 	}
 

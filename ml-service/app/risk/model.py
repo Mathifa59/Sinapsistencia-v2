@@ -28,30 +28,7 @@ NUMERIC_COLS = ["time_since_incident_days"]
 COMPLEXITY_RANK = {"baja": 0.0, "media": 0.5, "alta": 1.0}
 PRIORITY_RANK = {"baja": 0.0, "media": 1 / 3, "alta": 2 / 3, "critica": 1.0}
 
-# Debe mantenerse sincronizado con SPECIALTY_BASELINE en
-# training/generate_risk_dataset.py (mismas claves/valores).
-SPECIALTY_BASELINE = {
-    "Cirugía General": 0.45,
-    "Ginecología y Obstetricia": 0.50,
-    "Anestesiología": 0.48,
-    "Traumatología": 0.40,
-    "Neurología": 0.42,
-    "Cardiología": 0.38,
-    "Oncología": 0.40,
-    "Urología": 0.35,
-    "Gastroenterología": 0.30,
-    "Neumología": 0.28,
-    "Nefrología": 0.30,
-    "Infectología": 0.27,
-    "Hematología": 0.28,
-    "Reumatología": 0.22,
-    "Endocrinología": 0.24,
-    "Oftalmología": 0.25,
-    "Psiquiatría": 0.30,
-    "Pediatría": 0.33,
-    "Dermatología": 0.18,
-    "Medicina General": 0.20,
-}
+from app.risk.baselines import SPECIALTY_BASELINE  # fuente unica de verdad
 
 RECOMMENDATIONS_BY_FACTOR = {
     "documentation": "Completar la historia clínica y la documentación de soporte del caso.",

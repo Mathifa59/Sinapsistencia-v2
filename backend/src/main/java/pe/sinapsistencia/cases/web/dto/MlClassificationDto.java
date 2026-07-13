@@ -12,6 +12,9 @@ public record MlClassificationDto(
 		String complexity,
 		String suggestedSpecialty,
 		BigDecimal confidence,
+		BigDecimal riskScore,
+		String riskLevel,
+		String riskFactorsJson,
 		String modelVersion,
 		Integer responseTimeMs,
 		Instant createdAt) {
@@ -24,6 +27,9 @@ public record MlClassificationDto(
 				c.getComplexity() == null ? null : c.getComplexity().getValue(),
 				c.getSuggestedSpecialty(),
 				c.getConfidence(),
+				c.getRiskScore(),
+				c.getRiskLevel(),
+				c.getRiskFactors(),
 				c.getModelVersion(),
 				c.getResponseTimeMs(),
 				c.getCreatedAt());

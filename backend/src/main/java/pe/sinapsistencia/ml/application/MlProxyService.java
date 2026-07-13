@@ -93,11 +93,15 @@ public class MlProxyService {
 	}
 
 	/** POST /api/v1/recommendations — matching ML; lanza si el servicio no responde (el caller hace fallback). */
-	public JsonNode recommendations(String doctorId, Map<String, Object> doctorProfile, int topK) {
-		Map<String, Object> body = Map.of(
-				"doctor_id", doctorId,
-				"doctor_profile", doctorProfile,
-				"top_k", topK);
+	public JsonNode recommendations(String doctorId, Map<String, Object> doctorProfile, int topK,
+			java.util.List<Map<String, Object>> lawyers) {
+		Map<String, Object> body = new LinkedHashMap<>();
+		body.put("doctor_id", doctorId);
+		body.put("doctor_profile", doctorProfile);
+		body.put("top_k", topK);
+		if (lawyers != null && !lawyers.isEmpty()) {
+			body.put("lawyers", lawyers);
+		}
 		return restClient.post()
 				.uri("/api/v1/recommendations")
 				.header("Content-Type", "application/json")

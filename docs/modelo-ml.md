@@ -45,6 +45,25 @@ muestra siempre acompañado de la nota ética y la revisión humana es obligator
 
 ---
 
+## 2.1 Pipeline unificado (una sola fuente de verdad)
+
+El RF se invoca **en el backend al crear el caso** (`CaseClassificationService`):
+
+```
+Crear caso → backend llama al RF (/api/v1/risk-assessment)
+           → persiste score, nivel, desglose de factores y versión del modelo
+             en ml_classifications (V11)
+           → la PRIORIDAD del caso es la sugerida por el modelo
+             (nivel de riesgo → prioridad); la urgencia percibida del médico
+             queda documentada y puede imponerse editando el caso (HU-43)
+           → riesgo alto/crítico dispara la alerta n8n
+           → la UI (animación de creación y detalle del caso) LEE el resultado
+             persistido: lo que se muestra al crear es lo que muestra el detalle
+```
+
+Si el servicio ML no responde, se degrada al sistema de reglas (`rules-v1`)
+usando la urgencia percibida — fallback declarado, no silencioso.
+
 ## 3. Dataset sintético — metodología de generación
 
 Script: [`ml-service/training/generate_risk_dataset.py`](../ml-service/training/generate_risk_dataset.py)

@@ -45,12 +45,30 @@ class DoctorProfile(BaseModel):
     sub_specialties: list[str] = Field(default_factory=list)
     hospital: Optional[str] = None
     years_experience: Optional[int] = None
+    # Texto libre del caso (titulo + descripcion + tipo de evento): entra al
+    # vector TF-IDF para que el matching sea semantico, no solo por especialidad.
+    case_text: Optional[str] = ""
+
+
+class LawyerCorpusItem(BaseModel):
+    """Abogado del corpus VIVO: el backend envia la lista real de la BD en cada
+    matching (incluye abogados registrados por la app y ratings actuales)."""
+    lawyer_id: str
+    name: Optional[str] = ""
+    specialties: list[str] = Field(default_factory=list)
+    medical_areas: list[str] = Field(default_factory=list)
+    bio: Optional[str] = ""
+    rating: float = 0.0
+    resolved_cases: int = 0
+    years_experience: int = 0
 
 
 class RecommendationsRequest(BaseModel):
     doctor_id: str
     doctor_profile: DoctorProfile
     top_k: int = 10
+    # Corpus vivo (opcional): si no viene, se usa lawyers_corpus.json como fallback.
+    lawyers: Optional[list[LawyerCorpusItem]] = None
 
 
 class FeatureImportance(BaseModel):

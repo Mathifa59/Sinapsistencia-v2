@@ -122,6 +122,10 @@ public class LegalCaseService {
 			legalCase.setPerceivedUrgency(parsePriority(request.perceivedUrgency()));
 		}
 		legalCase.setNotes(request.notes());
+		// Factores de riesgo (V11): alimentan al Random Forest en la clasificación.
+		legalCase.setDocumentationComplete(request.documentationComplete() == null || request.documentationComplete());
+		legalCase.setInformedConsent(request.informedConsent() == null || request.informedConsent());
+		legalCase.setHasPriorComplaints(Boolean.TRUE.equals(request.hasPriorComplaints()));
 		legalCase = caseRepository.save(legalCase);
 
 		CaseContext context = null;
@@ -143,7 +147,7 @@ public class LegalCaseService {
 			context = contextRepository.save(context);
 		}
 
-		classificationService.classifyAndPrioritize(legalCase);
+		classificationService.classifyAndPrioritize(legalCase, context);
 		legalCase = caseRepository.findWithPeopleById(legalCase.getId())
 				.orElseThrow(() -> new NotFoundException("Caso no encontrado"));
 		if (context == null) {
