@@ -233,7 +233,10 @@ propuesto cierra el ciclo:
 ### 8.2 Otras mejoras
 
 - Incorporar **NLP sobre la descripción** del caso (embeddings) al clasificador.
-- **Validación con datos reales anonimizados** y recalibración de umbrales.
+- **Validación con datos reales anonimizados** y recalibración de umbrales —
+  ver [investigacion-datasets-reales-riesgo.md](investigacion-datasets-reales-riesgo.md)
+  para las fuentes candidatas (NPDB, Kaggle, SUSALUD) y la metodología de
+  calibración.
 - **Curva de calibración** y análisis de sesgo por especialidad.
 - Registro de versiones de modelo y *drift monitoring* en producción.
 

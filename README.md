@@ -105,41 +105,26 @@ Ver [ml-service/README.md](ml-service/README.md) — Random Forest (riesgo) + TF
 Ver `backend/.env.example` y `frontend/.env.example`. En producción se configuran en Railway
 (backend/ML) y Vercel (frontend).
 
-## Estado de la migración
+## Estado actual del proyecto
 
-Se ejecuta **por fases con checkpoints** (ver `docs/CLAUDE_CODE_PROMPT_Migracion_Sinapsistencia.md`).
+> 📋 **Documento maestro (foto completa, actualizada):**
+> [`docs/ESTADO_ACTUAL_PROYECTO.md`](docs/ESTADO_ACTUAL_PROYECTO.md) — arquitectura,
+> las 44 HUs, el modelo de ML en detalle, infraestructura y pendientes. Este README
+> se mantiene como punto de entrada rápido; para el estado real, ese documento manda.
 
-- [x] **Fase 0 — Scaffold:** backend Spring Boot + frontend Angular + docker-compose.
-- [x] **Fase 1 — Base de datos (Flyway):** `V1__schema.sql` (17 tablas, alineación académica:
-      6 estados de consulta HU-16, contexto simulado Ley 29733, tablas ML/XAI/métricas) +
-      `V3__seed_demo.sql` (hospitales + usuarios demo, password `Demo123!`).
-- [x] **Fase 2 — Núcleo backend:** contrato `ApiResponse`/`PageResponse` + `GlobalExceptionHandler`,
-      17 entidades JPA con `AttributeConverter` (enums en español exactos), 17 repositorios
-      Spring Data, `SecurityConfig` stateless + CORS + OpenAPI. Hibernate valida contra Flyway.
-- [x] **Fase 3 — Auth:** login (email+password y modo demo `{role}`), JWT (jjwt) en cookie
-      httpOnly `access_token` + Bearer, `JwtAuthFilter` → `ROLE_DOCTOR/LAWYER/ADMIN`,
-      logout, `/me`, register con perfiles profesionales. Mensajes de error del legacy.
-- [x] **Fase 4 — Dominio:** módulos cases (consultas + contexto simulado), documents
-      (versiones + firma con hash SHA-256 real), users, audit, profile (+avatar Cloudinary).
-      Ownership por rol en cada query (reemplazo de RLS) con 8 tests de integración.
-- [x] **Fase 5 — Matching + ML proxy + n8n:** directorios, recomendaciones ML con explicación
-      XAI persistida (HU-31/32) y fallback cold-start por especialidad, contact-requests
-      (aceptar → consulta `en_revision`, HU-18), relevant-cases; `MlController` proxy
-      (camelCase, n8n solo en alto/critico, fire-and-forget). Mocks de dev en `tools/mocks/`.
-- [x] **Fase 6 — Frontend: base y diseño:** scaffold Angular 21 (standalone, signals, control
-      flow), Tailwind v4 + spartan/ui replicando tema/tipografía (Geist) del legacy 1:1,
-      TanStack Query, capa de API (`ApiService` + clientes generados desde OpenAPI), UI
-      compartida (badges de estado, stat cards, diálogos, selects).
-- [x] **Fase 7 — Frontend: features por portal:** 7 páginas portal médico, 4 portal abogado,
-      5 portal admin, ruteo completo por rol (`/doctor` `/lawyer` `/admin`) verificado contra
-      el backend real (build + checks visuales).
-- [ ] **Fase 8 — Cierre + despliegue** (en curso):
-  - [x] `AuditAspect` (AOP → `audit_logs` con ip/user-agent) sobre login/logout, CRUD de
-        consultas/documentos/usuarios, contact-requests y perfil (incluye detección de
-        firma HU-34: `update` documento → `sign` si queda `firmado`).
-  - [x] Storage Cloudinary en producción (config condicional + `ProfileService.uploadAvatar`).
-  - [x] `.env.example` (backend y frontend).
-  - [ ] Smoke tests.
-  - [ ] Regenerar cliente OpenAPI (si cambian DTOs/endpoints).
-  - [ ] Despliegue: Angular → Vercel, Spring Boot → Railway, FastAPI ML → Railway, Postgres →
-        Railway; variables de entorno y CORS.
+La migración descrita originalmente en
+`docs/CLAUDE_CODE_PROMPT_Migracion_Sinapsistencia.md` **se completó**: las 8 fases
+(scaffold, base de datos, núcleo backend, auth, dominio, matching/ML/n8n, frontend base,
+features por portal) están cerradas, con **44/44 Historias de Usuario implementadas** y
+desplegadas en producción (Angular → Vercel, Spring Boot + FastAPI ML → Railway,
+Postgres → Railway).
+
+Desde el cierre de la migración se agregó, entre otras cosas: subida de archivos a
+Cloudinary, correos transaccionales vía n8n + Gmail, CI/CD (GitHub Actions), un
+**pipeline de ML unificado** (el Random Forest real clasifica y persiste el riesgo al
+crear cada caso, ver `docs/modelo-ml.md`), matching compuesto (contenido + desempeño del
+abogado), protecciones Ley 29733 (`user_consents`) y hardening de login (rate limiting).
+
+Pendiente activo: resolver el vencimiento de los trials de Railway y n8n Cloud antes de
+la validación con usuarios reales (hasta agosto) — detalle en
+`docs/ESTADO_ACTUAL_PROYECTO.md` §7.1 y §9.
