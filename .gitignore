@@ -4,6 +4,10 @@
 # Dependencias
 node_modules/
 
+# Python
+__pycache__/
+*.pyc
+
 # Backend (Maven / Spring Boot)
 /backend/target/
 
@@ -23,3 +27,12 @@ node_modules/
 *.iml
 .DS_Store
 Thumbs.db
+
+# Datos crudos externos sujetos a acuerdo de uso (Fase 5, NPDB/HRSA):
+# el CSV NUNCA entra al repo. Solo el script y su hash SHA-256 se versionan.
+# Ver docs/calibracion-generador.md.
+NPDB*.CSV
+NPDB*.csv
+NPDB*.DAT
+NPDB*.POR
+ml-service/evaluation/calibration/data/

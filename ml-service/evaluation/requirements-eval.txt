@@ -1,0 +1,10 @@
+# Dependencias SOLO para la evaluación offline de DS-03/DS-04/ablación
+# (build_corpus.py, build_test_collection.py, run_ablation.py, report.py).
+#
+# NO van en requirements.txt: ese archivo despliega el servicio FastAPI de
+# produccion en Railway, y estas librerias no las usa /app en tiempo de
+# ejecucion, solo los scripts de ml-service/evaluation/.
+#
+# Instalar con: pip install -r evaluation/requirements-eval.txt
+
+rank_bm25==0.2.2

@@ -1,0 +1,182 @@
+[
+  {
+    "query_id": "q01",
+    "medical_specialty": "Cirugía General",
+    "event_type": "Complicación quirúrgica",
+    "perceived_urgency": "alta",
+    "procedure_complexity": "alta",
+    "names_specialty": false,
+    "case_description": "Paciente intervenido por colecistectomía que evolucionó con una lesión de la vía biliar detectada recién en el control postoperatorio, lo que obligó a una segunda intervención de urgencia. La familia ha solicitado una explicación formal por escrito y menciona la posibilidad de iniciar un reclamo. La documentación del procedimiento original está completa, pero no hay registro claro de la conversación previa sobre este riesgo específico. Se busca orientación sobre exposición legal y sobre cómo proceder con la respuesta a la familia."
+  },
+  {
+    "query_id": "q02",
+    "medical_specialty": "Ginecología y Obstetricia",
+    "event_type": "Hemorragia post-parto",
+    "perceived_urgency": "critica",
+    "procedure_complexity": "alta",
+    "names_specialty": false,
+    "case_description": "Gestante con parto instrumentado que presentó hemorragia post-parto severa, requirió transfusión de múltiples unidades y permaneció 48 horas en cuidados intensivos. El esposo ha exigido una reunión con la dirección médica y ha mencionado a un abogado externo que ya está revisando el caso. El consentimiento para el parto instrumentado está firmado, pero no detalla el riesgo de hemorragia mayor. Se requiere asesoría urgente sobre cómo documentar lo ocurrido y qué comunicar a la familia antes de esa reunión."
+  },
+  {
+    "query_id": "q03",
+    "medical_specialty": "Traumatología",
+    "event_type": "Consolidación viciosa",
+    "perceived_urgency": "media",
+    "procedure_complexity": "media",
+    "names_specialty": true,
+    "case_description": "Paciente con fractura de tobillo tratada de forma conservadora que terminó consolidando en mala posición, lo que ha requerido una cirugía correctiva meses después. El paciente sostiene que nunca se le explicó la alternativa quirúrgica inicial y que de haberlo sabido la habría preferido. Se trata de un caso de traumatología con documentación parcial: existe la radiografía inicial pero no una nota explícita sobre las opciones discutidas con el paciente en esa primera consulta. Se solicita evaluación del nivel de exposición legal."
+  },
+  {
+    "query_id": "q04",
+    "medical_specialty": "Medicina General",
+    "event_type": "Falta de seguimiento",
+    "perceived_urgency": "baja",
+    "procedure_complexity": "baja",
+    "names_specialty": false,
+    "case_description": "Consulta ambulatoria de rutina en la que el paciente refiere no haber recibido la llamada de seguimiento acordada tras un resultado de laboratorio limítrofe. No hubo daño ni complicación clínica, pero el paciente se ha quejado formalmente por la falta de comunicación y pide una explicación por escrito. La historia clínica registra el resultado y la indicación de seguimiento, pero no hay evidencia de que la llamada se haya realizado. Se pide orientación sobre cómo responder al reclamo sin reconocer una falta que no está clara."
+  },
+  {
+    "query_id": "q05",
+    "medical_specialty": "Pediatría",
+    "event_type": "Error de medicación",
+    "perceived_urgency": "media",
+    "procedure_complexity": "media",
+    "names_specialty": true,
+    "case_description": "Niño de corta edad que recibió una dosis de un medicamento pediátrico distinta a la indicada por error de transcripción en la orden médica, aunque sin consecuencias clínicas observables tras 24 horas de vigilancia. Los padres fueron informados de inmediato y solicitaron una reunión con el servicio de pediatría para entender qué falló. Existe un registro del error en el sistema interno de notificación de eventos, pero los padres no han visto ese documento. Se requiere orientación sobre qué información compartir y cómo formalizar la respuesta."
+  },
+  {
+    "query_id": "q06",
+    "medical_specialty": "Cirugía General",
+    "event_type": "Resultado estético",
+    "perceived_urgency": "baja",
+    "procedure_complexity": "baja",
+    "names_specialty": false,
+    "case_description": "Paciente disconforme con el resultado estético de una cicatriz tras una intervención abdominal programada, sin ninguna complicación clínica asociada. Ha enviado un correo solicitando una compensación económica y amenaza con dejar reseñas negativas si no recibe respuesta en la semana. El consentimiento firmado menciona de forma genérica la posibilidad de cicatrización visible, pero no incluye fotografías de referencia ni una conversación documentada sobre expectativas estéticas. Se pide una lectura rápida del riesgo real detrás de este reclamo."
+  },
+  {
+    "query_id": "q07",
+    "medical_specialty": "Cardiología",
+    "event_type": "Complicación de procedimiento",
+    "perceived_urgency": "alta",
+    "procedure_complexity": "alta",
+    "names_specialty": false,
+    "case_description": "Paciente sometido a un cateterismo que presentó una disección coronaria durante el procedimiento, resuelta con un stent adicional no previsto originalmente. La recuperación fue favorable, pero la familia cuestiona por qué no se les informó de inmediato sobre la complicación y se enteraron recién al día siguiente por otro miembro del equipo. El consentimiento cubre el procedimiento base pero no detalla explícitamente el riesgo de disección. Se solicita asesoría sobre la exposición derivada del retraso en la comunicación, más que del evento clínico en sí."
+  },
+  {
+    "query_id": "q08",
+    "medical_specialty": "Neurología",
+    "event_type": "Diagnóstico tardío",
+    "perceived_urgency": "media",
+    "procedure_complexity": "alta",
+    "names_specialty": true,
+    "case_description": "Paciente evaluado por un cuadro de cefalea intensa que fue dado de alta desde el servicio de neurología con diagnóstico de migraña, y que dos días después reingresó por un evento vascular mayor con secuelas motoras persistentes. La familia sostiene que los síntomas de alarma ya estaban presentes en la primera consulta y que no se solicitó una imagen a tiempo. La historia clínica de la primera visita es breve y no documenta explícitamente por qué se descartó un origen vascular. Se requiere una lectura del riesgo legal del caso."
+  },
+  {
+    "query_id": "q09",
+    "medical_specialty": "Oncología",
+    "event_type": "Demora diagnóstica",
+    "perceived_urgency": "alta",
+    "procedure_complexity": "media",
+    "names_specialty": false,
+    "case_description": "Paciente con un hallazgo radiológico sospechoso que permaneció sin biopsia confirmatoria durante casi dos meses por una serie de citas reprogramadas y pérdida de una orden médica en el sistema. El diagnóstico finalmente confirmado corresponde a un estadio más avanzado que el que hubiera correspondido de haberse actuado antes. El paciente y su familia han solicitado formalmente el expediente completo y mencionan estar evaluando asesoría legal externa. Se pide apoyo para reconstruir la cronología exacta de las reprogramaciones antes de responder a esa solicitud."
+  },
+  {
+    "query_id": "q10",
+    "medical_specialty": "Anestesiología",
+    "event_type": "Evento adverso anestésico",
+    "perceived_urgency": "critica",
+    "procedure_complexity": "alta",
+    "names_specialty": true,
+    "case_description": "Paciente que presentó un paro cardiorrespiratorio durante la inducción anestésica de un procedimiento programado, con reanimación exitosa pero con un periodo de hipoxia que generó preocupación por posibles secuelas cognitivas, aún en evaluación. Se trata de un evento adverso de anestesiología poco frecuente que ya fue reportado internamente. La familia exige una explicación inmediata y ha contratado asesoría legal independiente. El registro anestésico documenta los signos vitales minuto a minuto, pero el consentimiento no menciona específicamente el riesgo de complicación cardiorrespiratoria grave."
+  },
+  {
+    "query_id": "q11",
+    "medical_specialty": "Urología",
+    "event_type": "Infección post-procedimiento",
+    "perceived_urgency": "media",
+    "procedure_complexity": "baja",
+    "names_specialty": false,
+    "case_description": "Paciente sometido a un procedimiento urológico ambulatorio que desarrolló una infección urinaria complicada en los días posteriores, atribuible según el paciente a una falla en las indicaciones postoperatorias que recibió al alta. No hubo hospitalización adicional, pero sí un tratamiento antibiótico prolongado y varias consultas de urgencia no programadas. El paciente sostiene que las indicaciones escritas eran genéricas y no mencionaban señales de alarma específicas para este procedimiento. Se solicita una valoración de la solidez de ese reclamo."
+  },
+  {
+    "query_id": "q12",
+    "medical_specialty": "Gastroenterología",
+    "event_type": "Perforación endoscópica",
+    "perceived_urgency": "baja",
+    "procedure_complexity": "media",
+    "names_specialty": false,
+    "case_description": "Paciente que sufrió una perforación durante una colonoscopía diagnóstica, resuelta quirúrgicamente sin secuelas mayores tras una estadía hospitalaria breve. El paciente entiende que es una complicación reconocida del procedimiento, pero cuestiona que no se le haya explicado con suficiente claridad antes de firmar el consentimiento, que menciona el riesgo de forma muy general. No ha habido amenaza explícita de demanda, pero sí ha solicitado copia completa del expediente y una reunión con el especialista. Se pide una opinión preliminar sobre el nivel de riesgo."
+  },
+  {
+    "query_id": "q13",
+    "medical_specialty": "Psiquiatría",
+    "event_type": "Alta prematura",
+    "perceived_urgency": "media",
+    "procedure_complexity": "baja",
+    "names_specialty": true,
+    "case_description": "Paciente dado de alta del servicio de psiquiatría tras una hospitalización breve, que días después tuvo una crisis que requirió una nueva internación de emergencia. La familia cuestiona que el alta se haya dado sin una evaluación de riesgo suficientemente documentada, y ha solicitado por escrito una revisión del criterio clínico utilizado. La historia clínica registra la evaluación de alta, pero de forma breve y sin una escala de riesgo estandarizada aplicada. Se requiere orientación sobre cómo abordar esta solicitud sin reconocer una falla que no está establecida."
+  },
+  {
+    "query_id": "q14",
+    "medical_specialty": "Cardiología",
+    "event_type": "Consentimiento incompleto",
+    "perceived_urgency": "baja",
+    "procedure_complexity": "media",
+    "names_specialty": false,
+    "case_description": "Paciente al que se le indicó un nuevo tratamiento farmacológico para una arritmia sin que, según refiere, se le explicaran con claridad los efectos secundarios más relevantes ni las alternativas disponibles. No ha habido ninguna complicación clínica, pero el paciente se siente insatisfecho con el nivel de información recibido y ha pedido una copia de su historia clínica para revisarla con un tercero. El registro de la consulta es breve y no detalla explícitamente la conversación sobre riesgos del nuevo medicamento. Se pide una lectura preventiva del caso."
+  },
+  {
+    "query_id": "q15",
+    "medical_specialty": "Traumatología",
+    "event_type": "Demora en atención",
+    "perceived_urgency": "alta",
+    "procedure_complexity": "media",
+    "names_specialty": false,
+    "case_description": "Paciente politraumatizado por una caída que permaneció varias horas en el área de emergencias antes de recibir atención especializada, en un día de alta demanda del servicio. La familia reclama que esa demora agravó una lesión que inicialmente parecía menor y que terminó requiriendo cirugía. El registro de triaje documenta la hora de ingreso, pero no hay una nota clara que explique el motivo específico de la demora en la atención especializada. Se solicita una evaluación de la exposición legal derivada de este caso."
+  },
+  {
+    "query_id": "q16",
+    "medical_specialty": "Dermatología",
+    "event_type": "Reacción adversa",
+    "perceived_urgency": "baja",
+    "procedure_complexity": "baja",
+    "names_specialty": false,
+    "case_description": "Paciente que se sometió a un procedimiento estético ambulatorio menor y desarrolló una reacción cutánea localizada que se resolvió sin secuelas tras un tratamiento tópico. No hubo ninguna hospitalización ni complicación grave, pero el paciente ha expresado su malestar por no haber sido advertido de este riesgo específico antes del procedimiento, y ha pedido que se revise su expediente. El consentimiento firmado es un formato genérico que no detalla reacciones cutáneas particulares. Se pide una opinión rápida sobre si amerita alguna acción adicional."
+  },
+  {
+    "query_id": "q17",
+    "medical_specialty": "Endocrinología",
+    "event_type": "Manejo tardío",
+    "perceived_urgency": "media",
+    "procedure_complexity": "media",
+    "names_specialty": true,
+    "case_description": "Paciente con diabetes de larga data que desarrolló una complicación relacionada con un ajuste tardío de su tratamiento, tras varias consultas de endocrinología en las que, según refiere, no se revisaron a fondo sus controles metabólicos recientes. La familia ha solicitado una explicación sobre por qué no se intensificó el manejo antes, y menciona que estaría dispuesta a buscar una segunda opinión legal si no queda satisfecha. La historia clínica muestra los controles registrados, pero no un análisis explícito de la tendencia entre consultas. Se solicita una lectura del riesgo del caso."
+  },
+  {
+    "query_id": "q18",
+    "medical_specialty": "Nefrología",
+    "event_type": "Infección asociada a catéter",
+    "perceived_urgency": "alta",
+    "procedure_complexity": "alta",
+    "names_specialty": false,
+    "case_description": "Paciente en tratamiento de diálisis que desarrolló una infección asociada al catéter que derivó en una hospitalización prolongada y un cambio de acceso vascular de urgencia. La familia sostiene que los signos iniciales de la infección no fueron tomados con suficiente seriedad en las primeras consultas de control. Existe un registro de esas consultas, pero las notas son breves y no documentan explícitamente por qué se descartó un origen infeccioso en ese momento. Dada la complejidad del caso y la gravedad del desenlace, se solicita una evaluación legal detallada."
+  },
+  {
+    "query_id": "q19",
+    "medical_specialty": "Reumatología",
+    "event_type": "Retraso diagnóstico",
+    "perceived_urgency": "baja",
+    "procedure_complexity": "media",
+    "names_specialty": true,
+    "case_description": "Paciente con síntomas articulares persistentes que fue derivado a reumatología después de varios meses de consultas en otras especialidades sin un diagnóstico claro, y que finalmente fue diagnosticado con una enfermedad autoinmune en una etapa ya establecida. El paciente cuestiona si ese tiempo pudo haberse acortado y solicita una revisión de su historial completo. No hay evidencia de un error puntual, sino de una serie de consultas en las que el cuadro no terminaba de encajar en un diagnóstico. Se pide una opinión sobre si existe algún fundamento para un reclamo formal."
+  },
+  {
+    "query_id": "q20",
+    "medical_specialty": "Hematología",
+    "event_type": "Interconsulta pendiente",
+    "perceived_urgency": "media",
+    "procedure_complexity": "media",
+    "names_specialty": false,
+    "case_description": "Paciente con resultados de laboratorio compatibles con un trastorno hematológico que tardaron en derivarse a la especialidad correspondiente debido a una interconsulta que quedó pendiente en el sistema durante varias semanas. El diagnóstico finalmente se confirmó y el tratamiento se inició, pero con un retraso que el paciente considera evitable. No ha habido una complicación clínica grave hasta el momento, pero el paciente ha solicitado una explicación formal sobre lo ocurrido con la interconsulta. Se pide una valoración de la exposición legal antes de responder por escrito."
+  }
+]

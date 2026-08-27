@@ -1,0 +1,759 @@
+[
+  {
+    "lawyer_id": "d0000000-0000-0000-0000-000000000002",
+    "full_name": "Dra. Lucía Fernández Torres",
+    "bar_number": "34521",
+    "specialties": [
+      "Derecho Médico",
+      "Responsabilidad Civil Médica",
+      "Derecho Sanitario"
+    ],
+    "medical_areas": [
+      "Cirugía General",
+      "Ginecología y Obstetricia"
+    ],
+    "years_experience": 15,
+    "rating": 4.8,
+    "resolved_cases": 47,
+    "biography": "Es la abogada de cabecera para las consultas más delicadas del hospital, la que revisan primero cuando algo puede escalar a un reclamo formal. Prioriza siempre la conciliación temprana sobre el litigio, y sostiene que la mayoría de los conflictos se resuelven bien si la documentación está en orden desde el primer día. Coordina directamente con los servicios quirúrgicos y de maternidad del hospital."
+  },
+  {
+    "lawyer_id": "d2000000-0000-0000-0000-000000000001",
+    "full_name": "Abg. Joaquín Espinoza Ruiz",
+    "bar_number": "31245",
+    "specialties": [
+      "Responsabilidad Civil Médica",
+      "Negligencia Médica"
+    ],
+    "medical_areas": [
+      "Cirugía General",
+      "Traumatología"
+    ],
+    "years_experience": 10,
+    "rating": 4.6,
+    "resolved_cases": 32,
+    "biography": "Antes de litigar fue asistente legal en una aseguradora, donde aprendió a leer un peritaje médico línea por línea antes de que le llegara el caso ya armado. Esa costumbre no la perdió: revisa personalmente cada historia clínica antes de aceptar un caso. Sus clientes suelen llegar por recomendación de otros médicos a los que ya defendió."
+  },
+  {
+    "lawyer_id": "d2000000-0000-0000-0000-000000000002",
+    "full_name": "Abg. Daniela Vargas Solís",
+    "bar_number": "33678",
+    "specialties": [
+      "Derecho Sanitario",
+      "Consentimiento Informado"
+    ],
+    "medical_areas": [
+      "Ginecología y Obstetricia",
+      "Pediatría"
+    ],
+    "years_experience": 7,
+    "rating": 4.5,
+    "resolved_cases": 19,
+    "biography": "Se dedica casi exclusivamente a la atención materno-infantil: partos complicados, cuidados neonatales y las consultas de pediatría que terminan escalando cuando la comunicación con la familia falló antes que la técnica. Da charlas periódicas a residentes de ginecología y obstetricia sobre cómo documentar un consentimiento que resista una revisión legal."
+  },
+  {
+    "lawyer_id": "d2000000-0000-0000-0000-000000000003",
+    "full_name": "Abg. Mateo Huamán Ríos",
+    "bar_number": "29456",
+    "specialties": [
+      "Derecho Penal Médico",
+      "Bioética y Derecho"
+    ],
+    "medical_areas": [
+      "Anestesiología",
+      "Cirugía General"
+    ],
+    "years_experience": 18,
+    "rating": 4.9,
+    "resolved_cases": 64,
+    "biography": "Dieciocho años defendiendo médicos en sede penal le han dejado una regla fija: el proceso se gana o se pierde en la primera declaración ante la fiscalía, no en el juicio. Se especializa en eventos adversos durante procedimientos con sedación, donde la línea entre riesgo asumido y negligencia suele decidirse por minutos en el registro anestésico."
+  },
+  {
+    "lawyer_id": "d2000000-0000-0000-0000-000000000004",
+    "full_name": "Abg. Patricia Núñez Flores",
+    "bar_number": "35890",
+    "specialties": [
+      "Seguros Médicos",
+      "Derecho Médico"
+    ],
+    "medical_areas": [
+      "Medicina General",
+      "Dermatología"
+    ],
+    "years_experience": 5,
+    "rating": 4.3,
+    "resolved_cases": 11,
+    "biography": "Empezó su carrera del lado de la aseguradora, calificando pólizas de responsabilidad civil profesional para clínicas privadas, y hace cinco años cruzó al otro lado del mostrador para representar directamente a los médicos asegurados. Atiende sobre todo consultas ambulatorias y procedimientos estéticos menores."
+  },
+  {
+    "lawyer_id": "d3000000-0000-0000-0000-000000000001",
+    "full_name": "Abg. Mario Castillo Bravo",
+    "bar_number": "21567",
+    "specialties": [
+      "Negligencia Médica",
+      "Derecho Penal Médico",
+      "Derecho Médico"
+    ],
+    "medical_areas": [
+      "Cardiología",
+      "Medicina General",
+      "Neumología"
+    ],
+    "years_experience": 12,
+    "rating": 4.6,
+    "resolved_cases": 34,
+    "biography": "Su especialidad de facto es la medicina interna: casos de cardiología y neumología donde el paciente venía con varias comorbilidades y la defensa necesita reconstruir, a veces con ayuda de un perito externo, si el desenlace era o no evitable dado el cuadro de base. Litiga poco fuera de Lima, pero acepta consultoría remota para el interior."
+  },
+  {
+    "lawyer_id": "d3000000-0000-0000-0000-000000000002",
+    "full_name": "Abg. Paola Ramírez Soto",
+    "bar_number": "24890",
+    "specialties": [
+      "Consentimiento Informado",
+      "Bioética y Derecho",
+      "Derecho Sanitario"
+    ],
+    "medical_areas": [
+      "Ginecología y Obstetricia",
+      "Pediatría",
+      "Endocrinología"
+    ],
+    "years_experience": 9,
+    "rating": 4.7,
+    "resolved_cases": 21,
+    "biography": "Trabaja el punto exacto donde la obstetricia se cruza con la pediatría neonatal, y con menos frecuencia acompaña casos endocrinológicos complejos en gestantes. Fue auditora médico-legal antes de litigar, experiencia que aplica revisando la trazabilidad completa del expediente antes de aceptar cualquier caso nuevo."
+  },
+  {
+    "lawyer_id": "d3000000-0000-0000-0000-000000000003",
+    "full_name": "Abg. Renato Salazar Méndez",
+    "bar_number": "27345",
+    "specialties": [
+      "Seguros Médicos",
+      "Responsabilidad Civil Médica",
+      "Derecho Médico"
+    ],
+    "medical_areas": [
+      "Traumatología",
+      "Cirugía General",
+      "Anestesiología"
+    ],
+    "years_experience": 18,
+    "rating": 4.9,
+    "resolved_cases": 63,
+    "biography": "El expediente más largo que ha llevado tuvo catorce peritajes cruzados por una prótesis de cadera mal posicionada; lo ganó y desde entonces las aseguradoras lo llaman directamente para litigios complejos de cirugía traumatológica. Cobra por resultado en la mayoría de sus casos, algo poco común entre sus colegas."
+  },
+  {
+    "lawyer_id": "d3000000-0000-0000-0000-000000000004",
+    "full_name": "Abg. Carmen Vega Ibáñez",
+    "bar_number": "19234",
+    "specialties": [
+      "Derecho Médico",
+      "Negligencia Médica",
+      "Bioética y Derecho"
+    ],
+    "medical_areas": [
+      "Oncología",
+      "Hematología",
+      "Medicina General"
+    ],
+    "years_experience": 10,
+    "rating": 4.5,
+    "resolved_cases": 28,
+    "biography": "Los reclamos que atiende casi nunca son por un solo error puntual, sino por una cadena de decisiones a lo largo de meses de tratamiento oncológico: demoras en biopsias, cambios de protocolo sin explicación, interconsultas que se pierden en el camino. Trabaja con un comité médico propio que revisa la cronología clínica caso por caso."
+  },
+  {
+    "lawyer_id": "d3000000-0000-0000-0000-000000000005",
+    "full_name": "Abg. Diego Huamán Vera",
+    "bar_number": "30678",
+    "specialties": [
+      "Derecho Penal Médico",
+      "Responsabilidad Civil Médica",
+      "Derecho Sanitario"
+    ],
+    "medical_areas": [
+      "Neurología",
+      "Psiquiatría",
+      "Medicina General"
+    ],
+    "years_experience": 14,
+    "rating": 4.65,
+    "resolved_cases": 39,
+    "biography": "La mitad de su cartera son internamientos psiquiátricos cuestionados por la familia del paciente, y la otra mitad son secuelas neurológicas tras procedimientos que se complicaron. Publicó un artículo sobre capacidad de consentir en pacientes con deterioro cognitivo que sigue siendo citado en foros de derecho sanitario."
+  },
+  {
+    "lawyer_id": "d3000000-0000-0000-0000-000000000006",
+    "full_name": "Abg. Inés Quispe Loayza",
+    "bar_number": "15432",
+    "specialties": [
+      "Derecho Sanitario",
+      "Consentimiento Informado",
+      "Bioética y Derecho"
+    ],
+    "medical_areas": [
+      "Dermatología",
+      "Oftalmología",
+      "Urología"
+    ],
+    "years_experience": 7,
+    "rating": 4.4,
+    "resolved_cases": 16,
+    "biography": "Se mueve entre tres consultorios distintos —dermatológico, oftalmológico y urológico— porque comparten un mismo patrón de riesgo: procedimientos ambulatorios cortos donde nadie se detiene a documentar bien el consentimiento hasta que ya es tarde. Prepara los formularios de autorización de dos clínicas privadas de Lima."
+  },
+  {
+    "lawyer_id": "d3000000-0000-0000-0000-000000000007",
+    "full_name": "Abg. Jorge Paredes Flores",
+    "bar_number": "26781",
+    "specialties": [
+      "Responsabilidad Civil Médica",
+      "Seguros Médicos",
+      "Negligencia Médica"
+    ],
+    "medical_areas": [
+      "Gastroenterología",
+      "Nefrología",
+      "Infectología"
+    ],
+    "years_experience": 16,
+    "rating": 4.75,
+    "resolved_cases": 51,
+    "biography": "Construyó su práctica en el terreno menos disputado de la medicina interna: complicaciones de diálisis, cuadros infecciosos intrahospitalarios y errores de manejo digestivo que rara vez llegan a la prensa pero generan litigios largos y técnicos. Prefiere los peritajes propios antes que confiar en el informe médico legal oficial."
+  },
+  {
+    "lawyer_id": "b4000000-0000-0000-0000-000000000001",
+    "full_name": "Abg. Rocío Ochoa Manrique",
+    "bar_number": "40112",
+    "specialties": [
+      "Responsabilidad Civil Médica",
+      "Derecho Médico"
+    ],
+    "medical_areas": [
+      "Oncología"
+    ],
+    "years_experience": 6,
+    "rating": 4.2,
+    "resolved_cases": 9,
+    "biography": "Egresó de la Universidad Católica Santo Toribio de Mogrovejo, en Chiclayo, y desde entonces atiende sobre todo casos derivados de cirugías oncológicas con reingresos no previstos por complicaciones postoperatorias. Trabaja sola, sin estudio, y responde directamente los mensajes de sus clientes fuera de horario cuando el caso lo amerita."
+  },
+  {
+    "lawyer_id": "b4000000-0000-0000-0000-000000000002",
+    "full_name": "Abg. Fernando Zúñiga Palacios",
+    "bar_number": "40233",
+    "specialties": [
+      "Negligencia Médica",
+      "Responsabilidad Civil Médica"
+    ],
+    "medical_areas": [
+      "Traumatología",
+      "Cirugía General"
+    ],
+    "years_experience": 22,
+    "rating": 4.85,
+    "resolved_cases": 88,
+    "biography": "Con más de dos décadas de ejercicio, es de los pocos abogados de la plaza que aceptan clientes solo por referencia directa de otro médico. Especializado en fracturas mal consolidadas y reintervenciones quirúrgicas, considera que la mayoría de sus victorias vienen de un buen perito, no de un buen alegato."
+  },
+  {
+    "lawyer_id": "b4000000-0000-0000-0000-000000000003",
+    "full_name": "Abg. Milagros Cárdenas Vidal",
+    "bar_number": "40318",
+    "specialties": [
+      "Derecho Sanitario",
+      "Consentimiento Informado"
+    ],
+    "medical_areas": [
+      "Ginecología y Obstetricia"
+    ],
+    "years_experience": 4,
+    "rating": 4.1,
+    "resolved_cases": 6,
+    "biography": "Es la más joven del grupo, pero ya lleva seis casos ganados en obstetricia, todos relacionados con consentimiento para procedimientos de inducción y cesárea de urgencia. Antes de titularse trabajó dos años como asistente de sala en un servicio de maternidad, lo que le da un manejo poco común del lenguaje clínico."
+  },
+  {
+    "lawyer_id": "b4000000-0000-0000-0000-000000000004",
+    "full_name": "Abg. Ricardo Palomino Aguirre",
+    "bar_number": "40407",
+    "specialties": [
+      "Derecho Médico",
+      "Derecho Sanitario"
+    ],
+    "medical_areas": [
+      "Medicina General",
+      "Pediatría"
+    ],
+    "years_experience": 13,
+    "rating": 4.55,
+    "resolved_cases": 30,
+    "biography": "Atiende clínicas de atención primaria y consultorios pediátricos familiares, un segmento que casi nadie más cubre porque los montos en juego son bajos y los casos, tediosos. Dicta un taller anual gratuito para médicos jóvenes sobre cómo redactar una historia clínica que no los exponga."
+  },
+  {
+    "lawyer_id": "b4000000-0000-0000-0000-000000000005",
+    "full_name": "Abg. Adriana Trujillo Bermúdez",
+    "bar_number": "40521",
+    "specialties": [
+      "Responsabilidad Civil Médica",
+      "Negligencia Médica"
+    ],
+    "medical_areas": [
+      "Ginecología y Obstetricia",
+      "Cirugía General"
+    ],
+    "years_experience": 8,
+    "rating": 4.35,
+    "resolved_cases": 17,
+    "biography": "Los últimos tres años los dedicó casi por completo a un solo tipo de caso: complicaciones de cesárea con reintervención posterior. Conoce a los peritos obstétricos de la plaza uno por uno y prefiere elegir el suyo antes de que lo asigne el juzgado."
+  },
+  {
+    "lawyer_id": "b4000000-0000-0000-0000-000000000006",
+    "full_name": "Abg. Sebastián Cornejo Zevallos",
+    "bar_number": "40609",
+    "specialties": [
+      "Seguros Médicos",
+      "Derecho Médico"
+    ],
+    "medical_areas": [
+      "Traumatología"
+    ],
+    "years_experience": 11,
+    "rating": 4.45,
+    "resolved_cases": 25,
+    "biography": "Litiga contra las mismas cuatro o cinco aseguradoras desde hace once años, lo que le da una ventaja poco habitual: conoce de memoria las cláusulas de exclusión que suelen aplicar en accidentes de tránsito con fracturas expuestas. Su tasa de conciliación extrajudicial supera el setenta por ciento."
+  },
+  {
+    "lawyer_id": "b4000000-0000-0000-0000-000000000007",
+    "full_name": "Abg. Gabriela Manrique Rosales",
+    "bar_number": "40714",
+    "specialties": [
+      "Bioética y Derecho",
+      "Derecho Sanitario"
+    ],
+    "medical_areas": [
+      "Pediatría"
+    ],
+    "years_experience": 15,
+    "rating": 4.6,
+    "resolved_cases": 41,
+    "biography": "Enseña bioética clínica los fines de semana en un diplomado de posgrado y litiga casos de pediatría entre semana; sostiene que ambas cosas se alimentan mutuamente. Su bio profesional en el colegio de abogados la describe simplemente como 'defensora de decisiones difíciles', una frase que ella misma escribió."
+  },
+  {
+    "lawyer_id": "b4000000-0000-0000-0000-000000000008",
+    "full_name": "Abg. Álvaro Farfán Aliaga",
+    "bar_number": "40822",
+    "specialties": [
+      "Derecho Penal Médico",
+      "Negligencia Médica"
+    ],
+    "medical_areas": [
+      "Cirugía General",
+      "Traumatología"
+    ],
+    "years_experience": 20,
+    "rating": 4.7,
+    "resolved_cases": 57,
+    "biography": "Formado en San Marcos, con una maestría en Ciencias Penales por la misma universidad. Veinte años después sigue prefiriendo la sala penal a cualquier otra: dice que ahí se define de verdad si un médico trabajó dentro de la lex artis o no. Rechaza más casos de los que acepta."
+  },
+  {
+    "lawyer_id": "b4000000-0000-0000-0000-000000000009",
+    "full_name": "Abg. Beatriz Salcedo Otiniano",
+    "bar_number": "40915",
+    "specialties": [
+      "Responsabilidad Civil Médica",
+      "Derecho Médico"
+    ],
+    "medical_areas": [
+      "Cardiología"
+    ],
+    "years_experience": 9,
+    "rating": 4.4,
+    "resolved_cases": 18,
+    "biography": "Se hizo un nombre defendiendo a un cardiólogo acusado de retrasar una angioplastía en un caso que llegó a segunda instancia y terminó absuelto; desde entonces la mitad de sus consultas llegan por ese caso puntual. Trabaja con un cardiólogo forense externo en cada expediente nuevo."
+  },
+  {
+    "lawyer_id": "b4000000-0000-0000-0000-000000000010",
+    "full_name": "Abg. Iván Contreras Sotelo",
+    "bar_number": "41003",
+    "specialties": [
+      "Derecho Penal Médico",
+      "Bioética y Derecho"
+    ],
+    "medical_areas": [
+      "Neurología",
+      "Psiquiatría"
+    ],
+    "years_experience": 17,
+    "rating": 4.75,
+    "resolved_cases": 49,
+    "biography": "Se especializó en neurología y psiquiatría después de un caso temprano en su carrera sobre alta médica prematura de un paciente con riesgo suicida, que lo marcó lo suficiente como para no volver a tocar otro tipo de expediente. Es perito judicial acreditado en capacidad civil."
+  },
+  {
+    "lawyer_id": "b4000000-0000-0000-0000-000000000011",
+    "full_name": "Abg. Lourdes Benavides Ugarte",
+    "bar_number": "41128",
+    "specialties": [
+      "Derecho Sanitario",
+      "Derecho Médico"
+    ],
+    "medical_areas": [
+      "Oncología"
+    ],
+    "years_experience": 6,
+    "rating": 4.15,
+    "resolved_cases": 8,
+    "biography": "Antes de litigar trabajó cinco años como coordinadora de calidad en un hospital oncológico, revisando exactamente el tipo de expedientes que ahora defiende desde el otro lado. Prefiere resolver por conciliación siempre que el paciente aún esté en tratamiento activo."
+  },
+  {
+    "lawyer_id": "b4000000-0000-0000-0000-000000000012",
+    "full_name": "Abg. Ximena Coronado Villanueva",
+    "bar_number": "41207",
+    "specialties": [
+      "Negligencia Médica",
+      "Seguros Médicos"
+    ],
+    "medical_areas": [
+      "Anestesiología"
+    ],
+    "years_experience": 12,
+    "rating": 4.5,
+    "resolved_cases": 27,
+    "biography": "El registro de signos vitales minuto a minuto es, según ella, la pieza que gana o pierde cualquier caso de sedación complicada; se lo repite a cada anestesiólogo que la contrata para revisar su protocolo antes de que ocurra algo. Litiga poco, asesora mucho."
+  },
+  {
+    "lawyer_id": "b4000000-0000-0000-0000-000000000013",
+    "full_name": "Abg. Rodrigo Terán Marín",
+    "bar_number": "41315",
+    "specialties": [
+      "Derecho Médico",
+      "Responsabilidad Civil Médica"
+    ],
+    "medical_areas": [
+      "Urología"
+    ],
+    "years_experience": 19,
+    "rating": 4.65,
+    "resolved_cases": 52,
+    "biography": "Su especialidad no aparece en ningún diploma: aprendió a litigar casos de urología acompañando a su padre, también abogado, desde los veinticuatro años. Hoy lleva el mismo estudio familiar y sigue recibiendo referidos de los clientes que atendió su padre."
+  },
+  {
+    "lawyer_id": "b4000000-0000-0000-0000-000000000014",
+    "full_name": "Abg. Camila Delgado Escobar",
+    "bar_number": "41402",
+    "specialties": [
+      "Derecho Sanitario",
+      "Consentimiento Informado"
+    ],
+    "medical_areas": [
+      "Gastroenterología"
+    ],
+    "years_experience": 8,
+    "rating": 4.3,
+    "resolved_cases": 14,
+    "biography": "Se enfoca en procedimientos endoscópicos que terminan en perforación o complicación no advertida al paciente. Sostiene que casi todos esos casos se explican por un formulario de autorización firmado sin haberlo leído, no por un error técnico del procedimiento en sí."
+  },
+  {
+    "lawyer_id": "b4000000-0000-0000-0000-000000000015",
+    "full_name": "Abg. Hugo Ponce Arriola",
+    "bar_number": "41519",
+    "specialties": [
+      "Derecho Penal Médico",
+      "Derecho Médico"
+    ],
+    "medical_areas": [
+      "Psiquiatría",
+      "Neurología"
+    ],
+    "years_experience": 5,
+    "rating": 4.05,
+    "resolved_cases": 5,
+    "biography": "Es reciente en la práctica de neurología y psiquiatría forense, pero viene de cuatro años en la defensa penal pública, donde litigó decenas de audiencias antes de cumplir treinta. Todavía construye su cartera de referidos médicos y acepta, por ahora, casos que otros colegas más establecidos prefieren no tomar por el monto reducido de los honorarios."
+  },
+  {
+    "lawyer_id": "b4000000-0000-0000-0000-000000000016",
+    "full_name": "Abg. Valeria Aguirre Bocanegra",
+    "bar_number": "41633",
+    "specialties": [
+      "Responsabilidad Civil Médica",
+      "Bioética y Derecho"
+    ],
+    "medical_areas": [
+      "Oncología",
+      "Hematología"
+    ],
+    "years_experience": 14,
+    "rating": 4.55,
+    "resolved_cases": 33,
+    "biography": "Perdió a un familiar cercano por lo que en su momento consideró una demora diagnóstica, y ese episodio personal terminó definiendo el rumbo de su carrera hacia la oncología y la hematología. Lo cuenta abiertamente en la primera reunión con cada cliente nuevo."
+  },
+  {
+    "lawyer_id": "b4000000-0000-0000-0000-000000000017",
+    "full_name": "Abg. Teresa Alvarado Yupanqui",
+    "bar_number": "41748",
+    "specialties": [
+      "Derecho Sanitario",
+      "Consentimiento Informado"
+    ],
+    "medical_areas": [
+      "Endocrinología"
+    ],
+    "years_experience": 10,
+    "rating": 4.2,
+    "resolved_cases": 12,
+    "biography": "Es una de las pocas abogadas de Lima con casos activos en endocrinología, un área donde casi no hay litigio especializado porque los reclamos suelen diluirse entre varias comorbilidades. Trabaja principalmente con pacientes diabéticos con complicaciones por manejo tardío, y suele apoyarse en un endocrinólogo de confianza para traducir el expediente clínico al lenguaje del proceso."
+  },
+  {
+    "lawyer_id": "b4000000-0000-0000-0000-000000000018",
+    "full_name": "Abg. Óscar Bedoya Landa",
+    "bar_number": "41856",
+    "specialties": [
+      "Negligencia Médica",
+      "Derecho Médico"
+    ],
+    "medical_areas": [
+      "Neumología"
+    ],
+    "years_experience": 16,
+    "rating": 4.45,
+    "resolved_cases": 38,
+    "biography": "La mayoría de sus casos llegan por reingresos hospitalarios de pacientes con insuficiencia respiratoria crónica que la familia considera prevenibles. Prepara cada expediente con línea de tiempo detallada de saturación de oxígeno, algo que pocos colegas se molestan en reconstruir."
+  },
+  {
+    "lawyer_id": "b4000000-0000-0000-0000-000000000019",
+    "full_name": "Abg. Natalia Guevara Chumpitaz",
+    "bar_number": "41904",
+    "specialties": [
+      "Responsabilidad Civil Médica",
+      "Derecho Sanitario"
+    ],
+    "medical_areas": [
+      "Nefrología"
+    ],
+    "years_experience": 7,
+    "rating": 4.1,
+    "resolved_cases": 9,
+    "biography": "Un solo caso de infección asociada a catéter de diálisis, que terminó en una indemnización considerable, la posicionó como referente para el resto de los centros de hemodiálisis de la ciudad. Sigue siendo prácticamente el único tipo de caso que acepta."
+  },
+  {
+    "lawyer_id": "b4000000-0000-0000-0000-000000000020",
+    "full_name": "Abg. Marco Del Águila Rosales",
+    "bar_number": "42011",
+    "specialties": [
+      "Derecho Penal Médico",
+      "Negligencia Médica"
+    ],
+    "medical_areas": [
+      "Infectología"
+    ],
+    "years_experience": 13,
+    "rating": 4.35,
+    "resolved_cases": 24,
+    "biography": "Litiga sobre todo infecciones intrahospitalarias mal contenidas, un terreno técnico que casi nadie más quiere pisar porque exige entender protocolos de bioseguridad además de derecho penal. Fue perito de parte en el brote hospitalario más citado de los últimos años en Lima."
+  },
+  {
+    "lawyer_id": "b4000000-0000-0000-0000-000000000021",
+    "full_name": "Abg. Silvia Ríos Contreras",
+    "bar_number": "42127",
+    "specialties": [
+      "Consentimiento Informado",
+      "Derecho Sanitario"
+    ],
+    "medical_areas": [
+      "Oftalmología"
+    ],
+    "years_experience": 4,
+    "rating": 4.0,
+    "resolved_cases": 4,
+    "biography": "Recién colegiada, construyó su primer caso relevante defendiendo a un oftalmólogo tras una cirugía refractiva con resultado no esperado; el paciente había firmado el consentimiento, pero sin que se le explicaran los riesgos verbalmente, y ese matiz decidió el proceso."
+  },
+  {
+    "lawyer_id": "b4000000-0000-0000-0000-000000000022",
+    "full_name": "Abg. Andrés Villanueva Bravo",
+    "bar_number": "42208",
+    "specialties": [
+      "Derecho Médico",
+      "Responsabilidad Civil Médica"
+    ],
+    "medical_areas": [
+      "Reumatología"
+    ],
+    "years_experience": 11,
+    "rating": 4.25,
+    "resolved_cases": 15,
+    "biography": "Es de los muy pocos abogados en Lima con casos activos en reumatología, casi siempre relacionados con retraso en el diagnóstico de enfermedades autoinmunes de progresión lenta. Reconoce abiertamente que es un nicho de bajo volumen, pero de clientes muy fieles."
+  },
+  {
+    "lawyer_id": "b4000000-0000-0000-0000-000000000023",
+    "full_name": "Abg. Claudia Chávez Marín",
+    "bar_number": "42315",
+    "specialties": [
+      "Seguros Médicos",
+      "Bioética y Derecho"
+    ],
+    "medical_areas": [
+      "Cardiología"
+    ],
+    "years_experience": 9,
+    "rating": 4.3,
+    "resolved_cases": 16,
+    "biography": "Cubre un segmento poco habitual dentro de la cardiología: eventos adversos durante pruebas de esfuerzo o cateterismos ambulatorios, donde la línea entre riesgo asumido y negligencia depende del protocolo previo de evaluación del paciente. Las aseguradoras la buscan específicamente para dictaminar si la complicación era previsible, y su informe suele ser determinante para que el caso se resuelva sin llegar a juicio."
+  },
+  {
+    "lawyer_id": "b4000000-0000-0000-0000-000000000024",
+    "full_name": "Abg. Rubén Gutiérrez Palomino",
+    "bar_number": "42409",
+    "specialties": [
+      "Responsabilidad Civil Médica",
+      "Consentimiento Informado"
+    ],
+    "medical_areas": [
+      "Urología"
+    ],
+    "years_experience": 10,
+    "rating": 4.4,
+    "resolved_cases": 20,
+    "biography": "Diez años dedicados casi en exclusiva a procedimientos ambulatorios de baja complejidad, donde el mayor riesgo legal no está en la técnica sino en la documentación previa: consentimientos incompletos, historias clínicas con vacíos, autorizaciones verbales nunca registradas por escrito. Revisa cada expediente como si fuera a terminar en un juzgado."
+  },
+  {
+    "lawyer_id": "b4000000-0000-0000-0000-000000000025",
+    "full_name": "Abg. Karina Sotelo Delgado",
+    "bar_number": "42501",
+    "specialties": [
+      "Seguros Médicos",
+      "Consentimiento Informado"
+    ],
+    "medical_areas": [
+      "Psiquiatría"
+    ],
+    "years_experience": 10,
+    "rating": 4.35,
+    "resolved_cases": 18,
+    "biography": "Diez años dedicados casi en exclusiva a procedimientos ambulatorios de baja complejidad, donde el mayor riesgo legal no está en la técnica sino en la documentación previa: consentimientos incompletos, historias clínicas con vacíos, autorizaciones verbales nunca registradas por escrito. Trabaja de la mano con las aseguradoras que cubren a la clínica."
+  },
+  {
+    "lawyer_id": "b4000000-0000-0000-0000-000000000026",
+    "full_name": "Abg. Estefanía Rojas Ibáñez",
+    "bar_number": "42618",
+    "specialties": [
+      "Derecho Penal Médico",
+      "Negligencia Médica"
+    ],
+    "medical_areas": [
+      "Urología"
+    ],
+    "years_experience": 13,
+    "rating": 4.55,
+    "resolved_cases": 29,
+    "biography": "Construyó su reputación en un solo tipo de expediente: intervenciones que se prolongaron mucho más de lo previsto y terminaron con una reintervención de urgencia. El común denominador, según ella, casi nunca es el cirujano sino la falta de un plan B documentado antes de entrar a sala."
+  },
+  {
+    "lawyer_id": "b4000000-0000-0000-0000-000000000027",
+    "full_name": "Abg. Gonzalo Manrique Trujillo",
+    "bar_number": "42704",
+    "specialties": [
+      "Responsabilidad Civil Médica",
+      "Negligencia Médica"
+    ],
+    "medical_areas": [
+      "Gastroenterología"
+    ],
+    "years_experience": 13,
+    "rating": 4.5,
+    "resolved_cases": 26,
+    "biography": "Construyó su reputación en un solo tipo de expediente: intervenciones que se prolongaron mucho más de lo previsto y terminaron con una reintervención de urgencia. El común denominador, según él, casi nunca es el cirujano sino la falta de un plan B documentado antes de entrar a sala. Litiga solo en Lima Metropolitana."
+  },
+  {
+    "lawyer_id": "b4000000-0000-0000-0000-000000000028",
+    "full_name": "Abg. Pilar Zevallos Farfán",
+    "bar_number": "42812",
+    "specialties": [
+      "Derecho Sanitario",
+      "Bioética y Derecho"
+    ],
+    "medical_areas": [
+      "Gastroenterología"
+    ],
+    "years_experience": 8,
+    "rating": 4.2,
+    "resolved_cases": 11,
+    "biography": "Atiende sobre todo casos donde el paciente reclama no haber entendido de verdad el tratamiento crónico que le indicaron, más allá de haber firmado el papel correspondiente. Sostiene que buena parte de estos reclamos se resuelven si el médico documenta la conversación, no solo la firma."
+  },
+  {
+    "lawyer_id": "b4000000-0000-0000-0000-000000000029",
+    "full_name": "Abg. Julio Aliaga Cornejo",
+    "bar_number": "42933",
+    "specialties": [
+      "Derecho Sanitario",
+      "Consentimiento Informado"
+    ],
+    "medical_areas": [
+      "Reumatología"
+    ],
+    "years_experience": 8,
+    "rating": 4.15,
+    "resolved_cases": 10,
+    "biography": "Atiende sobre todo casos donde el paciente reclama no haber entendido de verdad el tratamiento crónico que le indicaron, más allá de haber firmado el papel correspondiente. Sostiene que buena parte de estos reclamos se resuelven si el médico documenta la conversación, no solo la firma. Da seguimiento personal a cada caso hasta el cierre."
+  },
+  {
+    "lawyer_id": "b4000000-0000-0000-0000-000000000030",
+    "full_name": "Abg. Diana Landa Ochoa",
+    "bar_number": "43015",
+    "specialties": [
+      "Responsabilidad Civil Médica",
+      "Derecho Médico"
+    ],
+    "medical_areas": [
+      "Pediatría",
+      "Medicina General"
+    ],
+    "years_experience": 21,
+    "rating": 4.8,
+    "resolved_cases": 71,
+    "biography": "Es una de las de mayor antigüedad del directorio, con más de dos décadas de ejercicio. Empezó su carrera en un estudio grande y hace catorce años se independizó para litigar exclusivamente casos pediátricos. Su despacho queda a dos cuadras del hospital de niños, y no es casual."
+  },
+  {
+    "lawyer_id": "b4000000-0000-0000-0000-000000000031",
+    "full_name": "Abg. Elena Marín Bedoya",
+    "bar_number": "43126",
+    "specialties": [
+      "Negligencia Médica",
+      "Bioética y Derecho"
+    ],
+    "medical_areas": [
+      "Cardiología",
+      "Neurología"
+    ],
+    "years_experience": 15,
+    "rating": 4.6,
+    "resolved_cases": 40,
+    "biography": "Se formó como enfermera antes de estudiar Derecho, y todavía usa esa base clínica para leer un electrocardiograma o una resonancia sin depender por completo del perito. Divide su cartera entre casos cardiológicos y neurológicos casi en partes iguales, y es una de las pocas del gremio que redacta ella misma el resumen técnico de cada expediente antes de entregarlo al perito externo."
+  },
+  {
+    "lawyer_id": "b4000000-0000-0000-0000-000000000032",
+    "full_name": "Abg. Christian Aguirre Terán",
+    "bar_number": "43219",
+    "specialties": [
+      "Derecho Médico",
+      "Seguros Médicos"
+    ],
+    "medical_areas": [
+      "Anestesiología"
+    ],
+    "years_experience": 6,
+    "rating": 4.15,
+    "resolved_cases": 7,
+    "biography": "Todavía comparte oficina con otros dos abogados jóvenes, pero ya construyó una relación estable con dos clínicas privadas que lo llaman de forma recurrente para revisar protocolos quirúrgicos antes de que ocurra un incidente, no después. Es la parte del trabajo que más le interesa: prevenir el litigio en vez de ganarlo."
+  },
+  {
+    "lawyer_id": "b4000000-0000-0000-0000-000000000033",
+    "full_name": "Abg. Fiorella Ponce Guevara",
+    "bar_number": "43304",
+    "specialties": [
+      "Derecho Sanitario",
+      "Derecho Penal Médico"
+    ],
+    "medical_areas": [
+      "Ginecología y Obstetricia",
+      "Traumatología"
+    ],
+    "years_experience": 12,
+    "rating": 4.5,
+    "resolved_cases": 31,
+    "biography": "Litigó dos años en provincia antes de trasladarse a Lima, y sigue recibiendo casos derivados de colegas del norte del país. Sus casos más frecuentes combinan complicaciones obstétricas con lesiones traumáticas del parto instrumentado, un cruce poco común que pocos estudios de la capital manejan con la misma soltura."
+  }
+]

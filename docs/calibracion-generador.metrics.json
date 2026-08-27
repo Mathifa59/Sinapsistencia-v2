@@ -1,0 +1,89 @@
+{
+  "generated_at": "2026-08-27",
+  "random_state": 42,
+  "n_bootstrap": 10000,
+  "input_file": "NPDB2601.CSV",
+  "input_sha256": "1409fc66686b637033cf1d61d4e478e46fb5e6ed308a61c34f793a7b6b4f044b",
+  "n_filtered": 210304,
+  "n_filtered_expected": 210304,
+  "library_versions": {
+    "numpy": "2.4.4",
+    "pandas": "3.0.2"
+  },
+  "informed_consent": {
+    "n_with_707": 2248,
+    "n_without_707": 208056,
+    "mean_outcome_without_707": 6.4344215019033335,
+    "mean_outcome_with_707": 4.9488434163701065,
+    "mean_diff_707_minus_no707": -1.485578085533227,
+    "ci95_lo": -1.5733971867620637,
+    "ci95_hi": -1.3987948174403353,
+    "generator_effect": {
+      "informed_consent_false_main": 0.2,
+      "informed_consent_false_x_alta_complexity": 0.12,
+      "note": "Suma directa sobre risk_score en [0,1]; no es una escala OUTCOME 1-9."
+    }
+  },
+  "has_prior_complaints": {
+    "n_valid_npmalrpt": 210304,
+    "n_prior_gt1": 131470,
+    "n_first_report": 78834,
+    "mean_outcome_first_report": 6.563919121191364,
+    "mean_outcome_prior_gt1": 6.331368373012855,
+    "mean_diff_prior_minus_first": -0.23255074817850918,
+    "ci95_lo": -0.2520000686481088,
+    "ci95_hi": -0.21248511810146298,
+    "generator_effect": {
+      "has_prior_complaints_true_main": 0.15,
+      "has_prior_complaints_true_x_documentation_incomplete": 0.1
+    },
+    "caveat": "NPMALRPT cuenta reportes en el archivo publico COMPLETO, no en el subconjunto filtrado aqui; el filtro aplicado es a nivel de fila (RECTYPE/LICNFELD/OUTCOME), no de sujeto, asi que el conteo de NPMALRPT sigue siendo valido."
+  },
+  "time_since_incident": {
+    "n_valid_lag": 209784,
+    "n_dropped_out_of_range_or_missing": 520,
+    "lag_range_kept_years": [
+      0,
+      20
+    ],
+    "pearson_corr_lag_years_vs_outcome": 0.08894882912125324,
+    "outcome_mean_by_lag_year_bucket": {
+      "0": {
+        "n": 1235,
+        "mean_outcome": 4.804858299595142
+      },
+      "1": {
+        "n": 8260,
+        "mean_outcome": 5.292009685230024
+      },
+      "2": {
+        "n": 22952,
+        "mean_outcome": 6.014682816312304
+      },
+      "3": {
+        "n": 36039,
+        "mean_outcome": 6.363051139043813
+      },
+      "4": {
+        "n": 39694,
+        "mean_outcome": 6.479820627802691
+      },
+      "5": {
+        "n": 32876,
+        "mean_outcome": 6.57506995984913
+      },
+      "6+": {
+        "n": 68728,
+        "mean_outcome": 6.640728669537888
+      }
+    },
+    "generator_effect": {
+      "formula": "score += log1p(days) / log1p(365) * 0.08",
+      "days_domain_in_generator": [
+        0,
+        365
+      ],
+      "note": "El generador NUNCA representa lags mayores a un anio: time_since_incident_days se muestrea uniforme en [0, 365]. El NPDB opera en anios y con lags que superan holgadamente un anio. Ver nota de resolucion en el datasheet de salida."
+    }
+  }
+}
