@@ -151,6 +151,20 @@ def main() -> None:
     }
     joblib.dump(artifact, base / args.out, compress=3)
 
+    # ── Comparación honesta contra el baseline lineal: nunca asumir que RF
+    #    gana. Un margen de 0.01 en f1_macro separa "supera"/"queda por
+    #    debajo" de "empatado" (ruido esperable con n_test=8000).
+    f1_vs_logit = f1 - logit_f1
+    if f1_vs_logit > 0.01:
+        linear_clause = f"supera al baseline lineal (regresión logística, f1={logit_f1:.3f})"
+    elif f1_vs_logit < -0.01:
+        linear_clause = f"queda ligeramente por debajo de la regresión logística (f1={logit_f1:.3f})"
+    else:
+        linear_clause = (
+            f"queda a la par de la regresión logística (f1={logit_f1:.3f}), lo que indica "
+            f"que la estructura del generador es mayormente aditiva"
+        )
+
     # ── Métricas para model_metrics (HU-35) ─────────────────────────────────
     metrics = {
         "model_name": "risk_classifier",
@@ -162,7 +176,8 @@ def main() -> None:
         "notes": (
             f"RandomForest (150 árboles) sobre dataset sintético balanceado "
             f"({len(df)} filas). CV 5-fold f1_macro={cv_f1.mean():.4f}±{cv_f1.std():.4f}. "
-            f"Supera baseline lineal (f1={logit_f1:.3f}) y trivial (f1={dummy_f1:.3f})."
+            f"Supera ampliamente el baseline trivial (f1={dummy_f1:.3f}) y {linear_clause}. "
+            f"Se mantiene RandomForest por explicabilidad y manejo nativo de variables categóricas."
         ),
     }
     (base / args.metrics_out).write_text(

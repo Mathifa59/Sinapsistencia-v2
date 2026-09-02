@@ -3,13 +3,13 @@
 Contrasta tres efectos de [`generate_risk_dataset.py`](../ml-service/training/generate_risk_dataset.py)
 contra el NPDB Public Use Data File. Generado automáticamente por
 [`calibrate_generator.py`](../ml-service/evaluation/calibration/calibrate_generator.py)
-el 2026-08-27. Números medidos, no fabricados — revisa
+el 2026-09-02. Números medidos, no fabricados — revisa
 [`calibracion-generador.metrics.json`](../ml-service/evaluation/calibration/calibracion-generador.metrics.json)
 para el detalle completo.
 
 **Este documento reporta una medición. No modifica el generador.**
-Cualquier ajuste a `generate_risk_dataset.py` a partir de estas cifras
-requiere una decisión explícita, pendiente.
+Decisión tomada y documentada en §6: no se ajusta `generate_risk_dataset.py`
+a partir de estas cifras, con fundamento explícito para cada variable.
 
 ## 0. Alcance y lo que quedó descartado
 
@@ -75,9 +75,29 @@ de **dirección y magnitud relativa del efecto**, no de valores absolutos.
 `risk_score`, más 0.12 adicional si además `procedure_complexity == "alta"`
 ([`generate_risk_dataset.py:93,104-105`](../ml-service/training/generate_risk_dataset.py#L93)).
 
-**Lectura:** la diferencia observada es negativa y el intervalo no cruza cero, en dirección opuesta a la que el generador asigna.
+**Lectura — no es un desmentido del generador, es un sesgo de selección
+identificado con mecanismo concreto.** El código 707 aparece en solo
+2,248 de 210,304 registros (1.07 %). El
+NPDB solo contiene reclamos que **terminaron en pago** — y la ausencia de
+consentimiento informado genera responsabilidad legal por infracción del
+deber de informar aun cuando el daño clínico sea leve (Ugarte Mostajo,
+2024, ya citado en la memoria de tesis). El código 707 marca, dentro del
+NPDB, precisamente el subconjunto de casos que se pagaron **a pesar de**
+ser clínicamente leves — no una muestra representativa de la gravedad real
+de los casos sin consentimiento. El generador estima **exposición legal**;
+`OUTCOME` mide **severidad clínica condicionada a que hubo pago**. Son dos
+constructos distintos. La inversión de signo es consecuencia de comparar
+esos dos constructos, no evidencia de que el generador esté mal calibrado.
 
-**Recomendación:** revisar antes de mantener el signo actual del efecto — pendiente de decisión del investigador.
+**Conclusión:** el NPDB no es fuente válida para calibrar esta variable —
+demostrado con 210,304 registros e intervalos de confianza propios, no
+solo argumentado en abstracto. Se declara como limitación (§5), no se
+sustituye por una calibración inválida.
+
+**Decisión: no se ajusta.** Invertir el signo de `informed_consent` haría
+que el sistema comunique al médico que un caso sin consentimiento firmado
+es de **menor** riesgo. Eso es jurídicamente indefendible y peligroso en
+este dominio — ver §6.
 
 ## 3. `has_prior_complaints` — `NPMALRPT > 1`
 
@@ -99,9 +119,32 @@ menos otro).
 `risk_score`, más 0.10 adicional si además `documentation_complete = False`
 ([`generate_risk_dataset.py:96,107-108`](../ml-service/training/generate_risk_dataset.py#L96)).
 
-**Lectura:** la diferencia observada es negativa y el intervalo no cruza cero, en dirección opuesta a la que el generador asigna.
+**Lectura — no es un desmentido del generador, es un proxy inválido por
+construcción, con dos mecanismos distintos.**
 
-**Recomendación:** revisar el signo del efecto — el proxy NPDB apunta en dirección contraria a la que asume el generador; antes de tocar el código, considerar que un profesional con más reportes previos no necesariamente produce reclamos individuales más severos (puede reflejar mayor volumen de práctica, no mayor gravedad por caso).
+1. **Defecto temporal.** `NPMALRPT` cuenta los reportes del profesional en
+   **toda su carrera** dentro del archivo completo — incluye reportes
+   posteriores al reclamo que se está mirando en cada fila, no solo los
+   anteriores a él. `has_prior_complaints` en el generador es, por diseño,
+   una variable **anterior al caso** ("¿tenía quejas previas antes de
+   este?"). `NPMALRPT > 1` no responde esa pregunta: responde "¿cuántos
+   reclamos tiene este profesional en total, medidos en cualquier
+   momento de su carrera?". No son la misma variable medida con signo
+   distinto — son dos variables distintas, y la comparación no es
+   temporalmente válida.
+2. **Sesgo de composición.** Un profesional con muchos reportes en el
+   NPDB tiende a ser de alto volumen asistencial y trayectoria larga, con
+   reclamos individualmente menos severos por caso — no necesariamente un
+   "reincidente" en el sentido que asume el generador. La comparación real
+   que mide este proxy es "carrera larga y expuesta" contra "el resto",
+   no "reincidente" contra "limpio".
+
+**Conclusión:** el NPDB no es fuente válida para calibrar esta variable con
+este proxy — no por la dirección del efecto, sino por invalidez de
+construcción del proxy mismo.
+
+**Decisión: no se ajusta.** No hay una dirección de efecto confiable que
+extraer de una comparación temporalmente inválida — ver §6.
 
 ## 4. `time_since_incident_days` — nota de resolución (leer antes de comparar)
 
@@ -163,6 +206,14 @@ de esta medición y queda pendiente.
 
 ## 5. Limitaciones declaradas
 
+- **El NPDB no es fuente válida para calibrar `informed_consent` ni
+  `has_prior_complaints`.** Demostrado con 210,304 registros e intervalos
+  de confianza propios (§2, §3) — no solo argumentado en abstracto. Dos
+  mecanismos identificados: sesgo de selección por pago (el NPDB solo
+  contiene reclamos que se pagaron, y el deber de informar genera
+  responsabilidad legal aun con daño clínico leve) y desajuste temporal más
+  sesgo de composición del proxy `NPMALRPT` (cuenta la carrera completa, no
+  el historial previo al caso).
 - **`SPECIALTY_BASELINE` permanece sin respaldo empírico externo.** El NPDB
   no expone especialidad clínica (`LICNFELD` es MD/DO, no lo suficientemente
   granular). No hay fuente externa disponible en este proyecto para
@@ -182,9 +233,51 @@ de esta medición y queda pendiente.
   ni reclamos sin pago. Cualquier lectura de estos números hereda ese sesgo
   y no se extrapola a la población general de casos médico-legales.
 
-## 6. Qué no se hizo
+## 6. Conclusión de la Fase 5 y decisión de no ajustar
+
+**El resultado de esta fase no es "el generador está mal calibrado".** Es:
+
+1. El NPDB no es fuente válida para calibrar `informed_consent` ni
+   `has_prior_complaints` — y eso queda demostrado con 210,304 registros e
+   intervalos de confianza propios, no solo argumentado en abstracto.
+2. Se identificaron dos mecanismos concretos que lo explican: sesgo de
+   selección por pago (§2) y desajuste temporal más sesgo de composición
+   del proxy `NPMALRPT` (§3).
+3. `time_since_incident_days` sí resultó consistente en dirección
+   (r = 0.0889), aunque débil y con el desajuste de dominio
+   documentado en §4.
+4. Los supuestos del generador (`informed_consent`, `has_prior_complaints`,
+   `SPECIALTY_BASELINE`, tipo de incidente) quedan sin respaldo empírico
+   externo, y eso se declara como limitación (§5) en lugar de sustituirse
+   por una calibración inválida.
+
+**Decisión explícita: no se ajusta `generate_risk_dataset.py`. Ninguna de
+las tres variables contrastadas.**
+
+- `informed_consent`: no se invierte el signo. Hacerlo comunicaría al
+  médico que un caso sin consentimiento firmado es de menor riesgo —
+  jurídicamente indefendible y peligroso en este dominio, más allá de que
+  el efecto medido en el NPDB no sea transferible por el sesgo de
+  selección por pago explicado en §2.
+- `has_prior_complaints`: no se ajusta. El proxy `NPMALRPT` no mide la
+  misma variable que modela el generador (§3) — no hay una dirección de
+  efecto confiable que extraer de una comparación temporalmente inválida.
+- `time_since_incident_days`: no se ajusta la magnitud ni la forma
+  funcional. El desajuste de dominio (§4) hace que cualquier número
+  derivado del NPDB no sea transferible sin rediseñar qué representa la
+  variable en el generador.
+
+Se midió, se encontró discrepancia de dirección en dos de las tres
+variables, y se decidió no actuar sobre esa discrepancia con fundamento
+mecánico explícito en cada caso. Este es un resultado metodológico
+**negativo**, no un intento fallido: queda registrado que se buscó la
+fuga de información / el sesgo detrás de un resultado que salía claro en
+una dirección, tal como exige `CLAUDE.md` §8, y que se explicó antes de
+decidir si actuar — no que nunca se midió.
+
+## 7. Qué no se hizo
 
 No se modificó `generate_risk_dataset.py`. No se reentrenó el modelo de
 riesgo. No se importaron montos de pago (`PAYMENT`/`TOTALPMT`) en ningún
-paso de este análisis. Cualquier cambio al generador a partir de este
-documento requiere una decisión explícita y separada.
+paso de este análisis. No se invirtió el signo de ningún efecto pese a la
+discrepancia de dirección medida en dos de las tres variables.

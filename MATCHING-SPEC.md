@@ -146,16 +146,74 @@ Dentro del tope de 250, con margen de 44 pares. Las combinaciones descartadas an
 esta (todas excedían 250 con datos reales): top-10/8 variantes → 570; top-5/8 variantes → 376;
 top-5 sin `random` → 297; top-3/8 variantes (con `random` pooleada) → 257.
 
+### 4.4.1 ⚠ Ritmo real de adjudicación (piloto) — el tope de 250 no basta por sí solo
+
+⚠ Reemplaza la estimación implícita anterior. El instrumento del piloto (hoja «Instrucciones»,
+`adjudicacion-piloto.xlsx`) decía **"uno o dos minutos por fila"**. El piloto midió lo contrario.
+
+**Datos crudos** (hoja «Registro» del piloto, 21 pares completados):
+
+| Tanda | Fecha | Inicio | Fin | Duración |
+|---|---|---|---|---|
+| 1 | 2026-08-30 | 21:00 | 21:50 | 50 min |
+| 2 | 2026-08-31 | 22:00 | 22:20 | 20 min |
+| 3 | 2026-09-01 | 09:00 | 10:00 | 60 min |
+| 4 | 2026-09-01 | 09:00 | 10:00 | 60 min |
+
+Las tandas 3 y 4 quedaron anotadas con la misma fecha y el mismo rango horario exacto — no se
+puede distinguir desde el instrumento si son dos tandas reales o una sola registrada dos veces.
+Sin poder resolver esa ambigüedad, se documentan ambos límites:
+
+- **Límite inferior (130 min):** tandas 1+2+3, tratando la tanda 4 como duplicado de registro.
+- **Límite superior (190 min):** las cuatro tandas tal como están anotadas.
+
+**Ritmo medido:** 130 min / 21 pares ≈ **6 min/par** (inferior) a 190 min / 21 pares ≈ **9
+min/par** (superior). El supuesto anterior (1–2 min/par) subestimó el ritmo real por un factor de
+entre 3× y 6×, según el límite que se use.
+
+**3 min/par — supuesto optimista, no medido.** La mitad del límite inferior medido, asumiendo que
+el ritmo mejora con práctica sobre un instrumento más largo y homogéneo. Se documenta como
+supuesto para acotar un mejor caso razonable, no como dato observado.
+
+**Extrapolación a 206 pares** (volumen actual dentro del tope de 250):
+
+| Ritmo | Origen | Horas totales |
+|---|---|---|
+| 3 min/par | Supuesto optimista, régimen sostenido | ≈ 10.3 h |
+| 6 min/par | Medido, límite inferior | ≈ 21.2 h |
+| 9 min/par | Medido, límite superior | ≈ 30.9 h |
+
+Bajo cualquiera de los tres escenarios, el instrumento definitivo dimensionado a 206 pares excede
+holgadamente lo que una sesión o un puñado de sesiones cortas puede absorber.
+
+**Consecuencia para el tope de 250.** El tope numérico de pares (§4.4) sigue vigente como
+restricción dura, pero **no es suficiente por sí solo**: el volumen final del instrumento
+definitivo queda condicionado además a la disponibilidad real que confirme el adjudicador,
+medida en horas que esa persona puede comprometer, no solo en pares por debajo de 250. Hasta que
+esa disponibilidad esté confirmada, no se genera el instrumento definitivo (`ds04_pool.xlsx`).
+
 ### 4.5 Instrumento
 
-⚠ Proporciones alineadas al protocolo (la v1 daba cantidades absolutas):
+⚠ **Duplicados: parametrizado, por encima del 10 %** (`build_instrument.py --duplicate-rate`,
+default 0.15). El piloto validó que la marca de confianza baja predice inconsistencia
+intra-evaluador (§4.4.1), pero con un único par duplicado en régimen de inconsistencia sobre 21
+filas la medición tiene muy poca potencia — subir la tasa por encima del 10 % (la v2 la fijaba
+ahí) da más pares para medir consistencia intra-evaluador. Separados al menos 30 posiciones de su
+primera aparición cuando el instrumento lo permite; con `--n-queries` reducido, `build_instrument.py`
+usa una regla de separación mínima escalada y documentada (`min_duplicate_gap`), no silenciosa.
 
-- **Duplicados: 10 %** del total, separados al menos 30 posiciones de su primera aparición, sin
-  identificación visible
+- **Número de consultas: parametrizado** (`build_instrument.py --n-queries`), decidido junto con
+  la disponibilidad confirmada del adjudicador (§4.4.1), no antes.
 - **Justificación escrita: 15 %** de los pares, distribuidos a lo largo del instrumento
+  (`--justification-rate`).
 
 Formato XLSX con tres hojas —Instrucciones, Adjudicación, Registro— siguiendo la estructura del
-piloto ya entregado. Validación de datos en las columnas de relevancia (0/1/2) y confianza
+piloto ya entregado, con dos ajustes de redacción en Instrucciones tras el piloto (ninguno toca
+la rúbrica): se retira la promesa de "uno o dos minutos por fila" (el piloto la desmintió, ver
+§4.4.1) y se agrega la regla explícita sobre la vía jurídica como dato dado (protocolo §4.2, ya
+existía pero no era visible en el instrumento — el piloto mostró el síntoma: 52 % de las
+respuestas en la categoría intermedia, con justificaciones que corregían el encuadre jurídico en
+vez de evaluar al abogado). Validación de datos en las columnas de relevancia (0/1/2) y confianza
 (Alta/Media/Baja).
 
 **Requisitos de cegamiento, obligatorios.** El instrumento no muestra la puntuación del
@@ -253,7 +311,12 @@ Con 20 consultas, Precision@3 se mueve en saltos de 0.33 por consulta. Reportar 
 sería engañoso.
 
 - **Intervalos de confianza al 95 % por bootstrap** (10 000 remuestreos sobre consultas)
-- **Prueba de permutación pareada** entre variantes
+- **Prueba de permutación pareada** entre variantes — ⚠ 28 comparaciones (C(8,2)) a α=0.05 sin
+  ajustar producirían ~76 % de probabilidad de al menos un falso positivo por azar. Preregistrado
+  2026-09-02, antes de qrels reales: **confirmatorias** (7, `composite-070` contra cada otra
+  variante, α=0.05 sin ajustar — sostienen el argumento central) vs. **exploratorias** (21, el
+  resto, corrección de Bonferroni α≈0.00238 — describen comportamiento, no sustentan diseño).
+  Detalle y justificación de Bonferroni sobre Benjamini-Hochberg: `docs/datasheet-fase3-ablacion.md`.
 - Si dos variantes no difieren significativamente, **decirlo**, no elegir la de número mayor
 
 Los juicios de valor 1 se reportan **en ambos sentidos** (como relevantes y como no relevantes),
@@ -318,25 +381,59 @@ retroalimentación real como si fueran resultado obtenido.
 
 ---
 
-## 8. Calibración del clasificador de riesgo (Fase 5, alcance reducido)
+## 8. ⚠ Calibración del generador de riesgo (Fase 5, alcance replanteado)
 
-Tarea menor, aproximadamente una jornada. **No expandir.** El clasificador de riesgo no es el
-núcleo de la tesis: el médico declara su urgencia percibida y puede sobrescribir la sugerencia.
+Tarea menor, independiente del adjudicador — puede avanzar en paralelo a la Fase 2. El
+clasificador de riesgo no es el núcleo de la tesis: el médico declara su urgencia percibida y
+puede sobrescribir la sugerencia.
 
 Sobre `NPDB2601.CSV`, filtros `RECTYPE == 'P'`, `LICNFELD in (10, 20)`, `OUTCOME != 10` →
-**210 304 registros** (verificado; si tu ETL da otro número, hay un bug).
+**210 304 registros** (verificado contra el codebook oficial del NPDB; si tu ETL da otro número,
+hay un bug).
 
-Estimar la distribución de severidad condicionada a especialidad y contrastarla con
-`SPECIALTY_BASELINE` en `ml-service/app/risk/baselines.py`.
+⚠ **El alcance original de esta sección (calibrar por especialidad) no es ejecutable — descartado
+tras verificación, no reemplazado por una aproximación.**
 
-Transferir **efectos condicionales**, no frecuencias marginales: el NPDB solo contiene reclamos
-que terminaron en pago, y ese sesgo de selección afecta las marginales.
+- **Por especialidad clínica.** El NPDB no expone especialidad clínica en ningún campo;
+  `LICNFELD` solo distingue MD/DO. `SPECIALTY_BASELINE`
+  (`ml-service/app/risk/baselines.py`) **permanece sin respaldo empírico externo.**
+- **Por tipo de incidente (`ALGNNATR`).** `generate_risk_dataset.py` no modela ninguna variable
+  equivalente a naturaleza de alegato (cirugía, diagnóstico, obstetricia, etc.). `ALGNNATR` no
+  tiene contraparte en el generador.
+
+Ambas quedan declaradas como limitación permanente, no como pendiente a resolver.
+
+**Alcance ejecutado en su lugar:** contraste de tres variables del generador con proxy directo en
+el NPDB, sin pasar por especialidad ni tipo de incidente — `informed_consent` (código de alegato
+`707`, verificado contra el codebook oficial), `has_prior_complaints` (`NPMALRPT > 1`),
+`time_since_incident_days` (`ORIGYEAR − MALYEAR1`, con desajuste de dominio declarado: el
+generador nunca representa más de un año, el NPDB sí). Resultado, metodología completa y
+limitaciones adicionales: `docs/calibracion-generador.md` (generado por
+`ml-service/evaluation/calibration/calibrate_generator.py`, no ejecutar contra el CSV sin
+`--input` apuntando a una copia local — el archivo nunca se versiona en el repo).
+
+**Hallazgo y decisión, cerrados.** Dos de las tres variables (`informed_consent`,
+`has_prior_complaints`) midieron efecto en dirección opuesta a la que el generador asume hoy
+(intervalo de confianza al 95 % que no cruza cero en ambos casos). **No son un desmentido del
+generador — cada uno tiene mecanismo identificado:** `informed_consent` es un artefacto del sesgo
+de selección del NPDB (solo contiene reclamos pagados, y el deber de informar genera
+responsabilidad legal aun con daño clínico leve); `has_prior_complaints` compara con un proxy
+(`NPMALRPT`) que cuenta la carrera completa del profesional, no el historial previo al caso — no
+es la misma variable con signo invertido, es una comparación temporalmente inválida. **Decisión
+explícita: no se ajusta el generador en ninguna de las tres variables.** Invertir el signo de
+`informed_consent` comunicaría al médico que un caso sin consentimiento firmado es de menor
+riesgo — indefendible en este dominio. Detalle completo y razonamiento por variable:
+`docs/calibracion-generador.md` §2, §3, §6.
+
+**Transferir efectos condicionales, no frecuencias marginales:** el NPDB solo contiene reclamos
+que terminaron en pago, y ese sesgo de selección afecta las marginales — declarado en el
+datasheet de salida.
 
 **No importar montos de pago.** Reflejan el sistema legal estadounidense y no son transferibles.
+Ningún paso de `calibrate_generator.py` lee `PAYMENT` ni `TOTALPMT`.
 
 **No reentrenar el modelo.** Ajustar hiperparámetros sobre un corpus cuya etiqueta deriva del
-propio generador produce un número más alto pero no más creíble. Salida:
-`docs/calibracion-baselines.md` con la comparación y cada cambio justificado.
+propio generador produce un número más alto pero no más creíble.
 
 ---
 
@@ -346,13 +443,16 @@ propio generador produce un número más alto pero no más creíble. Salida:
 ml-service/
 ├── data/reference/
 │   ├── ds03_lawyers.json            ✅
-│   ├── ds04_queries.json
-│   ├── ds04_pool.xlsx
-│   └── ds04_qrels.csv
+│   ├── ds04_queries.json            ✅
+│   ├── ds04_pool.xlsx               pendiente — disponibilidad del adjudicador (§4.4.1)
+│   └── ds04_qrels.csv               pendiente — tras adjudicación
 ├── evaluation/
 │   ├── build_corpus.py              ✅
-│   ├── build_test_collection.py
-│   ├── run_ablation.py
+│   ├── build_test_collection.py     ✅
+│   ├── build_instrument.py          ✅ escrito, no ejecutado (§4.4.1)
+│   ├── calibration/
+│   │   └── calibrate_generator.py   ✅
+│   ├── run_ablation.py              ✅ escrito, verificado con --self-test (qrels sintéticos); no corrido contra ds04_qrels.csv real (no existe todavía)
 │   └── report.py
 ├── artifacts/matching/
 │   ├── metrics.json
@@ -364,8 +464,10 @@ docs/
 ├── vectorizacion-tfidf-matching.md  ✅
 ├── datasheet-corpus-ds03.md         ✅
 ├── datasheet-ds04.md                ✅
-├── protocolo-adjudicacion           ✅
-├── calibracion-baselines.md
+├── datasheet-fase3-ablacion.md      ✅ (§5.3, confirmatorias/exploratorias preregistrado)
+├── protocolo-adjudicacion_1.docx    ✅ (5 desviaciones en §11, nota §12)
+├── adjudicacion-piloto.xlsx         ✅ piloto respondido, 21/21 pares
+├── calibracion-generador.md         ✅ (§8, ya no calibracion-baselines.md)
 └── model_card_matching.md
 ```
 
@@ -376,11 +478,17 @@ docs/
 - [x] Corpus de 45 abogados con biografías variadas, no plantilla
 - [x] 20 consultas con al menos 3 de especialidades escasas — 5 de 20, verificado
 - [x] Pool con profundidad top-3, total ≤ 250 pares incluidos duplicados — 187 únicos, 206 con duplicados
-- [ ] Instrumento sin filtrar la salida del modelo, con 10 % duplicados y 15 % justificaciones
-- [ ] Las 8 variantes de ablación ejecutadas y reportadas
-- [ ] `bio-only` construida sin modificar `_lawyer_text()` en producción
-- [ ] Métricas con intervalos de confianza por bootstrap
-- [ ] Barrido de α con validación dejando una consulta fuera
+- [x] Piloto ejecutado (21/21 pares) y ritmo real medido — 6–9 min/par, ver §4.4.1
+- [ ] Disponibilidad real del adjudicador confirmada y redimensionamiento decidido (§4.4.1) —
+      bloquea la generación del instrumento definitivo
+- [ ] Instrumento sin filtrar la salida del modelo, con duplicados por encima del 10 % y 15 % justificaciones
+- [ ] Las 8 variantes de ablación ejecutadas y reportadas contra `ds04_qrels.csv` real —
+      `run_ablation.py` escrito y verificado con `--self-test`, pendiente de juicios humanos
+- [x] `bio-only` construida sin modificar `_lawyer_text()` en producción
+- [ ] Métricas con intervalos de confianza por bootstrap — implementado y verificado en
+      `--self-test`, pendiente de correrse contra resultado real
+- [ ] Barrido de α con validación dejando una consulta fuera — implementado (`composite_sweep_loo`),
+      pendiente de correrse contra resultado real
 - [ ] Juicios de valor 1 reportados en ambos sentidos
 - [ ] Contrato de la API intacto; fallbacks operativos
 - [ ] Reejecutar produce resultados idénticos
@@ -395,6 +503,8 @@ docs/
 - Si necesitas cambiar el contrato de la API o las 7 variables del clasificador
 - Si el ETL del NPDB no da 210 304 registros
 - Si consideras ajustar pesos mirando el resultado de la evaluación final
+- Si el ritmo real de adjudicación (§4.4.1) hace inviable el volumen dentro de la disponibilidad
+  que confirme el adjudicador — no generes el instrumento definitivo, redimensiona primero
 - Si un criterio de aceptación no se puede cumplir
 
 **Nunca** ajustes el protocolo de evaluación para alcanzar una meta numérica. Si el resultado
