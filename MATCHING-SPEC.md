@@ -187,10 +187,17 @@ Bajo cualquiera de los tres escenarios, el instrumento definitivo dimensionado a
 holgadamente lo que una sesión o un puñado de sesiones cortas puede absorber.
 
 **Consecuencia para el tope de 250.** El tope numérico de pares (§4.4) sigue vigente como
-restricción dura, pero **no es suficiente por sí solo**: el volumen final del instrumento
-definitivo queda condicionado además a la disponibilidad real que confirme el adjudicador,
-medida en horas que esa persona puede comprometer, no solo en pares por debajo de 250. Hasta que
-esa disponibilidad esté confirmada, no se genera el instrumento definitivo (`ds04_pool.xlsx`).
+restricción dura, pero **no es suficiente por sí solo**: el volumen del instrumento definitivo
+sigue siendo el mismo trabajo por adjudicador (~21–31 h medidas) independientemente de cuántas
+personas lo respondan.
+
+**⚠ Decisión final (2026-09-04): panel de varios adjudicadores en vez de resolver la
+disponibilidad de uno solo.** En lugar de bloquear la generación hasta reducir el volumen o
+confirmar horas de una sola persona, se generaron **5 copias idénticas del pool completo**
+(`--n-queries 20`, mismo `--seed`) para que el protocolo (§3/§7.1) pueda calcular kappa de Cohen
+entre evaluadores — cada copia sigue exigiendo el mismo tiempo medido en el piloto por persona.
+Composición del panel a esta fecha y su limitación condicional: `docs/datasheet-ds04.md` §4 y
+`docs/protocolo-adjudicacion_1.docx` §11.
 
 ### 4.5 Instrumento
 
@@ -444,12 +451,12 @@ ml-service/
 ├── data/reference/
 │   ├── ds03_lawyers.json            ✅
 │   ├── ds04_queries.json            ✅
-│   ├── ds04_pool.xlsx               pendiente — disponibilidad del adjudicador (§4.4.1)
+│   ├── ds04_pool.xlsx               ✅ 5 copias — docs/adjudicacion-definitivo-01..05.xlsx (§4.4.1)
 │   └── ds04_qrels.csv               pendiente — tras adjudicación
 ├── evaluation/
 │   ├── build_corpus.py              ✅
 │   ├── build_test_collection.py     ✅
-│   ├── build_instrument.py          ✅ escrito, no ejecutado (§4.4.1)
+│   ├── build_instrument.py          ✅ ejecutado — 5 copias, --copy-id parametrizado (§4.4.1)
 │   ├── calibration/
 │   │   └── calibrate_generator.py   ✅
 │   ├── run_ablation.py              ✅ escrito, verificado con --self-test (qrels sintéticos); no corrido contra ds04_qrels.csv real (no existe todavía)
@@ -465,8 +472,9 @@ docs/
 ├── datasheet-corpus-ds03.md         ✅
 ├── datasheet-ds04.md                ✅
 ├── datasheet-fase3-ablacion.md      ✅ (§5.3, confirmatorias/exploratorias preregistrado)
-├── protocolo-adjudicacion_1.docx    ✅ (5 desviaciones en §11, nota §12)
+├── protocolo-adjudicacion_1.docx    ✅ (6 desviaciones en §11, nota §12)
 ├── adjudicacion-piloto.xlsx         ✅ piloto respondido, 21/21 pares
+├── adjudicacion-definitivo-01..05.xlsx  ✅ instrumento definitivo, 5 copias idénticas (panel de kappa)
 ├── calibracion-generador.md         ✅ (§8, ya no calibracion-baselines.md)
 └── model_card_matching.md
 ```
@@ -479,9 +487,12 @@ docs/
 - [x] 20 consultas con al menos 3 de especialidades escasas — 5 de 20, verificado
 - [x] Pool con profundidad top-3, total ≤ 250 pares incluidos duplicados — 187 únicos, 206 con duplicados
 - [x] Piloto ejecutado (21/21 pares) y ritmo real medido — 6–9 min/par, ver §4.4.1
-- [ ] Disponibilidad real del adjudicador confirmada y redimensionamiento decidido (§4.4.1) —
-      bloquea la generación del instrumento definitivo
-- [ ] Instrumento sin filtrar la salida del modelo, con duplicados por encima del 10 % y 15 % justificaciones
+- [x] Instrumento definitivo generado — 5 copias idénticas (`--n-queries 20`), 187 pares únicos /
+      215 con 15 % de duplicados, panel de kappa en vez de un único adjudicador (§4.4.1). La
+      disponibilidad real (~21–31 h por persona) **no se confirmó individualmente** — decisión
+      explícita de proceder con panel múltiple; composición y su limitación condicional en
+      `docs/datasheet-ds04.md` §4
+- [x] Instrumento sin filtrar la salida del modelo, con duplicados por encima del 10 % y 15 % justificaciones
 - [ ] Las 8 variantes de ablación ejecutadas y reportadas contra `ds04_qrels.csv` real —
       `run_ablation.py` escrito y verificado con `--self-test`, pendiente de juicios humanos
 - [x] `bio-only` construida sin modificar `_lawyer_text()` en producción
@@ -504,7 +515,9 @@ docs/
 - Si el ETL del NPDB no da 210 304 registros
 - Si consideras ajustar pesos mirando el resultado de la evaluación final
 - Si el ritmo real de adjudicación (§4.4.1) hace inviable el volumen dentro de la disponibilidad
-  que confirme el adjudicador — no generes el instrumento definitivo, redimensiona primero
+  que confirme el adjudicador — no generes el instrumento definitivo sin que el investigador
+  decida cómo seguir (redimensionar el pool, o resolverlo de otra forma — aquí se resolvió con
+  un panel de varios adjudicadores en vez de reducir el pool, decisión explícita del investigador)
 - Si un criterio de aceptación no se puede cumplir
 
 **Nunca** ajustes el protocolo de evaluación para alcanzar una meta numérica. Si el resultado

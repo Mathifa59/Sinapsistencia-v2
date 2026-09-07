@@ -1,12 +1,17 @@
 """Construye el instrumento definitivo de adjudicacion (ds04_pool.xlsx),
 parametrizado por numero de consultas (MATCHING-SPEC.md §4.4.1).
 
-NO SE HA EJECUTADO TODAVIA. El piloto (docs/adjudicacion-piloto*.xlsx) midio
-un ritmo real de 6-9 min/par, muy por encima del "uno o dos minutos por fila"
-que asumia el instrumento del piloto. A 206 pares eso son entre ~21 y ~31
-horas (3 min/par optimista: ~10 h) -- ver MATCHING-SPEC.md §4.4.1. Generar
-el instrumento definitivo esta bloqueado hasta que el adjudicador confirme
-cuanta disponibilidad real tiene; ese numero decide --n-queries.
+El piloto (docs/adjudicacion-piloto*.xlsx) midio un ritmo real de 6-9
+min/par, muy por encima del "uno o dos minutos por fila" que asumia el
+instrumento del piloto -- ver MATCHING-SPEC.md §4.4.1. Ese hallazgo motivo
+el diseno de --n-queries parametrizado y --copy-id (2026-09-04): en vez de
+un unico adjudicador cargando el instrumento completo, el panel definitivo
+usa VARIAS copias identicas del MISMO pool completo (--n-queries 20) para
+que el protocolo (§3/§7.1) pueda calcular kappa de Cohen entre
+evaluadores, en vez de depender de un solo adjudicador con baja
+disponibilidad. --copy-id NUNCA debe combinarse con --n-queries reducido
+para un panel de kappa: todas las copias de un mismo panel deben compartir
+--n-queries y --seed para ser comparables fila por fila.
 
 Reutiliza el pool ya construido por build_test_collection.py (mismas 20
 consultas, mismo corpus, misma logica de ranking) -- no reimplementa nada de
@@ -33,11 +38,17 @@ Cambios de redaccion en la hoja de instrucciones respecto del piloto
      justo ese par el que produjo la unica inconsistencia intra-evaluador
      detectada entre los pares duplicados.
 
-Uso (NO EJECUTAR sin decidir antes --n-queries con el adjudicador):
+Uso -- panel de 5 copias idénticas (mismo --seed, mismo --n-queries):
     cd ml-service
     pip install -r evaluation/requirements-eval.txt
-    python evaluation/build_instrument.py --n-queries 14 --duplicate-rate 0.12 \
-        --out data/reference/ds04_pool.xlsx
+    for i in 01 02 03 04 05; do
+        python evaluation/build_instrument.py --n-queries 20 --copy-id "$i" \
+            --out "../docs/adjudicacion-definitivo-$i.xlsx"
+    done
+
+Uso -- copia suelta adicional más adelante (mismo --seed obligatorio):
+    python evaluation/build_instrument.py --n-queries 20 --copy-id 06 \
+        --out ../docs/adjudicacion-definitivo-06.xlsx
 """
 
 from __future__ import annotations
@@ -296,13 +307,16 @@ def write_adjudicacion(ws, rows: list[dict]) -> None:
         ws.cell(row=r, column=2).alignment = Alignment(wrap_text=True, vertical="top")
 
 
-def write_registro(ws, n_rows: int) -> None:
+def write_registro(ws, n_rows: int, copy_id: str | None) -> None:
     ws.column_dimensions["B"].width = 32
     ws.column_dimensions["C"].width = 20
     ws.column_dimensions["D"].width = 16
     ws.column_dimensions["E"].width = 16
 
-    ws.cell(row=2, column=2, value="Registro de la sesión").font = Font(size=13, bold=True)
+    title = "Registro de la sesión"
+    if copy_id:
+        title += f" — copia {copy_id}"
+    ws.cell(row=2, column=2, value=title).font = Font(size=13, bold=True)
     ws.cell(row=4, column=2, value="Anota las tandas en que trabajaste. No importa cuántas sean.")
 
     ws.cell(row=6, column=2, value="Tanda").font = Font(bold=True)
@@ -361,7 +375,16 @@ def main() -> None:
                               f"aumenta la potencia de esa medición.")
     parser.add_argument("--justification-rate", type=float, default=DEFAULT_JUSTIFICATION_RATE,
                          help=f"Proporción de filas con justificación escrita (default {DEFAULT_JUSTIFICATION_RATE}).")
-    parser.add_argument("--seed", type=int, default=RANDOM_STATE)
+    parser.add_argument("--seed", type=int, default=RANDOM_STATE,
+                         help="NUNCA varía entre copias de un mismo panel: el pool, el orden y los "
+                              "duplicados deben ser idénticos entre adjudicadores para que el kappa "
+                              "de Cohen (protocolo §3/§7.1) compare filas correspondientes.")
+    parser.add_argument("--copy-id", type=str, default=None,
+                         help="Etiqueta cosmética de la copia física (p. ej. '01'), visible solo en "
+                              "la hoja Registro -- para distinguir archivos idénticos entre sí sin "
+                              "identificar a la persona. NO afecta --seed ni el contenido del pool: "
+                              "todas las copias con el mismo --seed son filas idénticas en el mismo "
+                              "orden, con los mismos duplicados.")
     parser.add_argument("--out", type=Path,
                          default=Path(__file__).resolve().parents[1] / "data" / "reference" / "ds04_pool.xlsx")
     args = parser.parse_args()
@@ -394,11 +417,12 @@ def main() -> None:
     write_adjudicacion(ws_adj, rows)
 
     ws_reg = wb.create_sheet("Registro")
-    write_registro(ws_reg, len(rows))
+    write_registro(ws_reg, len(rows), args.copy_id)
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
     wb.save(args.out)
-    print(f"Escrito: {args.out.resolve()}")
+    copy_note = f" (copia {args.copy_id})" if args.copy_id else ""
+    print(f"Escrito{copy_note}: {args.out.resolve()}")
 
 
 if __name__ == "__main__":

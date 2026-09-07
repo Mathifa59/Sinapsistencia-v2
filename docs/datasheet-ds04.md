@@ -181,3 +181,53 @@ mejoras reales de relevancia (los reemplazos no puntúan mejor que Pilar/
 Julio), la acción sería documentar esa limitación en el datasheet de DS-03 y
 en las limitaciones del model card (`docs/model_card_matching.md`), no
 reabrir ni regenerar el corpus.
+
+---
+
+## 4. Composición del panel de adjudicadores — estado a 2026-09-04
+
+**Preregistrado antes de recibir ningún juicio**, en el mismo sentido que
+§2: escrito antes de que exista `ds04_qrels.csv`, para que no pueda leerse
+como una explicación posterior a un resultado ya conocido.
+
+**Instrumento generado:** 5 copias idénticas del pool completo (20
+consultas, `--n-queries 20`), no divididas entre personas —
+`docs/adjudicacion-definitivo-01.xlsx` a `-05.xlsx`, generadas con
+`ml-service/evaluation/build_instrument.py --copy-id`, mismo `--seed` en
+las 5. Verificado antes de entregarlas: las 5 hojas «Adjudicación» son
+celda por celda idénticas (mismo pool, mismo orden, mismos 28 duplicados
+sobre 187 pares únicos = 215 filas); solo difiere la etiqueta de copia en
+la hoja «Registro», sin metadata que identifique a ninguna persona. Esto es
+lo que exige el protocolo §3/§7.1 para calcular kappa de Cohen entre
+evaluadores: cada fila debe ser comparable uno a uno entre copias.
+
+**Composición confirmada hasta ahora:** los adjudicadores confirmados son
+**médicos**. No hay, a esta fecha, un abogado de derecho médico confirmado
+en el panel. El protocolo (§3) preveía idealmente un adjudicador secundario
+del ámbito legal, además del principal — esa posibilidad **existe, no está
+descartada, pero tampoco está confirmada** a la fecha de este preregistro.
+
+**Nota condicional — la resolución depende de qué panel exista al momento
+de adjudicar, no se decide aquí de antemano:**
+
+- **Si el panel se mantiene compuesto solo por médicos** al momento de
+  adjudicar: el kappa de Cohen resultante mide **consistencia
+  intra-gremio médico**, no concordancia entre disciplinas — la dimensión
+  jurídica del juicio (§4 del protocolo) queda evaluada exclusivamente
+  desde una perspectiva clínica, sin contraste independiente desde el
+  derecho. Esto se anota entonces como **limitación definitiva** en este
+  datasheet y en el §9 del protocolo (que ya anticipa el escenario de
+  "adjudicador único" sin secundario, aunque aquí son varios adjudicadores
+  homogéneos, no uno solo — matiz distinto, misma raíz: falta perspectiva
+  disciplinar independiente).
+- **Si se suma un abogado de derecho médico al panel**, sea antes o
+  después de esta fecha: se incorpora como **adjudicador secundario del
+  ámbito legal**, tal como el diseño original del protocolo (§3)
+  contemplaba. Su copia del instrumento se genera aparte con
+  `--copy-id` (mismo `--seed`, mismo pool completo, para que siga siendo
+  comparable fila a fila contra las 5 copias médicas), y su participación
+  se documenta en el acta de adjudicación (protocolo §10), no reabriendo
+  este datasheet.
+
+Ver también: `docs/protocolo-adjudicacion_1.docx` §11 (registro de
+desviaciones), donde queda la misma nota condicional con fecha y motivo.
