@@ -3,7 +3,7 @@
 Documento de estado para compartir entre autores de la tesis. Consolida lo
 ya documentado en varios archivos del repositorio — no introduce
 información nueva, solo la reúne en un solo lugar. Snapshot al
-**2026-09-02**. Para el detalle completo de cada punto, cada sección enlaza
+**2026-09-04**. Para el detalle completo de cada punto, cada sección enlaza
 a su fuente.
 
 > Proyecto: mediación médico-legal (caso de estudio SANNA "El Golf", San
@@ -331,21 +331,45 @@ desempeño = 0.50 · (rating / 5)
 - **Fase 2 (DS-04), colección de prueba:** 20 consultas diseñadas (≥3 de
   especialidad escasa, balance de urgencia/complejidad), pool construido
   con 7 variantes pooleables a profundidad top-3 (`random` excluida,
-  calculada analíticamente) — **187 pares únicos, 206 con el 10% de
-  duplicados simulado**, dentro del tope de 250.
+  calculada analíticamente) — **187 pares únicos**, dentro del tope de 250.
   (`docs/datasheet-ds04.md`, `docs/MATCHING-SPEC.md` §4).
 - **Piloto de adjudicación:** ejecutado, 21/21 pares respondidos. Reveló
   que el ritmo real de adjudicación (6–9 min/par medido) es 3×–6× más
-  lento que el supuesto original (1–2 min/par) — extrapolado a los 206
-  pares del instrumento definitivo, entre ≈10 h (supuesto optimista) y
-  ≈31 h (ritmo medido, límite superior). También reveló que la vía
+  lento que el supuesto original (1–2 min/par). También reveló que la vía
   jurídica del caso se estaba filtrando a las notas del adjudicador (no
-  estaba explícita como "dato dado" en el instrumento) y validó que
-  marcar "confianza baja" es predictivo de inconsistencia intra-evaluador.
-  Los 3 ajustes de redacción correspondientes ya están incorporados al
-  generador del instrumento definitivo. (`docs/MATCHING-SPEC.md` §4.4.1).
-- **Protocolo de adjudicación:** preregistrado, con 5 desviaciones
-  registradas y motivadas en su §11 tras el piloto
+  estaba explícita como "dato dado" en el instrumento), y validó que
+  marcar "confianza baja" es predictivo de inconsistencia intra-evaluador
+  — ese hallazgo motivó subir la tasa de duplicados del instrumento
+  definitivo por encima del 10 % original, para medir esa consistencia
+  con más potencia. Los 3 ajustes de redacción correspondientes quedaron
+  incorporados al generador del instrumento definitivo.
+  (`docs/MATCHING-SPEC.md` §4.4.1).
+- **Instrumento definitivo — generado (2026-09-04):** en vez de resolver la
+  disponibilidad de un único adjudicador (≈21–32 h medidas por persona
+  para el pool completo, inviable de confirmar de antemano), se optó por
+  un **panel de varios adjudicadores** que responden el **mismo pool
+  completo cada uno**, para que el protocolo (§3/§7.1) pueda calcular
+  kappa de Cohen entre evaluadores. Se generaron **5 copias idénticas**
+  (`docs/adjudicacion-definitivo-01.xlsx` a `-05.xlsx`, vía
+  `build_instrument.py --n-queries 20 --copy-id`): **187 pares únicos, 28
+  duplicados (15 %), 215 filas totales por copia**, mismo pool y mismo
+  orden aleatorio en las 5 — verificado celda por celda, sin metadata que
+  identifique a nadie. `--copy-id` queda parametrizado para generar copias
+  sueltas adicionales más adelante, con el mismo `--seed`.
+- **Composición del panel — nota condicional, preregistrada 2026-09-04:**
+  los adjudicadores confirmados hasta ahora son **médicos**; no hay, a
+  esta fecha, un abogado de derecho médico confirmado como adjudicador
+  secundario (el protocolo §3 lo preveía idealmente, sin estar
+  descartado ni confirmado). Si el panel se mantiene solo con médicos al
+  momento de adjudicar, el kappa resultante mide **consistencia
+  intra-gremio médico**, no concordancia entre disciplinas — limitación
+  definitiva en ese caso. Si se suma un abogado, se incorpora como
+  adjudicador secundario según el diseño original del protocolo, con su
+  copia generada aparte vía `--copy-id`.
+  (`docs/datasheet-ds04.md` §4, `docs/protocolo-adjudicacion_1.docx` §11).
+- **Protocolo de adjudicación:** preregistrado, con **6 desviaciones**
+  registradas y motivadas en su §11 (5 tras el piloto + la nota
+  condicional de composición del panel)
   (`docs/protocolo-adjudicacion_1.docx`).
 - **Fase 5 (calibración del generador de riesgo contra el NPDB):**
   cerrada. De 210,304 registros filtrados, 2 de 3 variables contrastadas
@@ -363,13 +387,9 @@ desempeño = 0.50 · (rating / 5)
   causa raíz (`train_risk_model.py` generaba la nota sin comparar de
   verdad).
 
-**Escrito y verificado con datos sintéticos, pendiente de juicios humanos
-reales** (no existen todavía — `ds04_qrels.csv` depende del instrumento
-definitivo, bloqueado por la disponibilidad real del adjudicador):
+**Pendiente de juicios humanos reales** (`ds04_qrels.csv` no existe
+todavía — depende de que el panel devuelva las copias respondidas):
 
-- **`build_instrument.py`** — genera el instrumento definitivo,
-  parametrizado por número de consultas y tasa de duplicados (>10%).
-  Escrito, no ejecutado.
 - **`run_ablation.py`** (Fase 3) — Precision@3, nDCG@3, MRR@3 y MAP@3 como
   métricas primarias (nDCG@5/Recall@5 solo como cotas inferiores,
   etiquetadas); intervalos de confianza al 95% por bootstrap (10,000
@@ -381,12 +401,14 @@ definitivo, bloqueado por la disponibilidad real del adjudicador):
   (`docs/datasheet-fase3-ablacion.md`). Verificado de punta a punta con
   qrels sintéticos (`--self-test`); no corrido contra datos reales.
 
-**Bloqueante actual:** el instrumento definitivo de adjudicación no se
-genera hasta que el adjudicador confirme su disponibilidad real en horas,
-dado el ritmo medido en el piloto. Todo el pipeline de Fase 3 (métricas,
-significancia estadística, barrido de α) está implementado y verificado —
-correrlo contra el resultado real es, en este momento, cuestión de tener
-`ds04_qrels.csv`.
+**Bloqueante actual:** ya no es la generación del instrumento (resuelto,
+5 copias entregables). Ahora depende de que el panel de adjudicadores
+devuelva las copias respondidas — cada una implica el mismo ritmo medido
+en el piloto (≈21–32 h por persona para las 215 filas, según el ritmo
+6–9 min/par) — y de construir `ds04_qrels.csv` a partir de esas
+respuestas. Todo el pipeline de Fase 3 (métricas, significancia
+estadística, barrido de α) está implementado y verificado; correrlo contra
+el resultado real es, en este momento, cuestión de tener esos juicios.
 
 ---
 
@@ -402,4 +424,5 @@ correrlo contra el resultado real es, en este momento, cuestión de tener
 | Datasheet de la colección de prueba DS-04 | `docs/datasheet-ds04.md` |
 | Preregistro de las pruebas de significancia de Fase 3 | `docs/datasheet-fase3-ablacion.md` |
 | Calibración del generador de riesgo contra el NPDB (Fase 5) | `docs/calibracion-generador.md` |
-| Protocolo de adjudicación humana | `docs/protocolo-adjudicacion_1.docx` |
+| Protocolo de adjudicación humana (6 desviaciones en §11) | `docs/protocolo-adjudicacion_1.docx` |
+| Instrumento definitivo, 5 copias idénticas (panel de kappa) | `docs/adjudicacion-definitivo-01.xlsx` … `-05.xlsx` |
