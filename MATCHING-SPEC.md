@@ -456,7 +456,11 @@ ml-service/
 ├── evaluation/
 │   ├── build_corpus.py              ✅
 │   ├── build_test_collection.py     ✅
-│   ├── build_instrument.py          ✅ ejecutado — 5 copias, --copy-id parametrizado (§4.4.1)
+│   ├── build_instrument.py          ✅ ejecutado — 5 copias, --copy-id parametrizado (§4.4.1). Bug de
+│   │                                    duplicados encontrado y corregido 2026-09-14, antes de que
+│   │                                    nadie respondiera nada (docs/datasheet-ds04.md §6)
+│   ├── build_lawyer_panel.py        ✅ ejecutado — 10 copias, subconjunto fijo de 49 pares del mismo
+│   │                                    pool (docs/datasheet-ds04.md §5)
 │   ├── calibration/
 │   │   └── calibrate_generator.py   ✅
 │   ├── run_ablation.py              ✅ escrito, verificado con --self-test (qrels sintéticos); no corrido contra ds04_qrels.csv real (no existe todavía)
@@ -474,7 +478,10 @@ docs/
 ├── datasheet-fase3-ablacion.md      ✅ (§5.3, confirmatorias/exploratorias preregistrado)
 ├── protocolo-adjudicacion_1.docx    ✅ (6 desviaciones en §11, nota §12)
 ├── adjudicacion-piloto.xlsx         ✅ piloto respondido, 21/21 pares
-├── adjudicacion-definitivo-01..05.xlsx  ✅ instrumento definitivo, 5 copias idénticas (panel de kappa)
+├── adjudicacion-definitivo-01..05.xlsx  ✅ panel médico — 187 únicos/28 duplicados, corregido y
+│                                          verificado (docs/datasheet-ds04.md §6)
+├── adjudicacion-abogados-01..10.xlsx    ✅ panel de abogados — 49 únicos/7 duplicados, corregido y
+│                                          verificado (docs/datasheet-ds04.md §5, §6)
 ├── calibracion-generador.md         ✅ (§8, ya no calibracion-baselines.md)
 └── model_card_matching.md
 ```

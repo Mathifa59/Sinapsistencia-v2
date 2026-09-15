@@ -56,6 +56,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from collections import Counter
 from pathlib import Path
 from random import Random
 
@@ -136,6 +137,80 @@ def min_duplicate_gap(total_rows: int) -> int:
     return max(5, min(30, total_rows // 4))
 
 
+def insert_duplicates(
+    base_rows: list[dict],
+    rng: Random,
+    duplicate_rate: float,
+    priority_pairs: set[tuple[str, str]] | None = None,
+) -> list[dict]:
+    """Inserta duplicados de `round(len(base_rows) * duplicate_rate)` filas.
+
+    Si se da `priority_pairs` (conjunto de (case_description, full_name)),
+    esos orígenes se eligen primero -- usado para que los duplicados del
+    panel de abogados coincidan, donde sea posible, con los del panel
+    médico (ver build_lawyer_panel.py).
+
+    ⚠ BUG CORREGIDO 2026-09-14 (ver docs/datasheet-ds04.md §6): la versión
+    anterior leía `dict(rows[orig_idx])` -- `rows` es la lista de SALIDA,
+    que va creciendo dentro de este mismo bucle por cada `rows.insert()`.
+    Como `orig_idx` son índices calculados contra `base_rows` ANTES de
+    cualquier inserción, una vez que una inserción cae en una posición
+    <= un `orig_idx` posterior, ese índice deja de apuntar a la fila
+    original que debía -- apunta a una fila ya desplazada, a veces a un
+    duplicado recién insertado. Efecto verificado en el instrumento de
+    médicos ya generado: 2 pares quedaron triplicados (3 apariciones en
+    vez de 2) y otros 2 pares que debían duplicarse no se duplicaron,
+    aunque el total de filas (215) seguía siendo el correcto -- por eso el
+    total de filas por sí solo no basta para detectar este bug. Corrección:
+    leer siempre de `base_rows` (inmutable), nunca de `rows`. Se verifica
+    estructuralmente al final de esta función, no solo se confía en el
+    conteo total.
+    """
+    n_base = len(base_rows)
+    n_duplicates = round(n_base * duplicate_rate)
+    gap = min_duplicate_gap(n_base + n_duplicates)
+
+    rows = list(base_rows)
+    if n_duplicates == 0:
+        return rows
+
+    priority_pairs = priority_pairs or set()
+    priority_idx = [
+        i for i, r in enumerate(base_rows)
+        if (r["case_description"], r["full_name"]) in priority_pairs
+    ]
+    other_idx = [i for i in range(n_base) if i not in set(priority_idx)]
+    rng.shuffle(priority_idx)
+    rng.shuffle(other_idx)
+    chosen_originals = (priority_idx + other_idx)[:n_duplicates]
+
+    for orig_idx in chosen_originals:
+        dup = dict(base_rows[orig_idx])  # <-- fuente inmutable, NUNCA `rows[orig_idx]`
+        # posición válida: al menos `gap` posiciones después del original
+        min_pos = orig_idx + gap
+        max_pos = len(rows)
+        insert_at = rng.randint(min(min_pos, max_pos), max_pos)
+        rows.insert(insert_at, dup)
+
+    # Verificación estructural obligatoria: el conjunto real de pares
+    # duplicados debe coincidir EXACTAMENTE con el pretendido -- ni
+    # triplicados, ni faltantes. El total de filas no es suficiente prueba
+    # (ver docstring): un bug puede preservar el total y aun así duplicar
+    # el par equivocado.
+    intended_pairs = {(base_rows[i]["case_description"], base_rows[i]["full_name"]) for i in chosen_originals}
+    counts = Counter((r["case_description"], r["full_name"]) for r in rows)
+    assert all(c <= 2 for c in counts.values()), (
+        f"Fila(s) triplicada(s) o más: {[(k, c) for k, c in counts.items() if c > 2]}"
+    )
+    actual_dup_pairs = {k for k, c in counts.items() if c == 2}
+    assert actual_dup_pairs == intended_pairs, (
+        "El conjunto real de pares duplicados no coincide con el pretendido -- "
+        f"faltan: {intended_pairs - actual_dup_pairs}, sobran: {actual_dup_pairs - intended_pairs}"
+    )
+
+    return rows
+
+
 def build_rows(
     queries: list[dict],
     lawyers: list[dict],
@@ -164,23 +239,7 @@ def build_rows(
             })
     rng.shuffle(base_rows)  # cegamiento adicional: no agrupar visiblemente por consulta
 
-    n_base = len(base_rows)
-    n_duplicates = round(n_base * duplicate_rate)
-    gap = min_duplicate_gap(n_base + n_duplicates)
-
-    rows = list(base_rows)
-    if n_duplicates > 0:
-        candidates = list(range(n_base))
-        rng.shuffle(candidates)
-        chosen_originals = candidates[:n_duplicates]
-        for orig_idx in chosen_originals:
-            dup = dict(rows[orig_idx])
-            # posición válida: al menos `gap` posiciones después del original,
-            # dentro del largo actual de `rows` (que crece en cada inserción)
-            min_pos = orig_idx + gap
-            max_pos = len(rows)
-            insert_at = rng.randint(min(min_pos, max_pos), max_pos)
-            rows.insert(insert_at, dup)
+    rows = insert_duplicates(base_rows, rng, duplicate_rate)
 
     n_total = len(rows)
     n_justify = round(n_total * justification_rate)
@@ -242,11 +301,11 @@ INSTRUCCIONES_TEXT = [
 ]
 
 
-def write_instrucciones(ws) -> None:
+def write_instrucciones(ws, text_blocks: list[tuple[str, str]] = INSTRUCCIONES_TEXT) -> None:
     ws.column_dimensions["A"].width = 3
     ws.column_dimensions["B"].width = 110
     r = 2
-    for kind, text in INSTRUCCIONES_TEXT:
+    for kind, text in text_blocks:
         cell = ws.cell(row=r, column=2, value=text)
         cell.alignment = Alignment(wrap_text=True, vertical="top")
         if kind == "title":
