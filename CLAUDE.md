@@ -57,7 +57,7 @@ sugerencia en la plataforma. **No trates el riesgo como si fuera el eje del proy
 **No es Azure.** La memoria de TP1 menciona Azure como infraestructura planificada; la
 realidad de producción es Railway + Vercel.
 
-Migraciones Flyway: **V1 → V13**. La siguiente que crees es V14.
+Migraciones Flyway: **V1 → V14**. La siguiente que crees es V15.
 
 ---
 

@@ -145,9 +145,10 @@ public class ContactRequestService {
 
 		request = contactRequestRepository.save(request);
 
-		// Aviso al abogado destinatario (fire-and-forget vía Resend).
+		// Aviso al abogado destinatario (fire-and-forget vía Resend). Reply-To =
+		// correo del médico, para que puedan corresponder directo por correo.
 		mailNotifier.sendContactRequestReceived(lawyer.getEmail(), lawyer.getName(),
-				doctor.getName(), request.getCaseTitle(), message);
+				doctor.getName(), request.getCaseTitle(), message, doctor.getEmail());
 
 		return enrich(List.of(request)).get(0);
 	}
@@ -189,10 +190,12 @@ public class ContactRequestService {
 		}
 
 		// Aviso al médico solicitante del resultado (fire-and-forget vía Resend).
+		// Reply-To = correo del abogado, para que puedan corresponder directo por correo.
 		mailNotifier.sendContactRequestAnswered(
 				request.getFromDoctor().getEmail(), request.getFromDoctor().getName(),
 				request.getToLawyer().getName(), request.getCaseTitle(),
-				request.getStatus() == ContactRequestStatus.ACEPTADO, responseMessage);
+				request.getStatus() == ContactRequestStatus.ACEPTADO, responseMessage,
+				request.getToLawyer().getEmail());
 
 		return enrich(List.of(request)).get(0);
 	}

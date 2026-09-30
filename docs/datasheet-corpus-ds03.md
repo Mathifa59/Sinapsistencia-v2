@@ -85,7 +85,48 @@ distintos entre sí, ninguno coincide con el hash compartido de `Demo123!`.
 
 ---
 
-## 4. Ver también
+## 5. Ampliación de producción post-congelamiento (2026-09-30)
+
+**No es una corrección del corpus DS-03.** Es una decisión de producto tomada
+después de que la evaluación DS-03/DS-04 ya estaba cerrada, y se documenta
+aquí para que quede explícito que el corpus congelado (§ arriba) y los datos
+en vivo de `lawyer_profiles` **divergieron deliberadamente** a partir de esta
+fecha.
+
+**Qué cambió:** la migración `V14__expand_scarce_specialty_lawyers.sql`
+agrega 8 perfiles de abogado nuevos (`INSERT`, rango de id `b6000000-...`),
+subiendo cada una de las 8 especialidades "Escasa" de §TARGET_COVERAGE
+(Dermatología, Endocrinología, Oftalmología, Neumología, Nefrología,
+Reumatología, Infectología, Hematología) de 2 a 4 abogados con `medical_areas`
+que la mencionan — al nivel de la franja "Media" original, no más.
+
+**Por qué era seguro hacerlo sin invalidar DS-03/DS-04:** verificado en el
+código, no supuesto, antes de aplicar la migración —
+[`build_test_collection.py:42`](../ml-service/evaluation/build_test_collection.py),
+`run_ablation.py:53` (importa la misma constante `CORPUS_PATH`) y
+[`build_lawyer_panel.py:78-83`](../ml-service/evaluation/build_lawyer_panel.py)
+(importa `CORPUS_PATH` y `pool_for_query` del mismo módulo) leen
+**exclusivamente** el snapshot congelado
+`ml-service/data/reference/ds03_lawyers.json`, escrito una sola vez por
+`build_corpus.py`. Ninguno de los tres consulta `lawyer_profiles` en vivo.
+Por lo tanto: (1) los 45 perfiles y sus `specialties`/`medical_areas`/`bio` ya
+evaluados quedan intactos — V14 es únicamente `INSERT`, nunca `UPDATE`; (2) re-
+correr cualquiera de los tres scripts hoy reproduce el mismo JSON de entrada y
+por lo tanto el mismo pool, RANDOM_STATE=42 incluido; (3) los instrumentos ya
+distribuidos (`docs/adjudicacion-definitivo-0X.xlsx`,
+`docs/adjudicacion-abogados-0X.xlsx`) siguen siendo válidos sin regenerarse.
+
+**Consecuencia práctica a futuro:** los 8 perfiles nuevos son candidatos
+plenos del *matching en producción* (`is_active = TRUE`, `available = TRUE`)
+pero **invisibles** para `build_corpus.py`/`ds03_lawyers.json` — no van a
+aparecer en ninguna corrida futura de `build_test_collection.py` ni
+`run_ablation.py` a menos que alguien los agregue explícitamente a
+`EXISTING_LAWYERS`/`NEW_LAWYERS` y regenere el corpus como un DS-03-v2
+deliberado (con su propio datasheet, no como edición silenciosa de este).
+
+---
+
+## 6. Ver también
 
 - [`docs/taxonomia-legal.md`](taxonomia-legal.md) — sustento normativo de las
   8 etiquetas de `specialties[]`.

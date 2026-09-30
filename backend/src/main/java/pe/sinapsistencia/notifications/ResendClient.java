@@ -17,7 +17,11 @@ import org.springframework.web.client.RestClient;
  *
  * <p>{@code fromAddress} solo necesita vivir en un dominio verificado en Resend — no
  * requiere ser una bandeja real. Si alguien responde un correo, esa respuesta va a
- * {@code replyToAddress} (opcional; vacío = sin header Reply-To).
+ * {@code replyToAddress} (opcional; vacío = sin header Reply-To) salvo que el llamador
+ * pase un Reply-To puntual — usado para que un médico y un abogado se correspondan
+ * directamente por correo (ver {@link MailNotifier#sendContactRequestReceived} /
+ * {@link MailNotifier#sendContactRequestAnswered}) en vez de que la respuesta caiga
+ * siempre en la bandeja del administrador.
  *
  * <p>No atrapa excepciones: cada llamador decide cómo loguear el fallo y con qué
  * semántica de fallback, igual que antes con el webhook de n8n.
@@ -50,15 +54,28 @@ public class ResendClient {
 		return !apiKey.isBlank();
 	}
 
-	/** Envía un correo. Lanza si la API de Resend responde con error o no responde a tiempo. */
+	/** Envía un correo con el Reply-To por defecto configurado en {@code app.resend.reply-to}. */
 	public void send(String to, String subject, String html) {
+		send(to, subject, html, null);
+	}
+
+	/**
+	 * Envía un correo. Si {@code replyToOverride} no es nulo/vacío, reemplaza el
+	 * Reply-To por defecto solo para este envío (ej. la dirección real de la otra
+	 * parte en una solicitud de contacto). Lanza si la API de Resend responde con
+	 * error o no responde a tiempo.
+	 */
+	public void send(String to, String subject, String html, String replyToOverride) {
 		Map<String, Object> payload = new HashMap<>();
 		payload.put("from", fromAddress);
 		payload.put("to", List.of(to));
 		payload.put("subject", subject);
 		payload.put("html", html);
-		if (!replyToAddress.isBlank()) {
-			payload.put("reply_to", replyToAddress);
+		String effectiveReplyTo = replyToOverride == null || replyToOverride.isBlank()
+				? replyToAddress
+				: replyToOverride.strip();
+		if (!effectiveReplyTo.isBlank()) {
+			payload.put("reply_to", effectiveReplyTo);
 		}
 		restClient.post()
 				.uri(RESEND_API_URL)
