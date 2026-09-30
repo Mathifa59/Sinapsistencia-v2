@@ -16,7 +16,7 @@ preservando 1:1 el tema, el contrato de API, los enums en español y el ruteo po
 | Base de datos | PostgreSQL 16 + pgvector |
 | Storage | Cloudinary |
 | ML | FastAPI (`ml-service/`) — Random Forest (riesgo) + TF-IDF/coseno (matching); Spring lo consume como proxy |
-| Automatización | n8n (webhook fire-and-forget para alertas de riesgo) |
+| Correo | Resend API — correos transaccionales + alerta de riesgo alto/crítico, envío directo fire-and-forget |
 | Despliegue | Frontend → Vercel · Backend + ML → Railway |
 
 ## Estructura del monorepo
@@ -26,7 +26,7 @@ sinapsistencia-v2/
 ├── backend/            # Spring Boot 3.5 (Maven, Java 21) — DDD por módulo
 ├── frontend/           # Angular 21
 ├── ml-service/         # FastAPI — Random Forest (riesgo) + TF-IDF/coseno (matching)
-├── n8n/                # workflow JSON de alertas (referencia, sin cambios)
+├── n8n/                # workflow JSON de alertas (histórico — reemplazado por Resend, ver docs/n8n-correos-setup.md)
 ├── docs/               # blueprint + prompt de migración
 ├── _legacy/            # Next.js + Supabase (SOLO LECTURA, referencia)
 └── docker-compose.yml  # Postgres 16 + pgvector para dev local

@@ -145,7 +145,7 @@ public class ContactRequestService {
 
 		request = contactRequestRepository.save(request);
 
-		// Aviso al abogado destinatario (fire-and-forget vía n8n).
+		// Aviso al abogado destinatario (fire-and-forget vía Resend).
 		mailNotifier.sendContactRequestReceived(lawyer.getEmail(), lawyer.getName(),
 				doctor.getName(), request.getCaseTitle(), message);
 
@@ -188,7 +188,7 @@ public class ContactRequestService {
 					"asignacion", "Abogado asignado tras aceptar la solicitud de contacto");
 		}
 
-		// Aviso al médico solicitante del resultado (fire-and-forget vía n8n).
+		// Aviso al médico solicitante del resultado (fire-and-forget vía Resend).
 		mailNotifier.sendContactRequestAnswered(
 				request.getFromDoctor().getEmail(), request.getFromDoctor().getName(),
 				request.getToLawyer().getName(), request.getCaseTitle(),

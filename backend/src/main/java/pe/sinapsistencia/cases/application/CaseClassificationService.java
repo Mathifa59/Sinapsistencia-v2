@@ -23,7 +23,7 @@ import pe.sinapsistencia.cases.domain.LegalCase;
 import pe.sinapsistencia.cases.infrastructure.CaseEventRepository;
 import pe.sinapsistencia.cases.infrastructure.LegalCaseRepository;
 import pe.sinapsistencia.ml.application.MlProxyService;
-import pe.sinapsistencia.ml.application.N8nNotifier;
+import pe.sinapsistencia.ml.application.RiskAlertNotifier;
 import pe.sinapsistencia.ml.domain.CaseComplexity;
 import pe.sinapsistencia.ml.domain.MlClassification;
 import pe.sinapsistencia.ml.infrastructure.MlClassificationRepository;
@@ -40,7 +40,7 @@ import pe.sinapsistencia.ml.infrastructure.MlClassificationRepository;
  * La prioridad del caso pasa a ser la SUGERIDA por el modelo (nivel de riesgo
  * → prioridad); la urgencia percibida del médico queda documentada en la
  * justificación y puede imponerse editando el caso (HU-43: apoyo, no decisión).
- * Riesgo alto/crítico dispara la alerta automática n8n. Si el ML no responde,
+ * Riesgo alto/crítico dispara la alerta automática por correo. Si el ML no responde,
  * se degrada al sistema de reglas (rules-v1) usando la urgencia percibida.
  */
 @Service
@@ -58,20 +58,20 @@ public class CaseClassificationService {
 	private final CaseEventRepository eventRepository;
 	private final LegalCaseRepository caseRepository;
 	private final MlProxyService mlProxyService;
-	private final N8nNotifier n8nNotifier;
+	private final RiskAlertNotifier riskAlertNotifier;
 	private final ObjectMapper objectMapper;
 
 	public CaseClassificationService(MlClassificationRepository classificationRepository,
 			CaseEventRepository eventRepository,
 			LegalCaseRepository caseRepository,
 			MlProxyService mlProxyService,
-			N8nNotifier n8nNotifier,
+			RiskAlertNotifier riskAlertNotifier,
 			ObjectMapper objectMapper) {
 		this.classificationRepository = classificationRepository;
 		this.eventRepository = eventRepository;
 		this.caseRepository = caseRepository;
 		this.mlProxyService = mlProxyService;
-		this.n8nNotifier = n8nNotifier;
+		this.riskAlertNotifier = riskAlertNotifier;
 		this.objectMapper = objectMapper;
 	}
 
@@ -135,7 +135,7 @@ public class CaseClassificationService {
 							+ "Urgencia percibida por el médico: '%s'.",
 					modelVersion, riskScore * 100, riskLevel, suggested.getValue(), perceived.getValue());
 
-			// HU-31: riesgo alto/crítico dispara la alerta automática (n8n).
+			// HU-31: riesgo alto/crítico dispara la alerta automática por correo.
 			if ("alto".equals(riskLevel) || "critico".equals(riskLevel)) {
 				Map<String, Object> alert = new LinkedHashMap<>();
 				alert.put("caseId", legalCase.getId().toString());
@@ -149,7 +149,7 @@ public class CaseClassificationService {
 				alert.put("documentationComplete", legalCase.isDocumentationComplete());
 				alert.put("informedConsent", legalCase.isInformedConsent());
 				alert.put("evaluatedAt", Instant.now().toString());
-				n8nNotifier.triggerRiskAlert(alert);
+				riskAlertNotifier.triggerRiskAlert(alert);
 			}
 		} else {
 			// ── Fallback por reglas (ML caído): la urgencia percibida manda ────

@@ -1,14 +1,20 @@
 package pe.sinapsistencia.notifications;
 
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
 /**
- * Plantillas HTML de los correos transaccionales que dispara {@link MailNotifier}.
+ * Plantillas HTML de los correos de la plataforma — los transaccionales que dispara
+ * {@link MailNotifier} y la alerta de riesgo de {@code RiskAlertNotifier}.
  *
- * El backend arma el asunto y el cuerpo aquí (versionable y testeable); n8n solo
- * recibe {@code subject}/{@code html}/{@code to} y los entrega vía Gmail. El HTML
- * usa estilos inline + layout de tablas para máxima compatibilidad con clientes
- * de correo (Gmail, Outlook, Apple Mail).
+ * El backend arma el asunto y el cuerpo aquí (versionable y testeable); {@link ResendClient}
+ * solo recibe {@code subject}/{@code html}/{@code to} y los entrega. El HTML usa estilos
+ * inline + layout de tablas para máxima compatibilidad con clientes de correo (Gmail,
+ * Outlook, Apple Mail). Pública porque {@code RiskAlertNotifier} vive en el paquete
+ * {@code ml.application}.
  */
-final class MailTemplates {
+public final class MailTemplates {
 
 	private static final String ACCENT = "#2563eb"; // blue-600 (color primario del frontend)
 	private static final String ACCENT_2 = "#06b6d4"; // cyan-500 (cierre del gradiente de marca)
@@ -127,6 +133,61 @@ final class MailTemplates {
 				caseRow.isBlank() ? infoRow("Estado", accepted ? "Abogado asignado" : "Sin asignar") : caseRow,
 				msgBlock, button("Ver en mi panel", panelLink));
 		return shell(accepted ? "Tu solicitud fue aceptada" : "Respuesta a tu solicitud", body);
+	}
+
+	// ── Alerta de riesgo alto/crítico (→ admin, HU-31) ─────────────────────────
+
+	/** @param alert mismo mapa que arma {@code CaseClassificationService}/{@code MlController}. */
+	public static String riskAlert(Map<String, Object> alert) {
+		String riskLevel = String.valueOf(alert.get("riskLevel"));
+		double riskScore = alert.get("riskScore") instanceof Number n ? n.doubleValue() : 0.0;
+		String badge = "critico".equals(riskLevel)
+				? "<span style=\"display:inline-block;padding:4px 12px;border-radius:999px;background:#fee2e2;color:#991b1b;font-size:12px;font-weight:600;\">Crítico</span>"
+				: "<span style=\"display:inline-block;padding:4px 12px;border-radius:999px;background:#ffedd5;color:#9a3412;font-size:12px;font-weight:600;\">Alto</span>";
+		String body = """
+				<p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#0f172a;">
+				  El clasificador de riesgo marcó un caso con nivel %s. %s
+				</p>
+				<table role="presentation" width="100%%" cellpadding="0" cellspacing="0"
+				  style="margin:0 0 24px;border:1px solid %s;border-radius:10px;overflow:hidden;">
+				  %s
+				</table>
+				%s
+				%s
+				<p style="margin:24px 0 0;font-size:13px;line-height:1.6;color:%s;">
+				  Evaluado el %s.
+				</p>
+				""".formatted(
+				esc(riskLevel), badge, BORDER,
+				infoRow("Caso", esc(String.valueOf(alert.get("caseId"))))
+						+ infoRow("Score de riesgo", String.format(Locale.ROOT, "%.0f%%", riskScore * 100))
+						+ infoRow("Especialidad", esc(String.valueOf(alert.get("specialty"))))
+						+ infoRow("Médico", esc(alert.get("doctorName") + " · " + alert.get("doctorEmail")))
+						+ infoRow("Documentación completa", boolLabel(alert.get("documentationComplete")))
+						+ infoRow("Consentimiento informado", boolLabel(alert.get("informedConsent"))),
+				listBlock("Factores de riesgo", alert.get("riskFactors")),
+				listBlock("Recomendaciones", alert.get("recommendations")),
+				MUTED, esc(String.valueOf(alert.get("evaluatedAt"))));
+		return shell("Alerta de riesgo " + riskLevel, body);
+	}
+
+	private static String boolLabel(Object value) {
+		return Boolean.TRUE.equals(value) ? "Sí" : "No";
+	}
+
+	private static String listBlock(String label, Object items) {
+		List<?> values = items instanceof List<?> list ? list : items == null ? List.of() : List.of(items);
+		if (values.isEmpty()) {
+			return "";
+		}
+		StringBuilder lis = new StringBuilder();
+		for (Object item : values) {
+			lis.append("<li style=\"margin:0 0 4px;\">").append(esc(String.valueOf(item))).append("</li>");
+		}
+		return """
+				<p style="margin:0 0 4px;font-size:12px;color:%s;">%s</p>
+				<ul style="margin:0 0 20px;padding-left:18px;font-size:14px;line-height:1.6;color:#0f172a;">%s</ul>
+				""".formatted(MUTED, esc(label), lis);
 	}
 
 	// ── Piezas compartidas ─────────────────────────────────────────────────────

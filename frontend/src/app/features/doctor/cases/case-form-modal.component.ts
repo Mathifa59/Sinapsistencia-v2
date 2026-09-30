@@ -64,7 +64,7 @@ const FACTOR_LABELS: Record<string, string> = {
  * Crear caso + análisis de riesgo automático: al registrar, el modal pasa a una
  * fase de "pipeline" que visualiza el análisis real — variables extraídas del
  * formulario → Random Forest (/api/ml/risk) → score, nivel y desglose por factor.
- * Riesgo alto/crítico dispara la alerta n8n en el backend (HU-31).
+ * Riesgo alto/crítico dispara la alerta por correo en el backend (HU-31).
  */
 @Component({
   selector: 'app-case-form-modal',
@@ -365,7 +365,7 @@ const FACTOR_LABELS: Record<string, string> = {
                     <div class="mt-4 flex items-start gap-2 rounded-lg bg-amber-400/10 px-3.5 py-2.5 ring-1 ring-inset ring-amber-400/25">
                       <lucide-icon name="zap" class="mt-0.5 h-4 w-4 shrink-0 text-amber-300" />
                       <p class="text-xs leading-relaxed text-amber-200">
-                        Riesgo {{ r.riskLevel }}: se disparó una <span class="font-semibold">alerta automática</span> al equipo legal (n8n).
+                        Riesgo {{ r.riskLevel }}: se disparó una <span class="font-semibold">alerta automática</span> al equipo legal.
                       </p>
                     </div>
                   }

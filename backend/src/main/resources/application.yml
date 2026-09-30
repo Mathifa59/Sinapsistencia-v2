@@ -55,11 +55,17 @@ app:
     cookie-secure: ${JWT_COOKIE_SECURE:false} # true en prod (HTTPS)
   ml:
     service-url: ${ML_SERVICE_URL:http://localhost:8000}
-  n8n:
-    # Vacio por defecto: sin n8n configurado no se intenta ninguna conexion
-    # (alertas de riesgo y correos se omiten con log.warn). Setea la URL en prod
-    # o en local si corres n8n (ej. http://localhost:5678).
-    webhook-url: ${N8N_WEBHOOK_URL:}
+  resend:
+    # Vacio por defecto: sin API key configurada no se intenta ninguna conexion
+    # (alertas de riesgo y correos se omiten con log.warn). Setea el API key en prod.
+    api-key: ${RESEND_API_KEY:}
+    from: ${MAIL_FROM:notificaciones@sinapsistencia.com}
+    # A donde llegan las respuestas de los usuarios (no confundir con `from`, que solo
+    # necesita vivir en un dominio verificado en Resend, no ser una bandeja real).
+    # Vacio = sin header Reply-To.
+    reply-to: ${MAIL_REPLY_TO:}
+    # Destinatario de la alerta de riesgo alto/critico (HU-31). Vacio = se omite.
+    risk-alert-to: ${RISK_ALERT_EMAIL:}
   # URL publica del frontend (Vercel en prod) — usada para armar los enlaces de los correos.
   frontend:
     url: ${APP_FRONTEND_URL:http://localhost:4200}

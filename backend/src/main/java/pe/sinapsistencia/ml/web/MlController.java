@@ -16,12 +16,12 @@ import org.springframework.web.bind.annotation.RestController;
 import pe.sinapsistencia.auth.security.AuthenticatedUser;
 import pe.sinapsistencia.ml.application.MlProxyService;
 import pe.sinapsistencia.ml.application.ModelMetricService;
-import pe.sinapsistencia.ml.application.N8nNotifier;
+import pe.sinapsistencia.ml.application.RiskAlertNotifier;
 import pe.sinapsistencia.ml.web.dto.ModelMetricDto;
 import pe.sinapsistencia.shared.api.ApiResponse;
 
 /**
- * Proxy ML — mismos paths que el legacy. POST /risk dispara n8n SOLO si
+ * Proxy ML — mismos paths que el legacy. POST /risk dispara la alerta de riesgo SOLO si
  * riskLevel ∈ {alto, critico} (fire-and-forget). GET /health es público
  * (igual que el indicador de disponibilidad del legacy).
  */
@@ -30,13 +30,13 @@ import pe.sinapsistencia.shared.api.ApiResponse;
 public class MlController {
 
 	private final MlProxyService mlProxyService;
-	private final N8nNotifier n8nNotifier;
+	private final RiskAlertNotifier riskAlertNotifier;
 	private final ModelMetricService modelMetricService;
 
-	public MlController(MlProxyService mlProxyService, N8nNotifier n8nNotifier,
+	public MlController(MlProxyService mlProxyService, RiskAlertNotifier riskAlertNotifier,
 			ModelMetricService modelMetricService) {
 		this.mlProxyService = mlProxyService;
-		this.n8nNotifier = n8nNotifier;
+		this.riskAlertNotifier = riskAlertNotifier;
 		this.modelMetricService = modelMetricService;
 	}
 
@@ -61,7 +61,7 @@ public class MlController {
 			alert.put("documentationComplete", body.getOrDefault("documentation_complete", false));
 			alert.put("informedConsent", body.getOrDefault("informed_consent", false));
 			alert.put("evaluatedAt", Instant.now().toString());
-			n8nNotifier.triggerRiskAlert(alert);
+			riskAlertNotifier.triggerRiskAlert(alert);
 		}
 
 		return ApiResponse.ok(result);

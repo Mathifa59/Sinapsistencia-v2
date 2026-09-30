@@ -1,5 +1,5 @@
 # Postgres 16 + pgvector para desarrollo local de Sinapsistencia.
-# Cloudinary (storage), FastAPI (ML) y n8n son servicios externos: no necesitan contenedor aqui.
+# Cloudinary (storage), FastAPI (ML) y Resend (correo) son servicios externos: no necesitan contenedor aqui.
 services:
   postgres:
     image: pgvector/pgvector:pg16

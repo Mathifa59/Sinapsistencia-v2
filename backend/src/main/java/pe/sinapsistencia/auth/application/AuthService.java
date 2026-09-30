@@ -226,8 +226,8 @@ public class AuthService {
 				Instant.now().plus(1, ChronoUnit.HOURS));
 		passwordResetTokenRepository.save(resetToken);
 
-		// Con n8n configurado el token viaja por correo y NO se expone en la respuesta.
-		// Sin n8n (dev local) se devuelve como fallback para no romper el flujo.
+		// Con Resend configurado el token viaja por correo y NO se expone en la respuesta.
+		// Sin Resend (dev local) se devuelve como fallback para no romper el flujo.
 		if (mailNotifier.isConfigured()) {
 			mailNotifier.sendPasswordReset(profile.getEmail(), profile.getName(), token);
 			return new ForgotPasswordResponse(message, null);

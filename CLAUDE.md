@@ -50,14 +50,14 @@ sugerencia en la plataforma. **No trates el riesgo como si fuera el eje del proy
 | Base de datos | PostgreSQL 16 + pgvector |
 | Storage | Cloudinary |
 | ML | FastAPI (`ml-service/`) — RandomForest (riesgo) + TF-IDF/coseno (matching) |
-| Correos | n8n + Gmail, webhooks fire-and-forget |
+| Correos | Resend API, envío directo fire-and-forget |
 | CI/CD | GitHub Actions, 3 workflows con path filters |
 | Despliegue | Frontend → Vercel · Backend + ML → Railway |
 
 **No es Azure.** La memoria de TP1 menciona Azure como infraestructura planificada; la
 realidad de producción es Railway + Vercel.
 
-Migraciones Flyway: **V1 → V11**. La siguiente que crees es V12.
+Migraciones Flyway: **V1 → V13**. La siguiente que crees es V14.
 
 ---
 
@@ -87,7 +87,7 @@ Los modelos de matching se versionan aparte: `match-v1`, `match-v2`, etc.
 
 ### 4.3 Degradación con fallback declarado
 
-El backend nunca bloquea si ML o n8n están caídos:
+El backend nunca bloquea si ML o Resend están caídos (o sin API key):
 
 - Clasificación → reglas `rules-v1`
 - Matching → score determinístico por coincidencia de área + rating + casos
