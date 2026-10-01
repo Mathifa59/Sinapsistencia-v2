@@ -18,6 +18,7 @@ import {
   ModalFooterDirective,
 } from '../../ui/modal.component';
 import { formatDate, formatDateTime, getInitials } from '../../utils/cn';
+import { formatMlScore } from '../../utils/ml-score.util';
 import {
   CASE_STATUS_LABELS,
   CASE_PRIORITY_LABELS,
@@ -249,7 +250,7 @@ const PRIORITY_DOTS: Record<CasePriority, string> = {
                     <div class="mb-1.5 flex items-center justify-between text-xs">
                       <span class="font-medium text-slate-500">Score de riesgo (Random Forest)</span>
                       <span class="font-bold text-slate-800">
-                        {{ Math.round((cls.riskScore ?? 0) * 100) }}%
+                        {{ formatMlScore(cls.riskScore) ?? '—' }}
                         @if (cls.riskLevel) {
                           <span class="font-normal capitalize text-slate-400">· nivel {{ cls.riskLevel }}</span>
                         }
@@ -639,6 +640,7 @@ export class CaseDetailComponent {
 
   protected readonly specialties = MEDICAL_SPECIALTIES;
   protected readonly Math = Math;
+  protected readonly formatMlScore = formatMlScore;
   protected readonly formatDate = formatDate;
   protected readonly formatDateTime = formatDateTime;
   protected readonly getInitials = getInitials;

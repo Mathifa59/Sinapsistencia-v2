@@ -8,6 +8,7 @@ import { ModalComponent, ModalHeaderDirective, ModalTitleDirective, ModalDescrip
 import { BtnDirective } from '../../../shared/ui/button.directive';
 import { InputDirective, LabelDirective, TextareaDirective, SelectDirective } from '../../../shared/ui/field.directives';
 import { MEDICAL_SPECIALTIES } from '../../../shared/constants';
+import { formatMlScore } from '../../../shared/utils/ml-score.util';
 
 interface RiskFactor {
   name: string;
@@ -324,7 +325,7 @@ const FACTOR_LABELS: Record<string, string> = {
                   <div class="flex flex-wrap items-center justify-between gap-3">
                     <div>
                       <p class="text-[11px] uppercase tracking-wider text-slate-400">Score de riesgo global</p>
-                      <p class="text-4xl font-bold tracking-tight">{{ Math.round(r.riskScore * 100) }}<span class="text-lg text-slate-400">%</span></p>
+                      <p class="text-4xl font-bold tracking-tight">{{ formatMlScore(r.riskScore) ?? '—' }}</p>
                     </div>
                     <span class="inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-semibold ring-1 ring-inset"
                       [class]="levels[r.riskLevel].chip">
@@ -411,6 +412,7 @@ export class CaseFormModalComponent {
   protected readonly specialties = MEDICAL_SPECIALTIES;
   protected readonly serverError = signal<string | null>(null);
   protected readonly Math = Math;
+  protected readonly formatMlScore = formatMlScore;
   protected readonly levels = RISK_LEVELS;
   protected readonly factorLabels = FACTOR_LABELS;
   protected readonly factorCount = Object.keys(FACTOR_LABELS).length;

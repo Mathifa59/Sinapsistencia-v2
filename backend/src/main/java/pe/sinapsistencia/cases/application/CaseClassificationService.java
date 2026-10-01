@@ -117,11 +117,17 @@ public class CaseClassificationService {
 		CasePriority finalPriority;
 		String justification;
 
-		if (risk != null && risk.get("riskLevel") != null) {
+		if (risk != null && !isValidMlRisk(risk)) {
+			log.warn("Respuesta ML inválida al clasificar el caso {}: {} — se trata como fallo del servicio",
+					legalCase.getId(), risk);
+			risk = null;
+		}
+
+		if (risk != null) {
 			String riskLevel = String.valueOf(risk.get("riskLevel"));
-			double riskScore = risk.get("riskScore") instanceof Number n ? n.doubleValue() : 0.0;
-			String modelVersion = String.valueOf(risk.getOrDefault("modelVersion", "rf"));
-			CasePriority suggested = RISK_TO_PRIORITY.getOrDefault(riskLevel, perceived);
+			double riskScore = ((Number) risk.get("riskScore")).doubleValue();
+			String modelVersion = String.valueOf(risk.get("modelVersion"));
+			CasePriority suggested = RISK_TO_PRIORITY.get(riskLevel);
 
 			finalPriority = suggested;
 			classification.setUrgency(suggested);
@@ -131,7 +137,7 @@ public class CaseClassificationService {
 			classification.setModelVersion(modelVersion);
 
 			justification = String.format(Locale.ROOT,
-					"Random Forest %s: score de riesgo %.0f%% (nivel %s) → prioridad sugerida '%s'. "
+					"Random Forest %s: score de riesgo %.2f%% (nivel %s) → prioridad sugerida '%s'. "
 							+ "Urgencia percibida por el médico: '%s'.",
 					modelVersion, riskScore * 100, riskLevel, suggested.getValue(), perceived.getValue());
 
@@ -177,6 +183,30 @@ public class CaseClassificationService {
 				"Caso clasificado por el sistema: " + justification);
 
 		return classification;
+	}
+
+	/**
+	 * H-04: valida presencia/rango/finitud de la respuesta del Random Forest antes
+	 * de confiarla. Un campo faltante o fuera de rango no debe convertirse
+	 * silenciosamente en 0 (riskScore) ni en un nivel inventado — se trata como
+	 * fallo del servicio y cae al fallback {@code rules-v1} ya existente.
+	 */
+	/** Visibilidad de paquete (no private) a propósito: probado directamente en {@code CaseClassificationServiceTest}. */
+	static boolean isValidMlRisk(Map<String, Object> risk) {
+		Object riskLevel = risk.get("riskLevel");
+		if (!(riskLevel instanceof String level) || !RISK_TO_PRIORITY.containsKey(level)) {
+			return false;
+		}
+		Object riskScore = risk.get("riskScore");
+		if (!(riskScore instanceof Number scoreNumber)) {
+			return false;
+		}
+		double score = scoreNumber.doubleValue();
+		if (!Double.isFinite(score) || score < 0.0 || score > 1.0) {
+			return false;
+		}
+		Object modelVersion = risk.get("modelVersion");
+		return modelVersion instanceof String mv && !mv.isBlank();
 	}
 
 	private String toJson(Object value) {

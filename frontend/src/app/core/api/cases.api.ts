@@ -78,7 +78,9 @@ export interface CaseDetailDto {
 
 export interface CaseReportDto {
   caseData: CaseResponse;
-  classification?: MlClassificationDto | null;
+  // H-04: usaba MlClassificationDto (base), que no trae riskScore/riskLevel --
+  // el reporte perdia esos campos aunque el backend si los envia en el JSON.
+  classification?: MlClassificationExtended | null;
   responses?: LegalResponseDto[];
   timeline?: TimelineEntryDto[];
   documentTitles?: string[];
