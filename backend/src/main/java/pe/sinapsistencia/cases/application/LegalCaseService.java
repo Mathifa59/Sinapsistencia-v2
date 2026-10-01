@@ -26,6 +26,7 @@ import pe.sinapsistencia.cases.infrastructure.LegalCaseRepository;
 import pe.sinapsistencia.cases.web.dto.CaseResponse;
 import pe.sinapsistencia.cases.web.dto.CreateCaseRequest;
 import pe.sinapsistencia.cases.web.dto.UpdateCaseRequest;
+import pe.sinapsistencia.ml.domain.CaseComplexity;
 import pe.sinapsistencia.shared.api.ListResponse;
 import pe.sinapsistencia.shared.exception.BadRequestException;
 import pe.sinapsistencia.shared.exception.ForbiddenException;
@@ -122,6 +123,14 @@ public class LegalCaseService {
 			legalCase.setPerceivedUrgency(parsePriority(request.perceivedUrgency()));
 		}
 		legalCase.setNotes(request.notes());
+		// H-05: complejidad reportada explícitamente por el médico, independiente de
+		// perceivedUrgency. Si el body la omite (cliente legacy), queda null aquí y
+		// CaseClassificationService la deriva al clasificar (complexitySource
+		// 'inferred_from_urgency_legacy'), nunca se atribuye al médico un dato que no dio.
+		if (request.procedureComplexity() != null && !request.procedureComplexity().isBlank()) {
+			legalCase.setProcedureComplexity(parseComplexity(request.procedureComplexity()));
+			legalCase.setComplexitySource("reported");
+		}
 		// Factores de riesgo (V11): alimentan al Random Forest en la clasificación.
 		legalCase.setDocumentationComplete(request.documentationComplete() == null || request.documentationComplete());
 		legalCase.setInformedConsent(request.informedConsent() == null || request.informedConsent());
@@ -263,6 +272,18 @@ public class LegalCaseService {
 			return CasePriority.fromValue(value);
 		} catch (IllegalArgumentException ex) {
 			throw new BadRequestException(ex.getMessage());
+		}
+	}
+
+	public static CaseComplexity parseComplexityPublic(String value) {
+		return parseComplexity(value);
+	}
+
+	private static CaseComplexity parseComplexity(String value) {
+		try {
+			return CaseComplexity.fromValue(value);
+		} catch (IllegalArgumentException ex) {
+			throw new BadRequestException("Complejidad del procedimiento inválida: " + value);
 		}
 	}
 

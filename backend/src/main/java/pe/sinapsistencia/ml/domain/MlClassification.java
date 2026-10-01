@@ -5,6 +5,10 @@ import java.time.Instant;
 import java.util.UUID;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -63,6 +67,19 @@ public class MlClassification {
 
 	@Column(name = "response_time_ms")
 	private Integer responseTimeMs;
+
+	/**
+	 * H-05: fotografía exacta de las 7 variables enviadas al RF + metadata
+	 * (complexitySource, evaluatedAt, eventDate, timeZone). NULL en
+	 * clasificaciones históricas anteriores a este flujo -- nunca se reconstruye.
+	 */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(name = "input_snapshot")
+	private JsonNode inputSnapshot;
+
+	/** Versión del pipeline de INTEGRACIÓN (ej. risk-input-pipeline-v3) -- distinta de modelVersion. */
+	@Column(name = "pipeline_version", length = 100)
+	private String pipelineVersion;
 
 	@CreationTimestamp
 	@Column(name = "created_at", nullable = false, updatable = false)
@@ -165,5 +182,21 @@ public class MlClassification {
 
 	public Instant getCreatedAt() {
 		return createdAt;
+	}
+
+	public JsonNode getInputSnapshot() {
+		return inputSnapshot;
+	}
+
+	public void setInputSnapshot(JsonNode inputSnapshot) {
+		this.inputSnapshot = inputSnapshot;
+	}
+
+	public String getPipelineVersion() {
+		return pipelineVersion;
+	}
+
+	public void setPipelineVersion(String pipelineVersion) {
+		this.pipelineVersion = pipelineVersion;
 	}
 }

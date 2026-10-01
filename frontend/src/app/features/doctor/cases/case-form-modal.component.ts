@@ -8,6 +8,7 @@ import { ModalComponent, ModalHeaderDirective, ModalTitleDirective, ModalDescrip
 import { BtnDirective } from '../../../shared/ui/button.directive';
 import { InputDirective, LabelDirective, TextareaDirective, SelectDirective } from '../../../shared/ui/field.directives';
 import { MEDICAL_SPECIALTIES } from '../../../shared/constants';
+import { formatMlScore } from '../../../shared/utils/ml-score.util';
 
 interface RiskFactor {
   name: string;
@@ -128,6 +129,20 @@ const FACTOR_LABELS: Record<string, string> = {
                 }
               </select>
             </div>
+          </div>
+
+          <div class="space-y-1.5">
+            <label appLabel>Complejidad del procedimiento *</label>
+            <select appSelect formControlName="procedureComplexity">
+              <option value="" disabled>Selecciona...</option>
+              <option value="baja">Baja</option>
+              <option value="media">Media</option>
+              <option value="alta">Alta</option>
+            </select>
+            <p class="text-[11px] text-slate-400">Características del procedimiento (no la urgencia temporal percibida).</p>
+            @if (form.controls.procedureComplexity.invalid && form.controls.procedureComplexity.touched) {
+              <p class="text-xs text-red-500">Selecciona la complejidad del procedimiento</p>
+            }
           </div>
 
           <div class="space-y-1.5">
@@ -271,26 +286,30 @@ const FACTOR_LABELS: Record<string, string> = {
                 </span>
                 <p class="text-sm font-medium">Variables extraídas del caso</p>
               </div>
-              @if (stage() >= 2 && inputs(); as vars) {
-                <div class="mt-2.5 ml-10 flex flex-wrap gap-1.5">
-                  <span class="rounded-full bg-white/10 px-2.5 py-0.5 text-[11px] text-slate-200 ring-1 ring-inset ring-white/10">{{ vars.specialty }}</span>
-                  <span class="rounded-full bg-white/10 px-2.5 py-0.5 text-[11px] text-slate-200 ring-1 ring-inset ring-white/10">Complejidad {{ vars.complexity }}</span>
-                  <span class="rounded-full bg-white/10 px-2.5 py-0.5 text-[11px] text-slate-200 ring-1 ring-inset ring-white/10">Prioridad {{ vars.priority }}</span>
-                  <span class="rounded-full px-2.5 py-0.5 text-[11px] ring-1 ring-inset"
-                    [class]="vars.documentation ? 'bg-emerald-400/10 text-emerald-300 ring-emerald-400/20' : 'bg-red-400/10 text-red-300 ring-red-400/20'">
-                    Documentación {{ vars.documentation ? 'completa' : 'incompleta' }}
-                  </span>
-                  <span class="rounded-full px-2.5 py-0.5 text-[11px] ring-1 ring-inset"
-                    [class]="vars.consent ? 'bg-emerald-400/10 text-emerald-300 ring-emerald-400/20' : 'bg-red-400/10 text-red-300 ring-red-400/20'">
-                    Consentimiento {{ vars.consent ? 'firmado' : 'ausente' }}
-                  </span>
-                  @if (vars.priorComplaints) {
-                    <span class="rounded-full bg-red-400/10 px-2.5 py-0.5 text-[11px] text-red-300 ring-1 ring-inset ring-red-400/20">Quejas previas</span>
-                  }
-                  @if (vars.daysSince != null) {
-                    <span class="rounded-full bg-white/10 px-2.5 py-0.5 text-[11px] text-slate-200 ring-1 ring-inset ring-white/10">{{ vars.daysSince }} días desde el evento</span>
-                  }
-                </div>
+              @if (stage() >= 2) {
+                @if (inputs(); as vars) {
+                  <div class="mt-2.5 ml-10 flex flex-wrap gap-1.5">
+                    <span class="rounded-full bg-white/10 px-2.5 py-0.5 text-[11px] text-slate-200 ring-1 ring-inset ring-white/10">{{ vars.specialty }}</span>
+                    <span class="rounded-full bg-white/10 px-2.5 py-0.5 text-[11px] text-slate-200 ring-1 ring-inset ring-white/10">Complejidad {{ vars.complexity }}</span>
+                    <span class="rounded-full bg-white/10 px-2.5 py-0.5 text-[11px] text-slate-200 ring-1 ring-inset ring-white/10">Prioridad {{ vars.priority }}</span>
+                    <span class="rounded-full px-2.5 py-0.5 text-[11px] ring-1 ring-inset"
+                      [class]="vars.documentation ? 'bg-emerald-400/10 text-emerald-300 ring-emerald-400/20' : 'bg-red-400/10 text-red-300 ring-red-400/20'">
+                      Documentación {{ vars.documentation ? 'completa' : 'incompleta' }}
+                    </span>
+                    <span class="rounded-full px-2.5 py-0.5 text-[11px] ring-1 ring-inset"
+                      [class]="vars.consent ? 'bg-emerald-400/10 text-emerald-300 ring-emerald-400/20' : 'bg-red-400/10 text-red-300 ring-red-400/20'">
+                      Consentimiento {{ vars.consent ? 'firmado' : 'ausente' }}
+                    </span>
+                    @if (vars.priorComplaints) {
+                      <span class="rounded-full bg-red-400/10 px-2.5 py-0.5 text-[11px] text-red-300 ring-1 ring-inset ring-red-400/20">Quejas previas</span>
+                    }
+                    @if (vars.daysSince != null) {
+                      <span class="rounded-full bg-white/10 px-2.5 py-0.5 text-[11px] text-slate-200 ring-1 ring-inset ring-white/10">{{ vars.daysSince }} días desde el evento</span>
+                    }
+                  </div>
+                } @else if (inputsUnavailable()) {
+                  <p class="mt-2.5 ml-10 text-[11px] text-slate-400">Entrada histórica no disponible.</p>
+                }
               }
             </div>
 
@@ -324,7 +343,7 @@ const FACTOR_LABELS: Record<string, string> = {
                   <div class="flex flex-wrap items-center justify-between gap-3">
                     <div>
                       <p class="text-[11px] uppercase tracking-wider text-slate-400">Score de riesgo global</p>
-                      <p class="text-4xl font-bold tracking-tight">{{ Math.round(r.riskScore * 100) }}<span class="text-lg text-slate-400">%</span></p>
+                      <p class="text-4xl font-bold tracking-tight">{{ formatMlScore(r.riskScore) ?? '—' }}</p>
                     </div>
                     <span class="inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-semibold ring-1 ring-inset"
                       [class]="levels[r.riskLevel].chip">
@@ -411,6 +430,7 @@ export class CaseFormModalComponent {
   protected readonly specialties = MEDICAL_SPECIALTIES;
   protected readonly serverError = signal<string | null>(null);
   protected readonly Math = Math;
+  protected readonly formatMlScore = formatMlScore;
   protected readonly levels = RISK_LEVELS;
   protected readonly factorLabels = FACTOR_LABELS;
   protected readonly factorCount = Object.keys(FACTOR_LABELS).length;
@@ -430,6 +450,8 @@ export class CaseFormModalComponent {
   } | null>(null);
   protected readonly createdId = signal<string>('');
   protected readonly createdPriority = signal<string>('media');
+  /** H-05: true cuando la clasificación persistida no trae inputSnapshot (fotografía legacy ausente). */
+  protected readonly inputsUnavailable = signal(false);
   private timers: ReturnType<typeof setTimeout>[] = [];
 
   /** Ley 29733: hallazgos de posibles datos personales en los campos libres. */
@@ -451,6 +473,7 @@ export class CaseFormModalComponent {
     medicalSpecialty: [''],
     eventType: [''],
     perceivedUrgency: ['media', Validators.required],
+    procedureComplexity: ['', Validators.required],
     notes: [''],
     documentationComplete: [true],
     informedConsent: [true],
@@ -486,6 +509,7 @@ export class CaseFormModalComponent {
         medicalSpecialty: v.medicalSpecialty || undefined,
         eventType: v.eventType.trim() || undefined,
         perceivedUrgency: v.perceivedUrgency,
+        procedureComplexity: v.procedureComplexity,
         documentationComplete: v.documentationComplete,
         informedConsent: v.informedConsent,
         hasPriorComplaints: v.hasPriorComplaints,
@@ -503,25 +527,15 @@ export class CaseFormModalComponent {
     onError: (err: Error) => this.serverError.set(err.message),
   }));
 
-  /** Pipeline de análisis: el backend ya clasificó con el RF al crear; aquí
-   * solo se anima la lectura del resultado PERSISTIDO (una sola fuente de verdad). */
+  /**
+   * Pipeline de análisis: el backend ya clasificó con el RF al crear; aquí solo se anima
+   * la lectura del resultado PERSISTIDO (una sola fuente de verdad). H-05: las variables
+   * del paso 2 se leen de `inputSnapshot` (lo que el backend REALMENTE evaluó), nunca se
+   * recomputan con el reloj/heurística del navegador.
+   */
   private startAnalysis(): void {
     const v = this.form.getRawValue();
     const urgency = v.perceivedUrgency || 'media';
-    const daysSince = v.eventDate
-      ? Math.max(0, Math.floor((Date.now() - new Date(v.eventDate).getTime()) / 86_400_000))
-      : null;
-    const complexity = urgency === 'critica' || urgency === 'alta' ? 'alta' : urgency === 'media' ? 'media' : 'baja';
-
-    this.inputs.set({
-      specialty: v.medicalSpecialty || v.medicalArea.trim() || 'Medicina General',
-      complexity,
-      priority: urgency,
-      documentation: v.documentationComplete,
-      consent: v.informedConsent,
-      priorComplaints: v.hasPriorComplaints,
-      daysSince,
-    });
 
     this.phase.set('analyzing');
     this.stage.set(1);
@@ -541,6 +555,24 @@ export class CaseFormModalComponent {
       .getDetail(this.createdId())
       .then((detail) => {
         this.createdPriority.set(detail.caseData?.priority ?? urgency);
+
+        const snapshot = detail.classification?.inputSnapshot;
+        const snapshotInputs = snapshot?.inputs;
+        this.inputsUnavailable.set(!snapshotInputs);
+        this.inputs.set(
+          snapshotInputs
+            ? {
+                specialty: snapshotInputs.specialty ?? '—',
+                complexity: snapshotInputs.procedure_complexity ?? '—',
+                priority: snapshotInputs.priority ?? '—',
+                documentation: !!snapshotInputs.documentation_complete,
+                consent: !!snapshotInputs.informed_consent,
+                priorComplaints: !!snapshotInputs.has_prior_complaints,
+                daysSince: snapshotInputs.time_since_incident_days ?? null,
+              }
+            : null,
+        );
+
         const cls = detail.classification;
         if (cls?.riskScore != null && cls.riskLevel) {
           let factors: RiskFactor[] = [];
@@ -599,12 +631,19 @@ export class CaseFormModalComponent {
   private resetAll(close = true): void {
     this.timers.forEach(clearTimeout);
     this.timers = [];
-    this.form.reset({ perceivedUrgency: 'media', documentationComplete: true, informedConsent: true, hasPriorComplaints: false });
+    this.form.reset({
+      perceivedUrgency: 'media',
+      procedureComplexity: '',
+      documentationComplete: true,
+      informedConsent: true,
+      hasPriorComplaints: false,
+    });
     this.serverError.set(null);
     this.phase.set('form');
     this.stage.set(0);
     this.risk.set(null);
     this.inputs.set(null);
+    this.inputsUnavailable.set(false);
     this.piiFindings.set([]);
     this.piiConfirmed.set(false);
     if (close) {

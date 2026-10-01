@@ -11,6 +11,8 @@ import pe.sinapsistencia.matching.web.dto.RecommendationDto.RecommendationsRespo
 public record CaseDetailResponse(
 		CaseResponse caseData,
 		MlClassificationDto classification,
+		// H-05: null = desconocido (fotografía legacy ausente), nunca una coincidencia fabricada.
+		Boolean isStale,
 		List<LegalResponseDto> responses,
 		List<CaseEventDto> events,
 		List<TimelineEntryDto> timeline,

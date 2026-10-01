@@ -13,7 +13,7 @@ import { InputDirective, SelectDirective } from '../../../shared/ui/field.direct
 import { BadgeDirective } from '../../../shared/ui/badge.directive';
 import { CasePriorityBadgeComponent } from '../../../shared/ui/status-badges.component';
 import { MlAdvisoryNoteComponent } from '../../../shared/ui/ml-advisory-note.component';
-import { cn, getInitials } from '../../../shared/utils/cn';
+import { cn, getInitials, formatDateTime } from '../../../shared/utils/cn';
 import type { CasePriority } from '../../../shared/constants';
 
 /** Abogados sugeridos: el médico elige la consulta a vincular antes de solicitar contacto. */
@@ -85,15 +85,15 @@ import type { CasePriority } from '../../../shared/constants';
         </p>
       }
 
-      @if (lawyersQuery.isLoading()) {
+      @if (lawyersQuery.isLoading() || latestRunQuery.isLoading()) {
         <div class="flex items-center justify-center py-16 text-slate-400">
           <lucide-icon name="loader-2" class="h-5 w-5 animate-spin mr-2" />
           <span>Cargando abogados...</span>
         </div>
       }
 
-      <!-- ── Pipeline de matching (TF-IDF + similitud coseno) ─────────────── -->
-      @if (selectedCaseId() && matchStage() < 4) {
+      <!-- ── Pipeline de matching (TF-IDF + similitud coseno) -- solo mientras genera ── -->
+      @if (generateMutation.isPending() || matchStage() > 0 && matchStage() < 4) {
         <div class="relative overflow-hidden rounded-2xl bg-slate-900 p-5 text-white lg:p-6">
           <div class="pointer-events-none absolute -top-20 -right-16 h-56 w-56 rounded-full bg-blue-600/25 blur-3xl"></div>
           <div class="pointer-events-none absolute -bottom-24 -left-10 h-56 w-56 rounded-full bg-cyan-500/15 blur-3xl"></div>
@@ -163,6 +163,61 @@ import type { CasePriority } from '../../../shared/constants';
         </div>
       }
 
+      @if (selectedCaseId() && !generateMutation.isPending() && !latestRunQuery.isLoading()) {
+        <div class="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white px-4 py-3">
+          <div class="text-sm text-slate-600">
+            @if (hasRun()) {
+              <span>Ranking generado {{ formatDateTime(latestRunCreatedAt() ?? '') }}
+                @if (latestRunOrigin() === 'fallback') {
+                  <span class="ml-1 rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-medium text-amber-700">Respaldo sin ML</span>
+                }
+              </span>
+            } @else {
+              <span>Todavía no se generó un ranking para este caso.</span>
+            }
+          </div>
+          <div class="flex items-center gap-2">
+            @if (hasRun()) {
+              <button type="button" class="text-xs font-medium text-blue-600 hover:underline" (click)="runHistoryOpen.set(!runHistoryOpen())">
+                {{ runHistoryOpen() ? 'Ocultar historial' : 'Ver historial' }}
+              </button>
+            }
+            <button appBtn type="button" [variant]="hasRun() ? 'outline' : 'primary'" size="sm" class="gap-1.5"
+              (click)="generate()" [disabled]="generateMutation.isPending()">
+              <lucide-icon name="zap" class="h-3.5 w-3.5" />
+              {{ hasRun() ? 'Actualizar recomendaciones' : 'Generar recomendaciones' }}
+            </button>
+          </div>
+        </div>
+
+        @if (runHistoryOpen()) {
+          <div class="rounded-lg border border-slate-200 bg-slate-50 p-3">
+            <p class="mb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Historial de ejecuciones</p>
+            @if (runHistoryQuery.isLoading()) {
+              <p class="text-xs text-slate-400">Cargando…</p>
+            } @else {
+              <ul class="space-y-1.5">
+                @for (r of runHistoryQuery.data() ?? []; track r.runId) {
+                  <li class="flex flex-wrap items-center justify-between gap-2 text-xs">
+                    <span class="text-slate-500">{{ formatDateTime(r.createdAt ?? '') }}</span>
+                    <span class="font-medium text-slate-700">
+                      {{ r.status }} · {{ r.origin ?? '—' }}
+                      <span class="text-slate-400">({{ r.resultCount ?? 0 }} resultados)</span>
+                    </span>
+                  </li>
+                }
+              </ul>
+            }
+          </div>
+        }
+      }
+
+      @if (generateMutation.isError()) {
+        <p class="text-sm text-red-700 bg-red-50 border border-red-200 rounded-md px-4 py-3">
+          No se pudo generar el ranking. Intenta de nuevo.
+        </p>
+      }
+
       @if (showLawyerCards()) {
       <div class="grid md:grid-cols-2 gap-4">
         @for (lawyer of filteredLawyers(); track lawyer.id; let i = $index) {
@@ -205,6 +260,17 @@ import type { CasePriority } from '../../../shared/constants';
                 <div class="h-1.5 overflow-hidden rounded-full bg-slate-100">
                   <div class="h-full rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 transition-all duration-700" [style.width.%]="matchScore"></div>
                 </div>
+                @let breakdown = getMatchBreakdown(lawyerUserId);
+                @if (breakdown) {
+                  <p class="mt-1.5 text-[11px] text-slate-400">
+                    <span class="font-medium text-slate-500">Cómo se calcula:</span>
+                    @if (breakdown.contentPercent !== null && breakdown.performancePercent !== null) {
+                      Contenido {{ breakdown.contentPercent }}%@if (breakdown.contentWeightPercent !== null) { × {{ breakdown.contentWeightPercent }}% } + Desempeño {{ breakdown.performancePercent }}%@if (breakdown.performanceWeightPercent !== null) { × {{ breakdown.performanceWeightPercent }}% } = Compatibilidad {{ breakdown.totalPercent }}%
+                    } @else {
+                      No disponible (estimación de respaldo — sin desglose de contenido/desempeño)
+                    }
+                  </p>
+                }
               </div>
             }
 
@@ -300,13 +366,16 @@ export class DoctorLawyersComponent {
   protected readonly selectedCaseId = signal('');
   protected readonly contactSuccess = signal(false);
   protected readonly contactError = signal<string | null>(null);
+  protected readonly runHistoryOpen = signal(false);
 
-  /** Etapa de la animación del matching: 1 vectorización · 2 coseno · 3 ranking · 4 listo. */
+  /** Etapa de la animación del matching (solo mientras genera): 1 vectorización · 2 coseno · 3 ranking · 4 listo. */
   protected readonly matchStage = signal(0);
-  protected readonly showLawyerCards = computed(() => !this.selectedCaseId() || this.matchStage() >= 4);
+  protected readonly showLawyerCards = computed(
+    () => !!this.selectedCaseId() && this.hasRun() && !this.generateMutation.isPending(),
+  );
   private matchTimers: ReturnType<typeof setTimeout>[] = [];
-  private lastAnimatedCase = '';
   protected readonly getInitials = getInitials;
+  protected readonly formatDateTime = formatDateTime;
   protected readonly cn = cn;
   protected readonly asPriority = (p?: string) => (p ?? 'media') as CasePriority;
 
@@ -348,23 +417,6 @@ export class DoctorLawyersComponent {
         this.selectedCaseId.set(cases[0].id ?? '');
       }
     });
-
-    // Cada vez que cambia el caso seleccionado, corre la animación del matching.
-    effect(() => {
-      const caseId = this.selectedCaseId();
-      if (!caseId || caseId === this.lastAnimatedCase) return;
-      this.lastAnimatedCase = caseId;
-      this.runMatchAnimation();
-    });
-  }
-
-  private runMatchAnimation(): void {
-    this.matchTimers.forEach(clearTimeout);
-    this.matchTimers = [];
-    this.matchStage.set(1);
-    this.matchTimers.push(setTimeout(() => this.matchStage.set(2), 1000));
-    this.matchTimers.push(setTimeout(() => this.matchStage.set(3), 2100));
-    this.matchTimers.push(setTimeout(() => this.matchStage.set(4), 2900));
   }
 
   protected readonly lawyersQuery = injectQuery(() => ({
@@ -372,10 +424,27 @@ export class DoctorLawyersComponent {
     queryFn: () => this.matchingApi.lawyers(),
   }));
 
-  protected readonly recommendationsQuery = injectQuery(() => ({
+  /** H-02: lee la ÚLTIMA ejecución guardada -- nunca calcula (GET puro). */
+  protected readonly latestRunQuery = injectQuery(() => ({
     queryKey: ['matching', 'recommendations', this.userId(), this.selectedCaseId()],
     queryFn: () => this.matchingApi.recommendations(this.userId(), this.selectedCaseId() || undefined),
     enabled: !!this.userId() && !!this.selectedCaseId(),
+  }));
+
+  protected readonly hasRun = computed(
+    () => (this.latestRunQuery.data()?.modelInfo?.['status'] as string | undefined) !== 'no_run_available',
+  );
+  protected readonly latestRunCreatedAt = computed(
+    () => this.latestRunQuery.data()?.modelInfo?.['createdAt'] as string | undefined,
+  );
+  protected readonly latestRunOrigin = computed(
+    () => this.latestRunQuery.data()?.modelInfo?.['origin'] as string | undefined,
+  );
+
+  protected readonly runHistoryQuery = injectQuery(() => ({
+    queryKey: ['matching', 'recommendation-runs', this.selectedCaseId()],
+    queryFn: () => this.matchingApi.recommendationRuns(this.selectedCaseId()),
+    enabled: !!this.selectedCaseId() && this.runHistoryOpen(),
   }));
 
   protected readonly contactRequestsQuery = injectQuery(() => ({
@@ -387,7 +456,7 @@ export class DoctorLawyersComponent {
   protected readonly filteredLawyers = computed(() => {
     const term = this.search().trim().toLowerCase();
     const lawyers = this.lawyersQuery.data() ?? [];
-    const recs = this.recommendationsQuery.data()?.recommendations ?? [];
+    const recs = this.latestRunQuery.data()?.recommendations ?? [];
     const hasRecs = recs.length > 0;
 
     const scoreMap = new Map<string, number>();
@@ -420,6 +489,7 @@ export class DoctorLawyersComponent {
     this.selectedCaseId.set(caseId);
     this.contactSuccess.set(false);
     this.contactError.set(null);
+    this.runHistoryOpen.set(false);
     void this.router.navigate([], {
       relativeTo: this.route,
       queryParams: { caseId: caseId || null },
@@ -429,14 +499,45 @@ export class DoctorLawyersComponent {
   }
 
   protected getMatchScore(lawyerUserId?: string): number | undefined {
-    return this.recommendationsQuery.data()?.recommendations?.find(
+    return this.latestRunQuery.data()?.recommendations?.find(
       (r) => (r.lawyer?.userId ?? r.lawyer?.id) === lawyerUserId,
     )?.score;
   }
 
+  /**
+   * H-03: desglose contenido/desempeño para el bloque "Cómo se calcula". Los
+   * pesos vienen de `modelInfo.weights` (no se asumen fijos en 70/30 — RF-03.4).
+   * Si los raw vienen null (origen fallback) se señala como no disponible en
+   * vez de inventar un desglose que no corrió.
+   */
+  protected getMatchBreakdown(lawyerUserId?: string):
+    | {
+        contentPercent: number | null;
+        performancePercent: number | null;
+        contentWeightPercent: number | null;
+        performanceWeightPercent: number | null;
+        totalPercent: number | null;
+      }
+    | undefined {
+    const data = this.latestRunQuery.data();
+    const rec = data?.recommendations?.find((r) => (r.lawyer?.userId ?? r.lawyer?.id) === lawyerUserId);
+    if (!rec) return undefined;
+
+    const weights = data?.modelInfo?.['weights'] as { content?: number; performance?: number } | undefined;
+    const toPercent = (v: number | null | undefined) => (v == null ? null : Math.round(v * 100));
+
+    return {
+      contentPercent: toPercent(rec.contentScoreRaw),
+      performancePercent: toPercent(rec.performanceScoreRaw),
+      contentWeightPercent: toPercent(weights?.content),
+      performanceWeightPercent: toPercent(weights?.performance),
+      totalPercent: rec.score ?? null,
+    };
+  }
+
   protected getMatchReasons(lawyerUserId?: string): string[] {
     return (
-      this.recommendationsQuery.data()?.recommendations?.find(
+      this.latestRunQuery.data()?.recommendations?.find(
         (r) => (r.lawyer?.userId ?? r.lawyer?.id) === lawyerUserId,
       )?.reasons ?? []
     );
@@ -455,13 +556,42 @@ export class DoctorLawyersComponent {
     )?.id;
   }
 
+  /** H-02: generación idempotente -- una clave NUEVA por cada clic, nunca se reutiliza entre casos. */
+  protected readonly generateMutation = injectMutation(() => ({
+    mutationFn: () =>
+      this.matchingApi.generateRecommendations({
+        caseId: this.selectedCaseId(),
+        idempotencyKey: crypto.randomUUID(),
+      }),
+    onSuccess: () => {
+      this.queryClient.invalidateQueries({ queryKey: ['matching', 'recommendations', this.userId(), this.selectedCaseId()] });
+      this.queryClient.invalidateQueries({ queryKey: ['matching', 'recommendation-runs', this.selectedCaseId()] });
+    },
+  }));
+
+  protected generate(): void {
+    this.matchTimers.forEach(clearTimeout);
+    this.matchTimers = [];
+    this.matchStage.set(1);
+    this.matchTimers.push(setTimeout(() => this.matchStage.set(2), 1000));
+    this.matchTimers.push(setTimeout(() => this.matchStage.set(3), 2100));
+    this.generateMutation.mutate(undefined, {
+      onSettled: () => {
+        this.matchTimers.forEach(clearTimeout);
+        this.matchStage.set(4);
+      },
+    });
+  }
+
   protected readonly contactMutation = injectMutation(() => ({
-    mutationFn: (payload: { toLawyerUserId: string; caseId: string; caseTitle: string }) =>
+    mutationFn: (payload: { toLawyerUserId: string; caseId: string; caseTitle: string; recommendationId?: string }) =>
       this.matchingApi.createContactRequest({
         fromDoctorId: this.userId(),
         toLawyerId: payload.toLawyerUserId,
         caseId: payload.caseId,
         message: `Hola, me gustaría contactarte para revisar el caso «${payload.caseTitle}».`,
+        recommendationId: payload.recommendationId,
+        selectionSource: payload.recommendationId ? 'recommendation' : 'directory',
       }),
     onSuccess: () => {
       this.contactSuccess.set(true);
@@ -500,10 +630,16 @@ export class DoctorLawyersComponent {
     if (!toLawyerUserId || !caseId || !selected) return;
     this.contactSuccess.set(false);
     this.contactError.set(null);
+    // H-02: el ID de la recomendación viene del ranking GUARDADO (UUID real), nunca
+    // se reconstruye desde la posición en pantalla.
+    const recommendationId = this.latestRunQuery.data()?.recommendations?.find(
+      (r) => (r.lawyer?.userId ?? r.lawyer?.id) === toLawyerUserId,
+    )?.id;
     this.contactMutation.mutate({
       toLawyerUserId,
       caseId,
       caseTitle: selected.title ?? 'Caso',
+      recommendationId,
     });
   }
 }

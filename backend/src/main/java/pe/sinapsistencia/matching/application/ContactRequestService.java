@@ -1,5 +1,7 @@
 package pe.sinapsistencia.matching.application;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -21,7 +23,11 @@ import pe.sinapsistencia.cases.infrastructure.CaseEventRepository;
 import pe.sinapsistencia.cases.infrastructure.LegalCaseRepository;
 import pe.sinapsistencia.matching.domain.ContactRequest;
 import pe.sinapsistencia.matching.domain.ContactRequestStatus;
+import pe.sinapsistencia.matching.domain.MatchRecommendation;
+import pe.sinapsistencia.matching.domain.RecommendationRun;
+import pe.sinapsistencia.matching.domain.RecommendationRunStatus;
 import pe.sinapsistencia.matching.infrastructure.ContactRequestRepository;
+import pe.sinapsistencia.matching.infrastructure.MatchRecommendationRepository;
 import pe.sinapsistencia.matching.web.dto.ContactRequestResponse;
 import pe.sinapsistencia.notifications.MailNotifier;
 import pe.sinapsistencia.profile.domain.DoctorProfile;
@@ -43,6 +49,7 @@ public class ContactRequestService {
 	private final CaseEventRepository eventRepository;
 	private final DoctorProfileRepository doctorProfileRepository;
 	private final LawyerProfileRepository lawyerProfileRepository;
+	private final MatchRecommendationRepository matchRecommendationRepository;
 	private final MailNotifier mailNotifier;
 
 	public ContactRequestService(ContactRequestRepository contactRequestRepository,
@@ -51,6 +58,7 @@ public class ContactRequestService {
 			CaseEventRepository eventRepository,
 			DoctorProfileRepository doctorProfileRepository,
 			LawyerProfileRepository lawyerProfileRepository,
+			MatchRecommendationRepository matchRecommendationRepository,
 			MailNotifier mailNotifier) {
 		this.contactRequestRepository = contactRequestRepository;
 		this.profileRepository = profileRepository;
@@ -58,6 +66,7 @@ public class ContactRequestService {
 		this.eventRepository = eventRepository;
 		this.doctorProfileRepository = doctorProfileRepository;
 		this.lawyerProfileRepository = lawyerProfileRepository;
+		this.matchRecommendationRepository = matchRecommendationRepository;
 		this.mailNotifier = mailNotifier;
 	}
 
@@ -95,7 +104,7 @@ public class ContactRequestService {
 
 	@Transactional
 	public ContactRequestResponse createContactRequest(AuthenticatedUser user, String toLawyerIdParam,
-			String message, String caseIdParam) {
+			String message, String caseIdParam, String recommendationIdParam, String selectionSourceParam) {
 		if (user.role() != UserRole.DOCTOR) {
 			throw new ForbiddenException("Solo un médico puede enviar solicitudes de contacto");
 		}
@@ -143,6 +152,11 @@ public class ContactRequestService {
 			}
 		}
 
+		// H-02: vincula la solicitud a la recomendación concreta que el médico vio
+		// al elegir -- la puntuación se COPIA del registro del servidor, nunca se
+		// acepta una cifra enviada por el cliente (RF-02.4, el frontend no envía mlScore).
+		applySelection(request, user, toLawyerId, lawyer, recommendationIdParam, selectionSourceParam);
+
 		request = contactRequestRepository.save(request);
 
 		// Aviso al abogado destinatario (fire-and-forget vía Resend). Reply-To =
@@ -151,6 +165,63 @@ public class ContactRequestService {
 				doctor.getName(), request.getCaseTitle(), message, doctor.getEmail());
 
 		return enrich(List.of(request)).get(0);
+	}
+
+	/**
+	 * H-02: resuelve el origen de la selección y, si viene del ranking, valida la
+	 * relación completa (ejecución completada, médico/caso/abogado coinciden,
+	 * abogado sigue disponible y activo -- RF-02.6) antes de copiar su score al
+	 * FK/{@code mlScore}. Bodies legacy sin estos campos quedan {@code legacy_untracked}.
+	 */
+	private void applySelection(ContactRequest request, AuthenticatedUser user, UUID toLawyerId,
+			pe.sinapsistencia.auth.domain.Profile lawyer, String recommendationIdParam, String selectionSourceParam) {
+		if (recommendationIdParam != null && !recommendationIdParam.isBlank()) {
+			if (selectionSourceParam != null && !"recommendation".equals(selectionSourceParam)) {
+				throw new BadRequestException(
+						"selectionSource debe ser 'recommendation' cuando se envía recommendationId");
+			}
+			MatchRecommendation recommendation = matchRecommendationRepository
+					.findById(UUID.fromString(recommendationIdParam))
+					.orElseThrow(() -> new NotFoundException("Recomendación no encontrada"));
+
+			RecommendationRun run = recommendation.getRun();
+			if (run == null || run.getStatus() != RecommendationRunStatus.COMPLETED) {
+				throw new BadRequestException("La recomendación indicada no pertenece a una ejecución completada");
+			}
+			if (!run.getDoctor().getId().equals(user.id())) {
+				throw new ForbiddenException("La recomendación no pertenece a tu ejecución");
+			}
+			if (request.getLegalCase() == null || !run.getLegalCase().getId().equals(request.getLegalCase().getId())) {
+				throw new BadRequestException("La recomendación no corresponde a la consulta indicada");
+			}
+			if (!recommendation.getLawyer().getId().equals(toLawyerId)) {
+				throw new BadRequestException("La recomendación no corresponde al abogado indicado");
+			}
+
+			LawyerProfile lawyerProfile = lawyerProfileRepository.findByUserId(toLawyerId).orElse(null);
+			if (lawyerProfile == null || !lawyerProfile.isAvailable() || !lawyer.isActive()) {
+				throw new ConflictException(
+						"El abogado ya no está disponible; genera un nuevo ranking para elegir otro.");
+			}
+
+			request.setRecommendation(recommendation);
+			request.setSelectionSource("recommendation");
+			if (recommendation.getScoreRaw() != null) {
+				request.setMlScore(recommendation.getScoreRaw().multiply(BigDecimal.valueOf(100))
+						.setScale(2, RoundingMode.HALF_UP));
+			}
+			return;
+		}
+
+		if ("directory".equals(selectionSourceParam)) {
+			request.setSelectionSource("directory");
+			return;
+		}
+		if (selectionSourceParam != null && !selectionSourceParam.isBlank()) {
+			throw new BadRequestException("selectionSource inválido: " + selectionSourceParam);
+		}
+		// Body legacy (cliente anterior a H-02): origen desconocido, nunca se finge ML.
+		request.setSelectionSource("legacy_untracked");
 	}
 
 	@Transactional

@@ -25,5 +25,8 @@ export interface ContactRequestResponse {
     mlScore?: number;
     createdAt?: string;
     respondedAt?: string;
+    recommendationId?: string;
+    recommendationRunId?: string;
+    selectionSource?: string;
 }
 

@@ -160,7 +160,7 @@ public final class MailTemplates {
 				""".formatted(
 				esc(riskLevel), badge, BORDER,
 				infoRow("Caso", esc(String.valueOf(alert.get("caseId"))))
-						+ infoRow("Score de riesgo", String.format(Locale.ROOT, "%.0f%%", riskScore * 100))
+						+ infoRow("Score de riesgo", String.format(Locale.ROOT, "%.2f%%", riskScore * 100))
 						+ infoRow("Especialidad", esc(String.valueOf(alert.get("specialty"))))
 						+ infoRow("Médico", esc(alert.get("doctorName") + " · " + alert.get("doctorEmail")))
 						+ infoRow("Documentación completa", boolLabel(alert.get("documentationComplete")))

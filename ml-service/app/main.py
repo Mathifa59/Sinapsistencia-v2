@@ -14,7 +14,7 @@ Contrato (consumido por MlProxyService en Spring, paths sin cambios):
 
 from fastapi import FastAPI, HTTPException
 
-from app.matching.model import get_matching_model
+from app.matching.model import W_CONTENT, W_PERFORMANCE, get_matching_model
 from app.risk.model import get_risk_model
 from app.schemas import (
     RecommendationsRequest,
@@ -63,13 +63,19 @@ def risk_assessment(req: RiskAssessmentRequest):
 @app.post("/api/v1/recommendations", response_model=RecommendationsResponse)
 def recommendations(req: RecommendationsRequest):
     model = get_matching_model()
-    live_corpus = [l.model_dump() for l in req.lawyers] if req.lawyers else None
+    # H-02: distinguir None (el backend no envio el campo -> corpus estatico legacy)
+    # de [] (el backend SI lo envio, pero hay 0 abogados disponibles -> 0 candidatos
+    # vivos, nunca el corpus estatico de perfiles ajenos a la BD).
+    live_corpus = [l.model_dump() for l in req.lawyers] if req.lawyers is not None else None
     recs = model.recommend(req.doctor_profile, req.top_k, lawyers=live_corpus)
     return RecommendationsResponse(
         recommendations=recs,
         model_info={
             "model": "tfidf-cosine+perf-v2",
-            "corpus": "live" if live_corpus else "static-fallback",
-            "corpus_size": len(live_corpus) if live_corpus else len(model.lawyers),
+            "corpus": "live" if live_corpus is not None else "static-fallback",
+            "corpus_size": len(live_corpus) if live_corpus is not None else len(model.lawyers),
+            # H-03 (RF-03.4): pesos y version del pipeline viajan con cada
+            # ejecucion -- no asumir 70/30 fijo al interpretar ejecuciones futuras.
+            "weights": {"content": W_CONTENT, "performance": W_PERFORMANCE},
         },
     )

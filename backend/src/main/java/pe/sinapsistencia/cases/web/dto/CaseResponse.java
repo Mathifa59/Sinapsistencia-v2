@@ -28,6 +28,12 @@ public record CaseResponse(
 		String lawyerId,
 		PersonSnapshot lawyer,
 		CaseContextDto context,
+		// H-05: expuestos para leer/editar fielmente el caso -- antes solo vivían en BD.
+		String procedureComplexity,
+		String complexitySource,
+		boolean documentationComplete,
+		boolean informedConsent,
+		boolean hasPriorComplaints,
 		String notes,
 		Instant createdAt,
 		Instant updatedAt) {
@@ -48,6 +54,11 @@ public record CaseResponse(
 				legalCase.getLawyer() == null ? null : legalCase.getLawyer().getId().toString(),
 				PersonSnapshot.from(legalCase.getLawyer()),
 				CaseContextDto.from(context),
+				legalCase.getProcedureComplexity() == null ? null : legalCase.getProcedureComplexity().getValue(),
+				legalCase.getComplexitySource(),
+				legalCase.isDocumentationComplete(),
+				legalCase.isInformedConsent(),
+				legalCase.isHasPriorComplaints(),
 				legalCase.getNotes(),
 				legalCase.getCreatedAt(),
 				legalCase.getUpdatedAt());

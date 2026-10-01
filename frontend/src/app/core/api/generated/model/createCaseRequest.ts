@@ -19,5 +19,6 @@ export interface CreateCaseRequest {
     perceivedUrgency?: string;
     notes?: string;
     context?: ContextPayload;
+    procedureComplexity?: string;
 }
 
