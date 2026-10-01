@@ -130,7 +130,10 @@ public class MlProxyService {
 		body.put("doctor_id", doctorId);
 		body.put("doctor_profile", doctorProfile);
 		body.put("top_k", topK);
-		if (lawyers != null && !lawyers.isEmpty()) {
+		// H-02: enviar el campo si lawyers != null, AUN VACIO -- omitirlo cuando la
+		// lista esta vacia (0 abogados disponibles) hacia que el ML service lo viera
+		// como ausente y activara el corpus estatico de perfiles ajenos a la BD.
+		if (lawyers != null) {
 			body.put("lawyers", lawyers);
 		}
 		return restClient.post()

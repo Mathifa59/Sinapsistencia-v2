@@ -53,6 +53,15 @@ public class ContactRequest {
 	@Column(name = "ml_score", precision = 5, scale = 2)
 	private BigDecimal mlScore;
 
+	/** H-02: recomendación concreta (tarjeta) desde la que se solicitó contacto, si vino del ranking. */
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "recommendation_id")
+	private MatchRecommendation recommendation;
+
+	/** 'recommendation' | 'directory' | 'legacy_untracked' (filas anteriores a H-02). */
+	@Column(name = "selection_source", length = 30)
+	private String selectionSource;
+
 	@Column(name = "response_message")
 	private String responseMessage;
 
@@ -123,6 +132,22 @@ public class ContactRequest {
 
 	public void setMlScore(BigDecimal mlScore) {
 		this.mlScore = mlScore;
+	}
+
+	public MatchRecommendation getRecommendation() {
+		return recommendation;
+	}
+
+	public void setRecommendation(MatchRecommendation recommendation) {
+		this.recommendation = recommendation;
+	}
+
+	public String getSelectionSource() {
+		return selectionSource;
+	}
+
+	public void setSelectionSource(String selectionSource) {
+		this.selectionSource = selectionSource;
 	}
 
 	public String getResponseMessage() {

@@ -25,6 +25,8 @@ import pe.sinapsistencia.matching.application.RelevantCasesService;
 import pe.sinapsistencia.matching.web.dto.ContactRequestResponse;
 import pe.sinapsistencia.matching.web.dto.DoctorCardDto;
 import pe.sinapsistencia.matching.web.dto.RecommendationDto.RecommendationsResponse;
+import pe.sinapsistencia.matching.web.dto.RecommendationRunDto;
+import pe.sinapsistencia.matching.web.dto.RecommendationRunSummaryDto;
 import pe.sinapsistencia.shared.api.ApiResponse;
 
 /** Mismos paths que el BFF legacy: /api/matching/{doctors,lawyers,contact-requests,relevant-cases}. */
@@ -32,13 +34,15 @@ import pe.sinapsistencia.shared.api.ApiResponse;
 @RequestMapping("/api/matching")
 public class MatchingController {
 
-	public record CreateContactRequestBody(String fromDoctorId, String toLawyerId, String message, String caseId) {
+	public record CreateContactRequestBody(String fromDoctorId, String toLawyerId, String message, String caseId,
+			String recommendationId, String selectionSource) {
 	}
 
 	public record RespondContactRequestBody(String requestId, String status, String responseMessage) {
 	}
 
-	public record GenerateRecommendationsBody(String caseId) {
+	/** H-02: generación idempotente -- caseId e idempotencyKey son obligatorios. */
+	public record GenerateRecommendationsBody(String caseId, String idempotencyKey) {
 	}
 
 	private final MatchingDirectoryService directoryService;
@@ -73,14 +77,30 @@ public class MatchingController {
 		return ApiResponse.ok(directoryService.listLawyers());
 	}
 
-	/** Genera recomendaciones (opcionalmente para una consulta) y las persiste con factores XAI (HU-31/32). */
+	/** H-02: genera una ejecución de matching idempotente y la persiste completa (HU-31/32). */
 	@PostMapping("/lawyers")
-	public ResponseEntity<ApiResponse<RecommendationsResponse>> generateRecommendations(
+	@Auditable(action = "create", resource = "recommendation_run")
+	public ResponseEntity<ApiResponse<RecommendationRunDto>> generateRecommendations(
 			@AuthenticationPrincipal AuthenticatedUser user,
-			@RequestBody(required = false) GenerateRecommendationsBody body) {
-		String caseId = body == null ? null : body.caseId();
+			@RequestBody GenerateRecommendationsBody body) {
 		return ResponseEntity.status(HttpStatus.CREATED)
-				.body(ApiResponse.ok(recommendationService.generateAndPersist(user, caseId)));
+				.body(ApiResponse.ok(recommendationService.generateRun(user, body.caseId(), body.idempotencyKey())));
+	}
+
+	/** H-02: historial de ejecuciones -- lectura pura, nunca invoca ML. */
+	@GetMapping("/recommendation-runs")
+	public ApiResponse<List<RecommendationRunSummaryDto>> recommendationRuns(
+			@AuthenticationPrincipal AuthenticatedUser user,
+			@RequestParam String caseId) {
+		return ApiResponse.ok(recommendationService.recommendationRuns(user, caseId));
+	}
+
+	/** H-02: detalle de una ejecución guardada -- lectura pura, nunca invoca ML. */
+	@GetMapping("/recommendation-runs/{runId}")
+	public ApiResponse<RecommendationRunDto> recommendationRun(
+			@AuthenticationPrincipal AuthenticatedUser user,
+			@PathVariable String runId) {
+		return ApiResponse.ok(recommendationService.recommendationRun(user, runId));
 	}
 
 	@GetMapping("/contact-requests")
@@ -99,7 +119,8 @@ public class MatchingController {
 			@RequestBody CreateContactRequestBody body) {
 		return ResponseEntity.status(HttpStatus.CREATED)
 				.body(ApiResponse.ok(contactRequestService.createContactRequest(
-						user, body.toLawyerId(), body.message(), body.caseId())));
+						user, body.toLawyerId(), body.message(), body.caseId(),
+						body.recommendationId(), body.selectionSource())));
 	}
 
 	@PatchMapping("/contact-requests")

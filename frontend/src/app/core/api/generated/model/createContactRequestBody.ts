@@ -14,5 +14,7 @@ export interface CreateContactRequestBody {
     toLawyerId?: string;
     message?: string;
     caseId?: string;
+    recommendationId?: string;
+    selectionSource?: string;
 }
 

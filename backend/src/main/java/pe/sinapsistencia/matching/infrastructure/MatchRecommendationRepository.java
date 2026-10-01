@@ -1,5 +1,6 @@
 package pe.sinapsistencia.matching.infrastructure;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,4 +10,6 @@ import pe.sinapsistencia.matching.domain.MatchRecommendation;
 
 @Repository
 public interface MatchRecommendationRepository extends JpaRepository<MatchRecommendation, UUID> {
+
+	List<MatchRecommendation> findByRun_IdOrderByRank(UUID runId);
 }

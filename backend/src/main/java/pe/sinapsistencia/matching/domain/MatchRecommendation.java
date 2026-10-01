@@ -10,6 +10,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -47,6 +49,33 @@ public class MatchRecommendation {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "case_id")
 	private LegalCase legalCase;
+
+	/** H-02: ejecución que generó esta fila. NULL = fila legacy anterior a H-02. */
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "run_id")
+	private RecommendationRun run;
+
+	/** Posición en el ranking de su ejecución (1 = mejor match). NULL en filas legacy. */
+	@Column
+	private Integer rank;
+
+	@Column(name = "score_raw", precision = 7, scale = 6)
+	private BigDecimal scoreRaw;
+
+	@Column(name = "content_score_raw", precision = 7, scale = 6)
+	private BigDecimal contentScoreRaw;
+
+	@Column(name = "performance_score_raw", precision = 7, scale = 6)
+	private BigDecimal performanceScoreRaw;
+
+	/** Fotografía del LawyerCardDto mostrado -- un cambio posterior de perfil no la reescribe. */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(name = "lawyer_snapshot")
+	private JsonNode lawyerSnapshot;
+
+	@JdbcTypeCode(SqlTypes.ARRAY)
+	@Column(name = "matched_specialties", columnDefinition = "text[]")
+	private List<String> matchedSpecialties;
 
 	@Column(nullable = false, precision = 5, scale = 2)
 	private BigDecimal score;
@@ -99,6 +128,62 @@ public class MatchRecommendation {
 
 	public void setLegalCase(LegalCase legalCase) {
 		this.legalCase = legalCase;
+	}
+
+	public RecommendationRun getRun() {
+		return run;
+	}
+
+	public void setRun(RecommendationRun run) {
+		this.run = run;
+	}
+
+	public Integer getRank() {
+		return rank;
+	}
+
+	public void setRank(Integer rank) {
+		this.rank = rank;
+	}
+
+	public BigDecimal getScoreRaw() {
+		return scoreRaw;
+	}
+
+	public void setScoreRaw(BigDecimal scoreRaw) {
+		this.scoreRaw = scoreRaw;
+	}
+
+	public BigDecimal getContentScoreRaw() {
+		return contentScoreRaw;
+	}
+
+	public void setContentScoreRaw(BigDecimal contentScoreRaw) {
+		this.contentScoreRaw = contentScoreRaw;
+	}
+
+	public BigDecimal getPerformanceScoreRaw() {
+		return performanceScoreRaw;
+	}
+
+	public void setPerformanceScoreRaw(BigDecimal performanceScoreRaw) {
+		this.performanceScoreRaw = performanceScoreRaw;
+	}
+
+	public JsonNode getLawyerSnapshot() {
+		return lawyerSnapshot;
+	}
+
+	public void setLawyerSnapshot(JsonNode lawyerSnapshot) {
+		this.lawyerSnapshot = lawyerSnapshot;
+	}
+
+	public List<String> getMatchedSpecialties() {
+		return matchedSpecialties;
+	}
+
+	public void setMatchedSpecialties(List<String> matchedSpecialties) {
+		this.matchedSpecialties = matchedSpecialties;
 	}
 
 	public BigDecimal getScore() {
