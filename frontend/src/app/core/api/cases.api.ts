@@ -19,6 +19,23 @@ export interface CaseListParams {
   [key: string]: string | number | boolean | undefined;
 }
 
+/** H-05: fotografía de las 7 entradas evaluadas por el RF + metadata de contexto. */
+export interface MlInputSnapshot {
+  inputs?: {
+    specialty?: string;
+    procedure_complexity?: string;
+    priority?: string;
+    documentation_complete?: boolean;
+    informed_consent?: boolean;
+    has_prior_complaints?: boolean;
+    time_since_incident_days?: number;
+  };
+  complexitySource?: string;
+  evaluatedAt?: string;
+  eventDate?: string | null;
+  timeZone?: string;
+}
+
 export interface MlClassificationDto {
   id?: string;
   caseType?: string;
@@ -28,6 +45,9 @@ export interface MlClassificationDto {
   confidence?: number;
   modelVersion?: string;
   responseTimeMs?: number;
+  // H-05: null en clasificaciones anteriores a este flujo -- nunca se reconstruye en el cliente.
+  inputSnapshot?: MlInputSnapshot | null;
+  pipelineVersion?: string | null;
   createdAt?: string;
 }
 
@@ -69,6 +89,8 @@ export type MlClassificationExtended = MlClassificationDto & {
 export interface CaseDetailDto {
   caseData: CaseResponse;
   classification?: MlClassificationExtended | null;
+  // H-05: null = desconocido (fotografía legacy ausente), nunca una coincidencia fabricada.
+  isStale?: boolean | null;
   responses?: LegalResponseDto[];
   events?: CaseEventDto[];
   timeline?: TimelineEntryDto[];
@@ -95,6 +117,11 @@ export interface EditCaseBody {
   medicalSpecialty?: string;
   eventType?: string;
   perceivedUrgency?: string;
+  // H-05: omitir un campo significa CONSERVAR su valor actual, nunca resetearlo.
+  procedureComplexity?: string;
+  documentationComplete?: boolean;
+  informedConsent?: boolean;
+  hasPriorComplaints?: boolean;
   notes?: string;
   context?: ContextPayload;
 }
@@ -136,6 +163,16 @@ export class CasesApi {
 
   getReport(id: string): Promise<CaseReportDto> {
     return this.api.get<CaseReportDto>(`/api/legal-cases/${id}/report`);
+  }
+
+  /** H-05: historial completo de clasificaciones -- lectura pura, no reclasifica. */
+  classifications(id: string): Promise<MlClassificationExtended[]> {
+    return this.api.get<MlClassificationExtended[]>(`/api/legal-cases/${id}/classifications`);
+  }
+
+  /** H-05: reevaluación explícita del riesgo con las entradas actuales del caso. */
+  reclassify(id: string): Promise<CaseDetailDto> {
+    return this.api.post<CaseDetailDto>(`/api/legal-cases/${id}/reclassify`, {});
   }
 
   create(body: CreateCaseRequest): Promise<CaseResponse> {

@@ -17,6 +17,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 import pe.sinapsistencia.auth.domain.Profile;
+import pe.sinapsistencia.ml.domain.CaseComplexity;
 
 /**
  * La consulta médico-legal (HU-11). Tabla `cases` por fidelidad con los paths
@@ -62,6 +63,15 @@ public class LegalCase {
 
 	@Column(name = "perceived_urgency", length = 20)
 	private CasePriority perceivedUrgency;
+
+	// H-05: complejidad del procedimiento, independiente de perceived_urgency.
+	// NULL = caso historico previo a este flujo o body legacy sin el campo.
+	@Column(name = "procedure_complexity", length = 20)
+	private CaseComplexity procedureComplexity;
+
+	/** 'reported' (el médico la indicó) | 'inferred_from_urgency_legacy' | null (histórico). */
+	@Column(name = "complexity_source", length = 50)
+	private String complexitySource;
 
 	// Factores de riesgo del caso: alimentan al Random Forest al clasificar (V11).
 	@Column(name = "documentation_complete", nullable = false)
@@ -195,6 +205,22 @@ public class LegalCase {
 
 	public void setPerceivedUrgency(CasePriority perceivedUrgency) {
 		this.perceivedUrgency = perceivedUrgency;
+	}
+
+	public CaseComplexity getProcedureComplexity() {
+		return procedureComplexity;
+	}
+
+	public void setProcedureComplexity(CaseComplexity procedureComplexity) {
+		this.procedureComplexity = procedureComplexity;
+	}
+
+	public String getComplexitySource() {
+		return complexitySource;
+	}
+
+	public void setComplexitySource(String complexitySource) {
+		this.complexitySource = complexitySource;
 	}
 
 	public String getNotes() {

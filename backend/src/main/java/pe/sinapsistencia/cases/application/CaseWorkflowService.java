@@ -5,10 +5,13 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 import pe.sinapsistencia.auth.domain.Profile;
 import pe.sinapsistencia.auth.domain.UserRole;
@@ -16,6 +19,7 @@ import pe.sinapsistencia.auth.infrastructure.ProfileRepository;
 import pe.sinapsistencia.auth.security.AuthenticatedUser;
 import pe.sinapsistencia.cases.domain.CaseContext;
 import pe.sinapsistencia.cases.domain.CaseEvent;
+import pe.sinapsistencia.cases.domain.CasePriority;
 import pe.sinapsistencia.cases.domain.CaseStatus;
 import pe.sinapsistencia.cases.domain.LegalCase;
 import pe.sinapsistencia.cases.domain.LegalResponse;
@@ -38,6 +42,7 @@ import pe.sinapsistencia.documents.domain.Document;
 import pe.sinapsistencia.documents.infrastructure.DocumentRepository;
 import pe.sinapsistencia.matching.application.RecommendationService;
 import pe.sinapsistencia.matching.web.dto.RecommendationDto.RecommendationsResponse;
+import pe.sinapsistencia.ml.domain.MlClassification;
 import pe.sinapsistencia.ml.infrastructure.MlClassificationRepository;
 import pe.sinapsistencia.shared.exception.BadRequestException;
 import pe.sinapsistencia.shared.exception.ForbiddenException;
@@ -55,6 +60,7 @@ public class CaseWorkflowService {
 	private final DocumentRepository documentRepository;
 	private final ProfileRepository profileRepository;
 	private final RecommendationService recommendationService;
+	private final CaseClassificationService classificationService;
 
 	public CaseWorkflowService(LegalCaseRepository caseRepository,
 			CaseContextRepository contextRepository,
@@ -63,7 +69,8 @@ public class CaseWorkflowService {
 			MlClassificationRepository classificationRepository,
 			DocumentRepository documentRepository,
 			ProfileRepository profileRepository,
-			RecommendationService recommendationService) {
+			RecommendationService recommendationService,
+			CaseClassificationService classificationService) {
 		this.caseRepository = caseRepository;
 		this.contextRepository = contextRepository;
 		this.eventRepository = eventRepository;
@@ -72,6 +79,7 @@ public class CaseWorkflowService {
 		this.documentRepository = documentRepository;
 		this.profileRepository = profileRepository;
 		this.recommendationService = recommendationService;
+		this.classificationService = classificationService;
 	}
 
 	@Transactional
@@ -100,6 +108,21 @@ public class CaseWorkflowService {
 		}
 		if (request.perceivedUrgency() != null) {
 			legalCase.setPerceivedUrgency(LegalCaseService.parsePriorityPublic(request.perceivedUrgency()));
+		}
+		// H-05: complejidad editada por el médico es, por definición, reportada -- nunca
+		// se reclasifica aquí (eso requiere POST /reclassify explícito, ver más abajo).
+		if (request.procedureComplexity() != null && !request.procedureComplexity().isBlank()) {
+			legalCase.setProcedureComplexity(LegalCaseService.parseComplexityPublic(request.procedureComplexity()));
+			legalCase.setComplexitySource("reported");
+		}
+		if (request.documentationComplete() != null) {
+			legalCase.setDocumentationComplete(request.documentationComplete());
+		}
+		if (request.informedConsent() != null) {
+			legalCase.setInformedConsent(request.informedConsent());
+		}
+		if (request.hasPriorComplaints() != null) {
+			legalCase.setHasPriorComplaints(request.hasPriorComplaints());
 		}
 		if (request.notes() != null) {
 			legalCase.setNotes(request.notes());
@@ -266,9 +289,13 @@ public class CaseWorkflowService {
 		CaseContext context = contextRepository.findByLegalCaseId(id).orElse(null);
 		CaseResponse caseData = CaseResponse.from(legalCase, context);
 
-		MlClassificationDto classification = classificationRepository
-				.findFirstByLegalCase_IdOrderByCreatedAtDesc(id)
-				.map(MlClassificationDto::from)
+		// H-05: orden con desempate por id -- dos clasificaciones pueden compartir
+		// createdAt (p. ej. una reclasificación inmediatamente posterior a la original).
+		var latestClassification = classificationRepository
+				.findFirstByLegalCase_IdOrderByCreatedAtDescIdDesc(id);
+		MlClassificationDto classification = latestClassification.map(MlClassificationDto::from).orElse(null);
+		Boolean isStale = latestClassification
+				.map(c -> computeIsStale(legalCase, context, c))
 				.orElse(null);
 
 		List<LegalResponseDto> responses = responseRepository.findByLegalCase_IdOrderByCreatedAtDesc(id).stream()
@@ -287,8 +314,90 @@ public class CaseWorkflowService {
 					legalCase.getDoctor().getId().toString(), legalCase.getId().toString());
 		}
 
-		return new CaseDetailResponse(caseData, classification, responses, events, timeline,
+		return new CaseDetailResponse(caseData, classification, isStale, responses, events, timeline,
 				recommendations, CaseDetailResponse.ADVISORY_NOTE);
+	}
+
+	/**
+	 * H-05: ¿las entradas que generaron la última clasificación persistida siguen
+	 * reflejando el estado actual del caso? Compara contra la fotografía
+	 * ({@code inputSnapshot}), nunca recalcula con el reloj del navegador.
+	 * Devuelve {@code null} (desconocido, no fabricado) cuando la fotografía es
+	 * legacy y no existe.
+	 * Visibilidad de paquete a propósito: probado directamente en {@code CaseWorkflowServiceTest}.
+	 */
+	static Boolean computeIsStale(LegalCase legalCase, CaseContext context, MlClassification classification) {
+		JsonNode snapshot = classification.getInputSnapshot();
+		JsonNode inputs = snapshot == null ? null : snapshot.get("inputs");
+		if (inputs == null || inputs.isNull()) {
+			return null;
+		}
+
+		CasePriority perceived = legalCase.getPerceivedUrgency() != null
+				? legalCase.getPerceivedUrgency()
+				: legalCase.getPriority();
+		String currentSpecialty = CaseClassificationService.resolveSpecialty(legalCase, context);
+		String currentComplexity = legalCase.getProcedureComplexity() == null
+				? null
+				: legalCase.getProcedureComplexity().getValue();
+		String currentEventDate = context != null && context.getEventDate() != null
+				? context.getEventDate().toString()
+				: null;
+		String snapshotEventDate = snapshot.hasNonNull("eventDate") ? snapshot.get("eventDate").asText() : null;
+
+		return !textFieldEquals(inputs, "specialty", currentSpecialty)
+				|| !textFieldEquals(inputs, "procedure_complexity", currentComplexity)
+				|| !textFieldEquals(inputs, "priority", perceived.getValue())
+				|| !boolFieldEquals(inputs, "documentation_complete", legalCase.isDocumentationComplete())
+				|| !boolFieldEquals(inputs, "informed_consent", legalCase.isInformedConsent())
+				|| !boolFieldEquals(inputs, "has_prior_complaints", legalCase.isHasPriorComplaints())
+				|| !Objects.equals(snapshotEventDate, currentEventDate);
+	}
+
+	private static boolean textFieldEquals(JsonNode inputs, String field, String expected) {
+		JsonNode value = inputs.get(field);
+		String actual = value == null || value.isNull() ? null : value.asText();
+		return Objects.equals(actual, expected);
+	}
+
+	private static boolean boolFieldEquals(JsonNode inputs, String field, boolean expected) {
+		JsonNode value = inputs.get(field);
+		boolean actual = value != null && value.asBoolean();
+		return actual == expected;
+	}
+
+	/**
+	 * H-05: reevaluación explícita a pedido del médico propietario -- nunca automática ni
+	 * disparada por una lectura. No sobrescribe la clasificación anterior: crea una nueva
+	 * fila y la vincula al caso vía el mismo flujo de {@code classifyAndPrioritize}, además
+	 * de un evento propio que distingue esta acción de la clasificación automática al crear.
+	 */
+	@Transactional
+	public CaseDetailResponse reclassify(AuthenticatedUser user, UUID id) {
+		LegalCase legalCase = loadCase(id);
+		assertDoctorOwner(user, legalCase);
+		if (!canEditBeforeAssignment(legalCase)) {
+			throw new BadRequestException(
+					"Solo se puede reevaluar el riesgo de consultas pendientes o clasificadas sin abogado asignado");
+		}
+
+		CaseContext context = contextRepository.findByLegalCaseId(id).orElse(null);
+		classificationService.classifyAndPrioritize(legalCase, context);
+
+		recordSystemEvent(eventRepository, legalCase, legalCase.getDoctor(), "reclasificacion",
+				"El médico solicitó una reevaluación de riesgo con las entradas actuales del caso");
+
+		return getDetail(user, id);
+	}
+
+	/** H-05: historial completo de clasificaciones del caso -- ninguna se sobrescribe ni se borra. */
+	@Transactional(readOnly = true)
+	public List<MlClassificationDto> getClassificationHistory(AuthenticatedUser user, UUID id) {
+		LegalCase legalCase = loadCase(id);
+		assertCanView(user, legalCase);
+		return classificationRepository.findByLegalCase_IdOrderByCreatedAtDescIdDesc(id).stream()
+				.map(MlClassificationDto::from)
+				.toList();
 	}
 
 	@Transactional(readOnly = true)

@@ -2,6 +2,7 @@ package pe.sinapsistencia.cases.application;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -14,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import pe.sinapsistencia.cases.domain.CaseContext;
@@ -22,6 +24,7 @@ import pe.sinapsistencia.cases.domain.CaseStatus;
 import pe.sinapsistencia.cases.domain.LegalCase;
 import pe.sinapsistencia.cases.infrastructure.CaseEventRepository;
 import pe.sinapsistencia.cases.infrastructure.LegalCaseRepository;
+import pe.sinapsistencia.config.ClockConfig;
 import pe.sinapsistencia.ml.application.MlProxyService;
 import pe.sinapsistencia.ml.application.RiskAlertNotifier;
 import pe.sinapsistencia.ml.domain.CaseComplexity;
@@ -57,22 +60,28 @@ public class CaseClassificationService {
 	private final MlClassificationRepository classificationRepository;
 	private final CaseEventRepository eventRepository;
 	private final LegalCaseRepository caseRepository;
+	/** H-05: version del pipeline de INTEGRACION (que se envia al modelo), no del modelo en si. */
+	private static final String PIPELINE_VERSION = "risk-input-pipeline-v3";
+
 	private final MlProxyService mlProxyService;
 	private final RiskAlertNotifier riskAlertNotifier;
 	private final ObjectMapper objectMapper;
+	private final Clock clock;
 
 	public CaseClassificationService(MlClassificationRepository classificationRepository,
 			CaseEventRepository eventRepository,
 			LegalCaseRepository caseRepository,
 			MlProxyService mlProxyService,
 			RiskAlertNotifier riskAlertNotifier,
-			ObjectMapper objectMapper) {
+			ObjectMapper objectMapper,
+			Clock clock) {
 		this.classificationRepository = classificationRepository;
 		this.eventRepository = eventRepository;
 		this.caseRepository = caseRepository;
 		this.mlProxyService = mlProxyService;
 		this.riskAlertNotifier = riskAlertNotifier;
 		this.objectMapper = objectMapper;
+		this.clock = clock;
 	}
 
 	@Transactional
@@ -82,7 +91,24 @@ public class CaseClassificationService {
 		CasePriority perceived = legalCase.getPerceivedUrgency() != null
 				? legalCase.getPerceivedUrgency()
 				: legalCase.getPriority();
-		CaseComplexity complexity = deriveComplexity(perceived);
+
+		// H-05: la complejidad reportada por el médico (independiente de la urgencia)
+		// manda sobre la derivación legacy. Un caso histórico/legacy sin el campo
+		// se deriva como antes, pero queda marcado para no confundirse con un dato real.
+		CaseComplexity complexity;
+		String complexitySource;
+		if (legalCase.getProcedureComplexity() != null) {
+			complexity = legalCase.getProcedureComplexity();
+			complexitySource = legalCase.getComplexitySource() != null
+					? legalCase.getComplexitySource()
+					: "reported";
+		} else {
+			complexity = deriveComplexity(perceived);
+			complexitySource = "inferred_from_urgency_legacy";
+			legalCase.setProcedureComplexity(complexity);
+			legalCase.setComplexitySource(complexitySource);
+		}
+
 		String caseType = deriveCaseType(legalCase);
 		String suggestedSpecialty = deriveSuggestedSpecialty(legalCase);
 		String specialty = resolveSpecialty(legalCase, context);
@@ -91,22 +117,28 @@ public class CaseClassificationService {
 		classification.setCaseType(caseType);
 		classification.setComplexity(complexity);
 		classification.setSuggestedSpecialty(suggestedSpecialty);
+		classification.setPipelineVersion(PIPELINE_VERSION);
+
+		// H-05: las 7 variables del RF se arman UNA vez — son la fuente de verdad
+		// tanto para la llamada al ML como para el snapshot que se persiste.
+		Map<String, Object> mlInputs = new LinkedHashMap<>();
+		mlInputs.put("specialty", specialty);
+		mlInputs.put("procedure_complexity", complexity.getValue());
+		mlInputs.put("priority", perceived.getValue());
+		mlInputs.put("documentation_complete", legalCase.isDocumentationComplete());
+		mlInputs.put("informed_consent", legalCase.isInformedConsent());
+		mlInputs.put("has_prior_complaints", legalCase.isHasPriorComplaints());
+		Long daysSince = daysSinceEvent(context);
+		if (daysSince != null) {
+			mlInputs.put("time_since_incident_days", daysSince);
+		}
+		classification.setInputSnapshot(buildInputSnapshot(mlInputs, complexitySource, context));
 
 		// ── Intento con el Random Forest real ──────────────────────────────────
 		Map<String, Object> risk = null;
 		try {
-			Map<String, Object> payload = new LinkedHashMap<>();
+			Map<String, Object> payload = new LinkedHashMap<>(mlInputs);
 			payload.put("case_id", legalCase.getId().toString());
-			payload.put("specialty", specialty);
-			payload.put("procedure_complexity", complexity.getValue());
-			payload.put("priority", perceived.getValue());
-			payload.put("documentation_complete", legalCase.isDocumentationComplete());
-			payload.put("informed_consent", legalCase.isInformedConsent());
-			payload.put("has_prior_complaints", legalCase.isHasPriorComplaints());
-			Long daysSince = daysSinceEvent(context);
-			if (daysSince != null) {
-				payload.put("time_since_incident_days", daysSince);
-			}
 			payload.put("description", legalCase.getDescription() == null ? "" : legalCase.getDescription());
 			risk = mlProxyService.riskAssessment(payload);
 		} catch (Exception ex) {
@@ -217,16 +249,34 @@ public class CaseClassificationService {
 		}
 	}
 
-	private static Long daysSinceEvent(CaseContext context) {
+	/**
+	 * H-05: fotografía de las 7 variables enviadas al RF + metadata de contexto.
+	 * Se guarda SIEMPRE (ML disponible o no) porque documenta qué se evaluó,
+	 * no qué respondió el modelo.
+	 */
+	private JsonNode buildInputSnapshot(Map<String, Object> mlInputs, String complexitySource, CaseContext context) {
+		Map<String, Object> snapshot = new LinkedHashMap<>();
+		snapshot.put("inputs", mlInputs);
+		snapshot.put("complexitySource", complexitySource);
+		snapshot.put("evaluatedAt", Instant.now(clock).toString());
+		snapshot.put("eventDate", context != null && context.getEventDate() != null
+				? context.getEventDate().toString()
+				: null);
+		snapshot.put("timeZone", ClockConfig.BUSINESS_ZONE.getId());
+		return objectMapper.valueToTree(snapshot);
+	}
+
+	private Long daysSinceEvent(CaseContext context) {
 		if (context == null || context.getEventDate() == null) {
 			return null;
 		}
 		LocalDate eventDate = context.getEventDate();
-		long days = ChronoUnit.DAYS.between(eventDate, LocalDate.now());
+		long days = ChronoUnit.DAYS.between(eventDate, LocalDate.now(clock));
 		return Math.max(days, 0);
 	}
 
-	private static String resolveSpecialty(LegalCase legalCase, CaseContext context) {
+	/** Visibilidad de paquete a propósito: reutilizada por {@code CaseWorkflowService} para el cálculo de isStale (H-05). */
+	static String resolveSpecialty(LegalCase legalCase, CaseContext context) {
 		if (legalCase.getMedicalSpecialty() != null && !legalCase.getMedicalSpecialty().isBlank()) {
 			return legalCase.getMedicalSpecialty();
 		}

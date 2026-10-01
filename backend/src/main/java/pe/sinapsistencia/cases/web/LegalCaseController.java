@@ -1,5 +1,6 @@
 package pe.sinapsistencia.cases.web;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
@@ -29,6 +30,7 @@ import pe.sinapsistencia.cases.web.dto.CreateCaseRequest;
 import pe.sinapsistencia.cases.web.dto.CreateLegalResponseRequest;
 import pe.sinapsistencia.cases.web.dto.EditCaseRequest;
 import pe.sinapsistencia.cases.web.dto.LegalResponseDto;
+import pe.sinapsistencia.cases.web.dto.MlClassificationDto;
 import pe.sinapsistencia.cases.web.dto.UpdateCaseRequest;
 import pe.sinapsistencia.shared.api.ApiResponse;
 import pe.sinapsistencia.shared.api.ListResponse;
@@ -87,6 +89,23 @@ public class LegalCaseController {
 			@AuthenticationPrincipal AuthenticatedUser user,
 			@PathVariable UUID id) {
 		return ApiResponse.ok(workflowService.getReport(user, id));
+	}
+
+	/** H-05: historial completo de clasificaciones -- lectura pura, no reclasifica. */
+	@GetMapping("/{id}/classifications")
+	public ApiResponse<List<MlClassificationDto>> getClassifications(
+			@AuthenticationPrincipal AuthenticatedUser user,
+			@PathVariable UUID id) {
+		return ApiResponse.ok(workflowService.getClassificationHistory(user, id));
+	}
+
+	/** H-05: reevaluación explícita del riesgo con las entradas actuales del caso. */
+	@PostMapping("/{id}/reclassify")
+	@Auditable(action = "create", resource = "ml_classification")
+	public ApiResponse<CaseDetailResponse> reclassify(
+			@AuthenticationPrincipal AuthenticatedUser user,
+			@PathVariable UUID id) {
+		return ApiResponse.ok(workflowService.reclassify(user, id));
 	}
 
 	@PutMapping("/{id}")
