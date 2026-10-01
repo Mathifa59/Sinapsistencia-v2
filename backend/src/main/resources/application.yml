@@ -66,6 +66,12 @@ app:
     reply-to: ${MAIL_REPLY_TO:}
     # Destinatario de la alerta de riesgo alto/critico (HU-31). Vacio = se omite.
     risk-alert-to: ${RISK_ALERT_EMAIL:}
+  # H-06: NotificationWorker despacha el outbox de notificaciones en lotes
+  # periodicos. worker-enabled en false detiene el despacho (las filas siguen
+  # encolandose, solo no se procesan) -- util para pruebas o mantenimiento.
+  notifications:
+    worker-enabled: ${NOTIFICATIONS_WORKER_ENABLED:true}
+    worker-interval-ms: ${NOTIFICATIONS_WORKER_INTERVAL_MS:15000}
   # URL publica del frontend (Vercel en prod) — usada para armar los enlaces de los correos.
   frontend:
     url: ${APP_FRONTEND_URL:http://localhost:4200}

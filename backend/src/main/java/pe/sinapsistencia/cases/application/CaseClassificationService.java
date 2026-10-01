@@ -12,6 +12,7 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,10 +27,11 @@ import pe.sinapsistencia.cases.infrastructure.CaseEventRepository;
 import pe.sinapsistencia.cases.infrastructure.LegalCaseRepository;
 import pe.sinapsistencia.config.ClockConfig;
 import pe.sinapsistencia.ml.application.MlProxyService;
-import pe.sinapsistencia.ml.application.RiskAlertNotifier;
 import pe.sinapsistencia.ml.domain.CaseComplexity;
 import pe.sinapsistencia.ml.domain.MlClassification;
 import pe.sinapsistencia.ml.infrastructure.MlClassificationRepository;
+import pe.sinapsistencia.notifications.MailTemplates;
+import pe.sinapsistencia.notifications.NotificationService;
 
 /**
  * Clasificación y priorización de casos (HU-29/30/31) — pipeline UNIFICADO.
@@ -64,24 +66,27 @@ public class CaseClassificationService {
 	private static final String PIPELINE_VERSION = "risk-input-pipeline-v3";
 
 	private final MlProxyService mlProxyService;
-	private final RiskAlertNotifier riskAlertNotifier;
+	private final NotificationService notificationService;
 	private final ObjectMapper objectMapper;
 	private final Clock clock;
+	private final String riskAlertTo;
 
 	public CaseClassificationService(MlClassificationRepository classificationRepository,
 			CaseEventRepository eventRepository,
 			LegalCaseRepository caseRepository,
 			MlProxyService mlProxyService,
-			RiskAlertNotifier riskAlertNotifier,
+			NotificationService notificationService,
 			ObjectMapper objectMapper,
-			Clock clock) {
+			Clock clock,
+			@Value("${app.resend.risk-alert-to:}") String riskAlertTo) {
 		this.classificationRepository = classificationRepository;
 		this.eventRepository = eventRepository;
 		this.caseRepository = caseRepository;
 		this.mlProxyService = mlProxyService;
-		this.riskAlertNotifier = riskAlertNotifier;
+		this.notificationService = notificationService;
 		this.objectMapper = objectMapper;
 		this.clock = clock;
+		this.riskAlertTo = riskAlertTo == null ? "" : riskAlertTo.strip();
 	}
 
 	@Transactional
@@ -148,6 +153,8 @@ public class CaseClassificationService {
 
 		CasePriority finalPriority;
 		String justification;
+		Map<String, Object> pendingAlert = null;
+		String pendingAlertLevel = null;
 
 		if (risk != null && !isValidMlRisk(risk)) {
 			log.warn("Respuesta ML inválida al clasificar el caso {}: {} — se trata como fallo del servicio",
@@ -174,20 +181,22 @@ public class CaseClassificationService {
 					modelVersion, riskScore * 100, riskLevel, suggested.getValue(), perceived.getValue());
 
 			// HU-31: riesgo alto/crítico dispara la alerta automática por correo.
+			// H-06: el encolado se difiere hasta después de guardar la clasificación
+			// (necesita un classificationId real y estable para el outbox).
 			if ("alto".equals(riskLevel) || "critico".equals(riskLevel)) {
-				Map<String, Object> alert = new LinkedHashMap<>();
-				alert.put("caseId", legalCase.getId().toString());
-				alert.put("riskScore", riskScore);
-				alert.put("riskLevel", riskLevel);
-				alert.put("riskFactors", risk.get("riskFactors"));
-				alert.put("recommendations", risk.get("recommendations"));
-				alert.put("specialty", specialty);
-				alert.put("doctorName", legalCase.getDoctor().getName());
-				alert.put("doctorEmail", legalCase.getDoctor().getEmail());
-				alert.put("documentationComplete", legalCase.isDocumentationComplete());
-				alert.put("informedConsent", legalCase.isInformedConsent());
-				alert.put("evaluatedAt", Instant.now().toString());
-				riskAlertNotifier.triggerRiskAlert(alert);
+				pendingAlert = new LinkedHashMap<>();
+				pendingAlert.put("caseId", legalCase.getId().toString());
+				pendingAlert.put("riskScore", riskScore);
+				pendingAlert.put("riskLevel", riskLevel);
+				pendingAlert.put("riskFactors", risk.get("riskFactors"));
+				pendingAlert.put("recommendations", risk.get("recommendations"));
+				pendingAlert.put("specialty", specialty);
+				pendingAlert.put("doctorName", legalCase.getDoctor().getName());
+				pendingAlert.put("doctorEmail", legalCase.getDoctor().getEmail());
+				pendingAlert.put("documentationComplete", legalCase.isDocumentationComplete());
+				pendingAlert.put("informedConsent", legalCase.isInformedConsent());
+				pendingAlert.put("evaluatedAt", Instant.now(clock).toString());
+				pendingAlertLevel = riskLevel;
 			}
 		} else {
 			// ── Fallback por reglas (ML caído): la urgencia percibida manda ────
@@ -213,6 +222,17 @@ public class CaseClassificationService {
 		CaseWorkflowService.recordSystemEvent(eventRepository, legalCase, legalCase.getDoctor(),
 				"clasificacion_ml",
 				"Caso clasificado por el sistema: " + justification);
+
+		if (pendingAlert != null) {
+			notificationService.enqueue(
+					"risk_alert:" + classification.getId(),
+					"risk_alert",
+					legalCase.getId(),
+					"ml_classification", classification.getId(),
+					riskAlertTo, null,
+					"Alerta de riesgo " + pendingAlertLevel + " — Sinapsistencia",
+					MailTemplates.riskAlert(pendingAlert));
+		}
 
 		return classification;
 	}

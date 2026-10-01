@@ -6,22 +6,25 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
 /**
  * Cliente HTTP de la API de Resend (https://resend.com/docs/api-reference/emails/send-email).
- * Punto único de envío de correo de la plataforma — lo usan {@link MailNotifier} (correos
- * transaccionales) y {@code RiskAlertNotifier} (alerta de riesgo alto/crítico a un admin).
+ * Punto único de envío de correo de la plataforma — lo usan {@link MailNotifier} (bienvenida
+ * y recuperación de contraseña, fuera del outbox) y {@link NotificationWorker} (H-06: los
+ * tres avisos correctivos -- solicitud recibida/contestada y alerta de riesgo -- vía el
+ * outbox de notificaciones).
  *
  * <p>{@code fromAddress} solo necesita vivir en un dominio verificado en Resend — no
  * requiere ser una bandeja real. Si alguien responde un correo, esa respuesta va a
  * {@code replyToAddress} (opcional; vacío = sin header Reply-To) salvo que el llamador
  * pase un Reply-To puntual — usado para que un médico y un abogado se correspondan
- * directamente por correo (ver {@link MailNotifier#sendContactRequestReceived} /
- * {@link MailNotifier#sendContactRequestAnswered}) en vez de que la respuesta caiga
- * siempre en la bandeja del administrador.
+ * directamente por correo (el outbox lo fija como la columna {@code reply_to} de cada
+ * fila, ver {@link NotificationService#enqueue}) en vez de que la respuesta caiga siempre
+ * en la bandeja del administrador.
  *
  * <p>No atrapa excepciones: cada llamador decide cómo loguear el fallo y con qué
  * semántica de fallback, igual que antes con el webhook de n8n.
@@ -63,7 +66,9 @@ public class ResendClient {
 	 * Envía un correo. Si {@code replyToOverride} no es nulo/vacío, reemplaza el
 	 * Reply-To por defecto solo para este envío (ej. la dirección real de la otra
 	 * parte en una solicitud de contacto). Lanza si la API de Resend responde con
-	 * error o no responde a tiempo.
+	 * error o no responde a tiempo. Firma preexistente (H-06): la usan los correos
+	 * que NO pasan por el outbox (bienvenida, recuperación de contraseña) -- sin
+	 * clave de idempotencia, igual que antes.
 	 */
 	public void send(String to, String subject, String html, String replyToOverride) {
 		Map<String, Object> payload = new HashMap<>();
@@ -77,12 +82,32 @@ public class ResendClient {
 		if (!effectiveReplyTo.isBlank()) {
 			payload.put("reply_to", effectiveReplyTo);
 		}
-		restClient.post()
+		sendRaw(payload, null);
+	}
+
+	/** H-06: resultado de un envío -- {@code providerMessageId} es el {@code id} del JSON de Resend. */
+	public record SendResult(String providerMessageId, int httpStatus) {
+	}
+
+	/**
+	 * H-06: envía un payload YA ARMADO (congelado por el outbox desde el primer
+	 * intento -- reintentos nunca recalculan el body) con una clave de idempotencia
+	 * opcional. Devuelve el {@code id} real del proveedor en vez de descartar la
+	 * respuesta; el llamador ({@code NotificationWorker}) decide cómo clasificar
+	 * errores HTTP (lanzados, no atrapados aquí) en transitorios vs permanentes.
+	 */
+	@SuppressWarnings("unchecked")
+	public SendResult sendRaw(Map<String, Object> payload, String idempotencyKey) {
+		RestClient.RequestBodySpec request = restClient.post()
 				.uri(RESEND_API_URL)
 				.header("Authorization", "Bearer " + apiKey)
-				.header("Content-Type", "application/json")
-				.body(payload)
-				.retrieve()
-				.toBodilessEntity();
+				.header("Content-Type", "application/json");
+		if (idempotencyKey != null && !idempotencyKey.isBlank()) {
+			request = request.header("Idempotency-Key", idempotencyKey);
+		}
+		ResponseEntity<Map> response = request.body(payload).retrieve().toEntity(Map.class);
+		Map<String, Object> body = response.getBody();
+		String providerMessageId = body != null && body.get("id") != null ? String.valueOf(body.get("id")) : null;
+		return new SendResult(providerMessageId, response.getStatusCode().value());
 	}
 }

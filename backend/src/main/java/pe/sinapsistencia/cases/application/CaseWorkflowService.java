@@ -44,6 +44,8 @@ import pe.sinapsistencia.matching.application.RecommendationService;
 import pe.sinapsistencia.matching.web.dto.RecommendationDto.RecommendationsResponse;
 import pe.sinapsistencia.ml.domain.MlClassification;
 import pe.sinapsistencia.ml.infrastructure.MlClassificationRepository;
+import pe.sinapsistencia.notifications.NotificationService;
+import pe.sinapsistencia.notifications.web.dto.NotificationOutboxDto;
 import pe.sinapsistencia.shared.exception.BadRequestException;
 import pe.sinapsistencia.shared.exception.ForbiddenException;
 import pe.sinapsistencia.shared.exception.NotFoundException;
@@ -61,6 +63,7 @@ public class CaseWorkflowService {
 	private final ProfileRepository profileRepository;
 	private final RecommendationService recommendationService;
 	private final CaseClassificationService classificationService;
+	private final NotificationService notificationService;
 
 	public CaseWorkflowService(LegalCaseRepository caseRepository,
 			CaseContextRepository contextRepository,
@@ -70,7 +73,8 @@ public class CaseWorkflowService {
 			DocumentRepository documentRepository,
 			ProfileRepository profileRepository,
 			RecommendationService recommendationService,
-			CaseClassificationService classificationService) {
+			CaseClassificationService classificationService,
+			NotificationService notificationService) {
 		this.caseRepository = caseRepository;
 		this.contextRepository = contextRepository;
 		this.eventRepository = eventRepository;
@@ -80,6 +84,7 @@ public class CaseWorkflowService {
 		this.profileRepository = profileRepository;
 		this.recommendationService = recommendationService;
 		this.classificationService = classificationService;
+		this.notificationService = notificationService;
 	}
 
 	@Transactional
@@ -398,6 +403,18 @@ public class CaseWorkflowService {
 		return classificationRepository.findByLegalCase_IdOrderByCreatedAtDescIdDesc(id).stream()
 				.map(MlClassificationDto::from)
 				.toList();
+	}
+
+	/**
+	 * H-06: estado de los avisos del caso (solicitudes/alerta de riesgo) -- lectura
+	 * pura del outbox, autorizada igual que el detalle. Un administrador ve además
+	 * el ID del proveedor y el código HTTP; nunca se expone destinatario/HTML/payload.
+	 */
+	@Transactional(readOnly = true)
+	public List<NotificationOutboxDto> getNotifications(AuthenticatedUser user, UUID id) {
+		LegalCase legalCase = loadCase(id);
+		assertCanView(user, legalCase);
+		return notificationService.listForCase(id, user.role() == UserRole.ADMIN);
 	}
 
 	@Transactional(readOnly = true)

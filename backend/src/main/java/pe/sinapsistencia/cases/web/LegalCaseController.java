@@ -32,6 +32,7 @@ import pe.sinapsistencia.cases.web.dto.EditCaseRequest;
 import pe.sinapsistencia.cases.web.dto.LegalResponseDto;
 import pe.sinapsistencia.cases.web.dto.MlClassificationDto;
 import pe.sinapsistencia.cases.web.dto.UpdateCaseRequest;
+import pe.sinapsistencia.notifications.web.dto.NotificationOutboxDto;
 import pe.sinapsistencia.shared.api.ApiResponse;
 import pe.sinapsistencia.shared.api.ListResponse;
 
@@ -106,6 +107,14 @@ public class LegalCaseController {
 			@AuthenticationPrincipal AuthenticatedUser user,
 			@PathVariable UUID id) {
 		return ApiResponse.ok(workflowService.reclassify(user, id));
+	}
+
+	/** H-06: estado de los avisos del caso (solicitud recibida/contestada, alerta de riesgo) -- lectura pura. */
+	@GetMapping("/{id}/notifications")
+	public ApiResponse<List<NotificationOutboxDto>> getNotifications(
+			@AuthenticationPrincipal AuthenticatedUser user,
+			@PathVariable UUID id) {
+		return ApiResponse.ok(workflowService.getNotifications(user, id));
 	}
 
 	@PutMapping("/{id}")
