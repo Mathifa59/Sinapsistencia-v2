@@ -7,6 +7,27 @@ import type { ListResponseCaseResponse } from './generated/model/listResponseCas
 import type { ContextPayload } from './generated/model/contextPayload';
 import type { RecommendationsResponse } from './generated/model/recommendationsResponse';
 
+/**
+ * H-06: estado público de un aviso del outbox. Nunca trae destinatario/HTML/payload
+ * (privados) -- providerMessageId/providerHttpStatus solo vienen si el usuario es admin.
+ */
+export interface NotificationOutboxDto {
+  id?: string;
+  type?: string;
+  resourceType?: string;
+  resourceId?: string;
+  status?: 'pending' | 'processing' | 'accepted_by_provider' | 'failed' | 'skipped' | string;
+  attemptCount?: number;
+  retryable?: boolean;
+  lastErrorCode?: string | null;
+  lastErrorMessage?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+  acceptedAt?: string | null;
+  providerMessageId?: string | null;
+  providerHttpStatus?: number | null;
+}
+
 export interface CaseListParams {
   status?: string;
   priority?: string;
@@ -173,6 +194,11 @@ export class CasesApi {
   /** H-05: reevaluación explícita del riesgo con las entradas actuales del caso. */
   reclassify(id: string): Promise<CaseDetailDto> {
     return this.api.post<CaseDetailDto>(`/api/legal-cases/${id}/reclassify`, {});
+  }
+
+  /** H-06: estado de los avisos del caso (solicitud recibida/contestada, alerta de riesgo). */
+  notifications(id: string): Promise<NotificationOutboxDto[]> {
+    return this.api.get<NotificationOutboxDto[]>(`/api/legal-cases/${id}/notifications`);
   }
 
   create(body: CreateCaseRequest): Promise<CaseResponse> {

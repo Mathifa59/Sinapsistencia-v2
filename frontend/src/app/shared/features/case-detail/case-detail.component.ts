@@ -6,7 +6,7 @@ import { injectMutation, injectQuery, injectQueryClient } from '@tanstack/angula
 import { LucideAngularModule } from 'lucide-angular';
 import { map } from 'rxjs';
 import { AuthService } from '../../../core/auth/auth.service';
-import { CasesApi, type CaseReportDto } from '../../../core/api/cases.api';
+import { CasesApi, type CaseReportDto, type NotificationOutboxDto } from '../../../core/api/cases.api';
 import { BtnDirective } from '../../ui/button.directive';
 import { ReasonModalComponent } from '../../ui/reason-modal.component';
 import { InputDirective, LabelDirective, TextareaDirective, SelectDirective } from '../../ui/field.directives';
@@ -17,7 +17,7 @@ import {
   ModalDescriptionDirective,
   ModalFooterDirective,
 } from '../../ui/modal.component';
-import { formatDate, formatDateTime, getInitials } from '../../utils/cn';
+import { cn, formatDate, formatDateTime, getInitials } from '../../utils/cn';
 import { formatMlScore } from '../../utils/ml-score.util';
 import {
   CASE_STATUS_LABELS,
@@ -524,6 +524,28 @@ const PRIORITY_DOTS: Record<CasePriority, string> = {
               }
             </div>
 
+            <!-- H-06: avisos del outbox (solicitud recibida/contestada, alerta de riesgo) -->
+            @if ((notificationsQuery.data() ?? []).length > 0) {
+              <div class="rounded-xl border border-slate-200 bg-white p-5">
+                <h3 class="mb-3 flex items-center gap-2.5 font-semibold text-slate-900">
+                  <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
+                    <lucide-icon name="mail" class="h-4 w-4" />
+                  </span>
+                  Avisos
+                </h3>
+                <ul class="space-y-2">
+                  @for (n of notificationsQuery.data() ?? []; track n.id) {
+                    <li class="flex items-center justify-between gap-2 text-xs">
+                      <span class="text-slate-500">{{ notificationTypeLabel(n.type) }}</span>
+                      <span [class]="cn('rounded-full px-2 py-0.5 font-medium ring-1 ring-inset', notificationStatusStyle(n.status))">
+                        {{ notificationStatusLabel(n.status) }}
+                      </span>
+                    </li>
+                  }
+                </ul>
+              </div>
+            }
+
             <!-- Línea de tiempo -->
             <div class="rounded-xl border border-slate-200 bg-white p-5">
               <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
@@ -757,6 +779,44 @@ export class CaseDetailComponent {
     queryFn: () => this.casesApi.getDetail(this.caseId()),
     enabled: !!this.caseId(),
   }));
+
+  /** H-06: estado de los avisos del caso -- lectura pura, nunca dispara un reenvío. */
+  protected readonly notificationsQuery = injectQuery(() => ({
+    queryKey: ['cases', 'notifications', this.caseId()],
+    queryFn: () => this.casesApi.notifications(this.caseId()),
+    enabled: !!this.caseId(),
+  }));
+
+  protected readonly cn = cn;
+
+  protected notificationTypeLabel(type?: string): string {
+    switch (type) {
+      case 'contact_request_received': return 'Solicitud de contacto';
+      case 'contact_request_answered': return 'Respuesta a la solicitud';
+      case 'risk_alert': return 'Alerta de riesgo';
+      default: return type ?? 'Aviso';
+    }
+  }
+
+  protected notificationStatusLabel(status?: string): string {
+    switch (status) {
+      case 'pending': return 'Pendiente';
+      case 'processing': return 'En proceso';
+      case 'accepted_by_provider': return 'Aceptado por el proveedor';
+      case 'failed': return 'Fallido';
+      case 'skipped': return 'Omitido';
+      default: return status ?? '—';
+    }
+  }
+
+  protected notificationStatusStyle(status?: string): string {
+    switch (status) {
+      case 'accepted_by_provider': return 'bg-emerald-50 text-emerald-700 ring-emerald-200';
+      case 'failed': return 'bg-red-50 text-red-700 ring-red-200';
+      case 'skipped': return 'bg-slate-100 text-slate-500 ring-slate-200';
+      default: return 'bg-amber-50 text-amber-700 ring-amber-200';
+    }
+  }
 
   protected readonly caseData = computed(() => this.detailQuery.data()?.caseData);
 
