@@ -77,14 +77,20 @@ public class MatchingController {
 		return ApiResponse.ok(directoryService.listLawyers());
 	}
 
-	/** H-02: genera una ejecución de matching idempotente y la persiste completa (HU-31/32). */
+	/**
+	 * H-02: genera una ejecución de matching idempotente y la persiste completa
+	 * (HU-31/32). 201 para una ejecución nueva; 200 cuando la misma clave+comando
+	 * reutiliza una ya completada (el cliente no puede distinguir "se creó" de
+	 * "ya existía" solo por el cuerpo).
+	 */
 	@PostMapping("/lawyers")
 	@Auditable(action = "create", resource = "recommendation_run")
 	public ResponseEntity<ApiResponse<RecommendationRunDto>> generateRecommendations(
 			@AuthenticationPrincipal AuthenticatedUser user,
 			@RequestBody GenerateRecommendationsBody body) {
-		return ResponseEntity.status(HttpStatus.CREATED)
-				.body(ApiResponse.ok(recommendationService.generateRun(user, body.caseId(), body.idempotencyKey())));
+		var result = recommendationService.generateRun(user, body.caseId(), body.idempotencyKey());
+		HttpStatus status = result.reused() ? HttpStatus.OK : HttpStatus.CREATED;
+		return ResponseEntity.status(status).body(ApiResponse.ok(result.run()));
 	}
 
 	/** H-02: historial de ejecuciones -- lectura pura, nunca invoca ML. */

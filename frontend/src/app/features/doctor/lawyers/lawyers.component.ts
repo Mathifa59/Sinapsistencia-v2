@@ -184,7 +184,7 @@ import type { CasePriority } from '../../../shared/constants';
             }
             <button appBtn type="button" [variant]="hasRun() ? 'outline' : 'primary'" size="sm" class="gap-1.5"
               (click)="generate()" [disabled]="generateMutation.isPending()">
-              <lucide-icon name="sparkles" class="h-3.5 w-3.5" />
+              <lucide-icon name="zap" class="h-3.5 w-3.5" />
               {{ hasRun() ? 'Actualizar recomendaciones' : 'Generar recomendaciones' }}
             </button>
           </div>

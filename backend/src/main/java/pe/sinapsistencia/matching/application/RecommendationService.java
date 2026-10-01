@@ -16,7 +16,9 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -79,6 +81,7 @@ public class RecommendationService {
 	private final RecommendationRunService runService;
 	private final MlProxyService mlProxyService;
 	private final ObjectMapper objectMapper;
+	private final TransactionTemplate transactionTemplate;
 
 	public RecommendationService(DoctorProfileRepository doctorProfileRepository,
 			LawyerProfileRepository lawyerProfileRepository,
@@ -88,7 +91,8 @@ public class RecommendationService {
 			RecommendationRunRepository runRepository,
 			RecommendationRunService runService,
 			MlProxyService mlProxyService,
-			ObjectMapper objectMapper) {
+			ObjectMapper objectMapper,
+			PlatformTransactionManager transactionManager) {
 		this.doctorProfileRepository = doctorProfileRepository;
 		this.lawyerProfileRepository = lawyerProfileRepository;
 		this.profileRepository = profileRepository;
@@ -98,6 +102,7 @@ public class RecommendationService {
 		this.runService = runService;
 		this.mlProxyService = mlProxyService;
 		this.objectMapper = objectMapper;
+		this.transactionTemplate = new TransactionTemplate(transactionManager);
 	}
 
 	// ── Lecturas: nunca invocan ML, nunca crean una ejecución ──────────────────
@@ -168,6 +173,10 @@ public class RecommendationService {
 
 	// ── Escritura: única vía que invoca ML, idempotente por clave del cliente ──
 
+	/** {@code reused=true} → reintento de una ejecución ya completada (controller responde 200, no 201). */
+	public record GenerateRunResult(RecommendationRunDto run, boolean reused) {
+	}
+
 	/**
 	 * POST /api/matching/lawyers: genera una ejecución nueva (o reutiliza la
 	 * completada de la misma clave+comando). Nunca recalcula dentro de una
@@ -175,7 +184,7 @@ public class RecommendationService {
 	 * ({@link RecommendationRunService#acquire}), invoca ML/fallback FUERA de
 	 * transacción, y finaliza en una segunda transacción atómica.
 	 */
-	public RecommendationRunDto generateRun(AuthenticatedUser user, String caseIdParam, String idempotencyKey) {
+	public GenerateRunResult generateRun(AuthenticatedUser user, String caseIdParam, String idempotencyKey) {
 		if (user.role() != UserRole.DOCTOR) {
 			throw new ForbiddenException("Solo un médico puede generar recomendaciones");
 		}
@@ -202,7 +211,14 @@ public class RecommendationService {
 		RecommendationRun run = acquired.run();
 		if (!acquired.reused()) {
 			try {
-				ComputedBundle computed = computeViaMlOrFallback(doctorId, legalCase);
+				// H-02: computeViaMlOrFallback lee asociaciones LAZY (LawyerProfile.user,
+				// DoctorProfile.user) -- generateRun ya NO es @Transactional (para no
+				// mezclar la adquisicion/finalizacion de la ejecucion, que usan
+				// TransactionTemplate, con el self-invocation de un @Transactional de
+				// la misma clase). Sin una transaccion propia aqui, esas lecturas
+				// lanzan LazyInitializationException fuera de sesion.
+				ComputedBundle computed = transactionTemplate.execute(
+						status -> computeViaMlOrFallback(doctorId, legalCase));
 				Map<UUID, Profile> lawyerUserById = profileRepository
 						.findAllById(computed.items().stream()
 								.map(RecommendationRunService.ComputedItem::lawyerUserId)
@@ -228,7 +244,7 @@ public class RecommendationService {
 		}
 
 		List<MatchRecommendation> rows = recommendationRepository.findByRun_IdOrderByRank(run.getId());
-		return toRunDto(run, rows);
+		return new GenerateRunResult(toRunDto(run, rows), acquired.reused());
 	}
 
 	private void markCaseEnteredPipelineIfNeeded(UUID caseId) {
