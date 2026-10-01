@@ -14,7 +14,7 @@ Contrato (consumido por MlProxyService en Spring, paths sin cambios):
 
 from fastapi import FastAPI, HTTPException
 
-from app.matching.model import get_matching_model
+from app.matching.model import W_CONTENT, W_PERFORMANCE, get_matching_model
 from app.risk.model import get_risk_model
 from app.schemas import (
     RecommendationsRequest,
@@ -71,5 +71,8 @@ def recommendations(req: RecommendationsRequest):
             "model": "tfidf-cosine+perf-v2",
             "corpus": "live" if live_corpus else "static-fallback",
             "corpus_size": len(live_corpus) if live_corpus else len(model.lawyers),
+            # H-03 (RF-03.4): pesos y version del pipeline viajan con cada
+            # ejecucion -- no asumir 70/30 fijo al interpretar ejecuciones futuras.
+            "weights": {"content": W_CONTENT, "performance": W_PERFORMANCE},
         },
     )

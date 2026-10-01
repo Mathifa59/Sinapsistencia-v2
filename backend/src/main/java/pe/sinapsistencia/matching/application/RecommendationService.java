@@ -1,6 +1,7 @@
 package pe.sinapsistencia.matching.application;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -187,13 +188,26 @@ public class RecommendationService {
 					if (lawyer == null) {
 						continue;
 					}
+					// H-03: campos obligatorios del modelo compuesto -- si falta uno o esta
+					// fuera de rango, se lanza y el catch de mas abajo activa el fallback
+					// identificado en vez de una explicacion numerica falsa (score/content
+					// en 0 por un default silencioso).
+					BigDecimal scoreRaw = requiredNormalizedScore(rec, "score");
+					BigDecimal contentScoreRaw = requiredNormalizedScore(rec, "content_score");
+					BigDecimal performanceScoreRaw = requiredNormalizedScore(rec, "performance_score");
+					double collaborative = rec.path("collaborative_score").asDouble(0);
+
 					recommendations.add(new RecommendationDto(
 							"rec-" + doctorId + "-" + lawyerUserId,
 							doctorId.toString(),
 							LawyerCardDto.from(lawyer),
-							(int) Math.round(rec.get("score").asDouble() * 100),
-							(int) Math.round(rec.path("content_score").asDouble(0) * 100),
-							(int) Math.round(rec.path("collaborative_score").asDouble(0) * 100),
+							toPercent(scoreRaw),
+							toPercent(contentScoreRaw),
+							toPercent(performanceScoreRaw),
+							(int) Math.round(collaborative * 100),
+							scoreRaw,
+							contentScoreRaw,
+							performanceScoreRaw,
 							toStringList(rec.path("matched_specialties")),
 							rec.path("model_used").asText("unknown"),
 							rec.path("feature_importance"),
@@ -220,21 +234,33 @@ public class RecommendationService {
 		List<RecommendationDto> fallback = lawyers.stream()
 				.filter(l -> l.getMedicalAreas().stream().anyMatch(area ->
 						area.toLowerCase().contains(specialtyLower) || specialtyLower.contains(area.toLowerCase())))
-				.map(l -> new RecommendationDto(
-						"rec-" + doctorId + "-" + l.getUser().getId(),
-						doctorId.toString(),
-						LawyerCardDto.from(l),
-						fallbackScore(l),
-						0,
-						0,
-						List.of(),
-						"fallback",
-						objectMapper.createArrayNode(),
-						List.of("Coincidencia por área médica (sin ML service)",
-								String.format("Valoración %.1f/5 · %d casos resueltos",
-										l.getRating() == null ? 0.0 : l.getRating().doubleValue(),
-										l.getResolvedCases())),
-						Instant.now().toString()))
+				.map(l -> {
+					int score = fallbackScore(l);
+					// H-03: el fallback (60 base + rating + casos) no descompone en
+					// contenido/desempeño como el modelo compuesto -- esos raw quedan
+					// null en vez de fingir una formula que no corrio (RF-03.3/12.2).
+					BigDecimal scoreRaw = BigDecimal.valueOf(score)
+							.divide(BigDecimal.valueOf(100), 6, RoundingMode.HALF_UP);
+					return new RecommendationDto(
+							"rec-" + doctorId + "-" + l.getUser().getId(),
+							doctorId.toString(),
+							LawyerCardDto.from(l),
+							score,
+							0,
+							0,
+							0,
+							scoreRaw,
+							null,
+							null,
+							List.of(),
+							"fallback",
+							objectMapper.createArrayNode(),
+							List.of("Coincidencia por área médica (sin ML service)",
+									String.format("Valoración %.1f/5 · %d casos resueltos",
+											l.getRating() == null ? 0.0 : l.getRating().doubleValue(),
+											l.getResolvedCases())),
+							Instant.now().toString());
+				})
 				.sorted((a, b) -> Integer.compare(b.score(), a.score()))
 				.toList();
 
@@ -290,6 +316,29 @@ public class RecommendationService {
 		if (legalCase.getEventType() != null) sb.append(legalCase.getEventType()).append(' ');
 		if (legalCase.getMedicalSpecialty() != null) sb.append(legalCase.getMedicalSpecialty());
 		return sb.toString().strip();
+	}
+
+	/**
+	 * H-03: extrae un componente normalizado [0,1] del modelo compuesto, validando
+	 * presencia/rango/finitud en vez de {@code path(...).asDouble(0)} -- un campo
+	 * faltante o fuera de rango no debe convertirse silenciosamente en 0.
+	 */
+	private static BigDecimal requiredNormalizedScore(JsonNode rec, String field) {
+		JsonNode node = rec.get(field);
+		if (node == null || !node.isNumber()) {
+			throw new IllegalStateException(
+					"Respuesta ML inválida: falta o no es numérico el campo '" + field + "'");
+		}
+		double value = node.asDouble();
+		if (!Double.isFinite(value) || value < 0.0 || value > 1.0) {
+			throw new IllegalStateException(
+					"Respuesta ML inválida: '" + field + "'=" + value + " fuera de rango [0,1]");
+		}
+		return BigDecimal.valueOf(value).setScale(6, RoundingMode.HALF_UP);
+	}
+
+	private static int toPercent(BigDecimal raw) {
+		return raw.multiply(BigDecimal.valueOf(100)).setScale(0, RoundingMode.HALF_UP).intValue();
 	}
 
 	private static List<String> toStringList(JsonNode node) {

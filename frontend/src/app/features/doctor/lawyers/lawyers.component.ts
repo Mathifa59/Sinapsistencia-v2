@@ -205,6 +205,17 @@ import type { CasePriority } from '../../../shared/constants';
                 <div class="h-1.5 overflow-hidden rounded-full bg-slate-100">
                   <div class="h-full rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 transition-all duration-700" [style.width.%]="matchScore"></div>
                 </div>
+                @let breakdown = getMatchBreakdown(lawyerUserId);
+                @if (breakdown) {
+                  <p class="mt-1.5 text-[11px] text-slate-400">
+                    <span class="font-medium text-slate-500">Cómo se calcula:</span>
+                    @if (breakdown.contentPercent !== null && breakdown.performancePercent !== null) {
+                      Contenido {{ breakdown.contentPercent }}%@if (breakdown.contentWeightPercent !== null) { × {{ breakdown.contentWeightPercent }}% } + Desempeño {{ breakdown.performancePercent }}%@if (breakdown.performanceWeightPercent !== null) { × {{ breakdown.performanceWeightPercent }}% } = Compatibilidad {{ breakdown.totalPercent }}%
+                    } @else {
+                      No disponible (estimación de respaldo — sin desglose de contenido/desempeño)
+                    }
+                  </p>
+                }
               </div>
             }
 
@@ -432,6 +443,37 @@ export class DoctorLawyersComponent {
     return this.recommendationsQuery.data()?.recommendations?.find(
       (r) => (r.lawyer?.userId ?? r.lawyer?.id) === lawyerUserId,
     )?.score;
+  }
+
+  /**
+   * H-03: desglose contenido/desempeño para el bloque "Cómo se calcula". Los
+   * pesos vienen de `modelInfo.weights` (no se asumen fijos en 70/30 — RF-03.4).
+   * Si los raw vienen null (origen fallback) se señala como no disponible en
+   * vez de inventar un desglose que no corrió.
+   */
+  protected getMatchBreakdown(lawyerUserId?: string):
+    | {
+        contentPercent: number | null;
+        performancePercent: number | null;
+        contentWeightPercent: number | null;
+        performanceWeightPercent: number | null;
+        totalPercent: number | null;
+      }
+    | undefined {
+    const data = this.recommendationsQuery.data();
+    const rec = data?.recommendations?.find((r) => (r.lawyer?.userId ?? r.lawyer?.id) === lawyerUserId);
+    if (!rec) return undefined;
+
+    const weights = data?.modelInfo?.['weights'] as { content?: number; performance?: number } | undefined;
+    const toPercent = (v: number | null | undefined) => (v == null ? null : Math.round(v * 100));
+
+    return {
+      contentPercent: toPercent(rec.contentScoreRaw),
+      performancePercent: toPercent(rec.performanceScoreRaw),
+      contentWeightPercent: toPercent(weights?.content),
+      performanceWeightPercent: toPercent(weights?.performance),
+      totalPercent: rec.score ?? null,
+    };
   }
 
   protected getMatchReasons(lawyerUserId?: string): string[] {

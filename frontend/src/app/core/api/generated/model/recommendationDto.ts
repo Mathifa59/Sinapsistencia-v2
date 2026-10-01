@@ -16,7 +16,11 @@ export interface RecommendationDto {
     lawyer?: LawyerCardDto;
     score?: number;
     contentScore?: number;
+    performanceScore?: number;
     collaborativeScore?: number;
+    scoreRaw?: number;
+    contentScoreRaw?: number;
+    performanceScoreRaw?: number;
     matchedSpecialties?: Array<string>;
     modelUsed?: string;
     featureImportance?: object;
