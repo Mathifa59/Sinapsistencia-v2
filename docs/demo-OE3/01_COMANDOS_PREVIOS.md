@@ -26,8 +26,10 @@ Verificar: `http://localhost:8000/health` responde OK.
 
 ```powershell
 cd backend
-.\mvnw.cmd spring-boot:run
+.\mvnw.cmd spring-boot:run "-Dspring-boot.run.profiles=local"
 ```
+
+(El perfil `local` permite arrancar sin `RESEND_API_KEY`; sin él y sin la llave la app no arranca.)
 
 Verificar: `http://localhost:8080/api/ml/health` responde.
 

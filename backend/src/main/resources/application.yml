@@ -2,6 +2,13 @@ spring:
   application:
     name: sinapsistencia
 
+  autoconfigure:
+    # La app autentica solo con JWT (SecurityConfig desactiva httpBasic y formLogin):
+    # no necesita el usuario en memoria con contraseña generada que Spring Security
+    # crea por defecto y que imprimía "Using generated security password" en el log.
+    exclude:
+      - org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
+
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5433/sinapsistencia}
     username: ${DB_USER:sinapsistencia}
@@ -49,6 +56,10 @@ springdoc:
 
 # Configuracion propia de la aplicacion (consumida en fases posteriores).
 app:
+  auth:
+    # Imprime en el log del servidor el token de recuperacion cuando no hay Resend.
+    # Solo se activa en application-local.yml; nunca viaja en la respuesta HTTP.
+    log-reset-token: false
   jwt:
     secret: ${JWT_SECRET:change-me-in-prod-use-a-long-random-base64-secret-value-please}
     expiration: ${JWT_EXPIRATION:86400000} # 24h en ms
@@ -56,8 +67,8 @@ app:
   ml:
     service-url: ${ML_SERVICE_URL:http://localhost:8000}
   resend:
-    # Vacio por defecto: sin API key configurada no se intenta ninguna conexion
-    # (alertas de riesgo y correos se omiten con log.warn). Setea el API key en prod.
+    # Obligatoria salvo en los perfiles local y test: ResendStartupValidator impide
+    # arrancar sin ella. En local (SPRING_PROFILES_ACTIVE=local) puede quedar vacia.
     api-key: ${RESEND_API_KEY:}
     from: ${MAIL_FROM:notificaciones@sinapsistencia.com}
     # A donde llegan las respuestas de los usuarios (no confundir con `from`, que solo

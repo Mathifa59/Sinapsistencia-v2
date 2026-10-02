@@ -50,9 +50,13 @@ docker compose up -d        # levanta Postgres 16 + pgvector en localhost:5433
 
 ```bash
 cd backend
-./mvnw spring-boot:run      # macOS/Linux
-.\mvnw.cmd spring-boot:run  # Windows
+./mvnw spring-boot:run -Dspring-boot.run.profiles=local      # macOS/Linux
+.\mvnw.cmd spring-boot:run "-Dspring-boot.run.profiles=local"  # Windows
 ```
+
+El perfil `local` permite arrancar sin `RESEND_API_KEY` (en cualquier otro perfil la app no
+arranca sin ella). Sin la llave no se envían correos y el token de recuperación de contraseña
+se imprime en el log del servidor.
 
 Health check: http://localhost:8080/actuator/health · Swagger UI: http://localhost:8080/swagger-ui.html
 
