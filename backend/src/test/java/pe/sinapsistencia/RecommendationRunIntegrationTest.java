@@ -38,7 +38,7 @@ class RecommendationRunIntegrationTest {
 	void setUp() throws Exception {
 		MvcResult login = mockMvc.perform(post("/api/auth/login")
 				.contentType(MediaType.APPLICATION_JSON)
-				.content("{\"role\":\"doctor\"}"))
+				.content("{\"email\":\"doctor.demo@sinapsistencia.pe\",\"password\":\"Demo123!\"}"))
 				.andExpect(status().isOk())
 				.andReturn();
 		doctorToken = JsonPath.read(login.getResponse().getContentAsString(), "$.data.token");

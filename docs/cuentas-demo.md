@@ -10,12 +10,14 @@ cuentas: `Demo123!`**
 
 ---
 
-## ⚡ Acceso rápido (botones de la pantalla de login)
+## Cuentas principales
 
-Los botones "Ingresar como…" entran directo a estas 3 cuentas:
+Los botones de "acceso rápido" de la pantalla de login se eliminaron (el login
+por rol sin contraseña ya no existe, ni en la UI ni en la API). Ingresa siempre
+con correo y contraseña:
 
-| Botón | Entra como | Recibe correos |
-|-------|-----------|----------------|
+| Rol | Cuenta | Recibe correos |
+|-----|--------|----------------|
 | **Doctor** | Dr. Carlos Mendoza (Cirugía General) | 📬 `mathiwen519+carlos@gmail.com` |
 | **Abogado** | Dra. Lucía Fernández | 📬 `mathiwen519+lucia@gmail.com` |
 | **Admin** | Jorge Ramírez | ✖️ (no necesita) |

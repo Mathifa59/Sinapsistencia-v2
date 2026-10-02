@@ -61,6 +61,19 @@ class OwnershipIntegrationTest {
 		lawyer1Id = whoAmI(lawyer1Token);
 	}
 
+	// ── Login ───────────────────────────────────────────────────────────────
+
+	@Test
+	@DisplayName("El login por rol sin contraseña ya no existe: ningún rol devuelve token")
+	void roleOnlyLoginIsRejected() throws Exception {
+		for (String role : new String[] { "doctor", "lawyer", "admin" }) {
+			mockMvc.perform(post("/api/auth/login")
+					.contentType(MediaType.APPLICATION_JSON)
+					.content("{\"role\":\"" + role + "\"}"))
+					.andExpect(status().isBadRequest());
+		}
+	}
+
 	// ── Consultas ───────────────────────────────────────────────────────────
 
 	@Test
@@ -215,7 +228,7 @@ class OwnershipIntegrationTest {
 	private String loginDemo(String role) throws Exception {
 		MvcResult result = mockMvc.perform(post("/api/auth/login")
 				.contentType(MediaType.APPLICATION_JSON)
-				.content("{\"role\":\"" + role + "\"}"))
+				.content("{\"email\":\"" + role + ".demo@sinapsistencia.pe\",\"password\":\"Demo123!\"}"))
 				.andExpect(status().isOk())
 				.andReturn();
 		return JsonPath.read(result.getResponse().getContentAsString(), "$.data.token");

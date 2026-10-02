@@ -4,10 +4,8 @@ import java.security.SecureRandom;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.HexFormat;
-import java.util.Map;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,7 +31,6 @@ import pe.sinapsistencia.shared.exception.BadRequestException;
 import pe.sinapsistencia.shared.exception.ConflictException;
 import pe.sinapsistencia.shared.exception.ForbiddenException;
 import pe.sinapsistencia.shared.exception.NotFoundException;
-import pe.sinapsistencia.shared.exception.ServiceUnavailableException;
 import pe.sinapsistencia.shared.exception.UnauthorizedException;
 
 /**
@@ -42,13 +39,6 @@ import pe.sinapsistencia.shared.exception.UnauthorizedException;
  */
 @Service
 public class AuthService {
-
-	/**
-	 * Correos de las cuentas demo (login por rol). Se toman de la configuración
-	 * para que coincidan con los correos reales que aplica DemoAccountEmailConfigurer
-	 * en producción; por defecto son los del seed (V3__seed_demo.sql).
-	 */
-	private final Map<String, String> demoAccounts;
 
 	private final ProfileRepository profileRepository;
 	private final DoctorProfileRepository doctorProfileRepository;
@@ -69,10 +59,7 @@ public class AuthService {
 			PasswordEncoder passwordEncoder,
 			JwtService jwtService,
 			MailNotifier mailNotifier,
-			LoginAttemptService loginAttemptService,
-			@Value("${app.demo.doctor-email:doctor.demo@sinapsistencia.pe}") String doctorEmail,
-			@Value("${app.demo.lawyer-email:lawyer.demo@sinapsistencia.pe}") String lawyerEmail,
-			@Value("${app.demo.admin-email:admin.demo@sinapsistencia.pe}") String adminEmail) {
+			LoginAttemptService loginAttemptService) {
 		this.profileRepository = profileRepository;
 		this.doctorProfileRepository = doctorProfileRepository;
 		this.lawyerProfileRepository = lawyerProfileRepository;
@@ -82,13 +69,9 @@ public class AuthService {
 		this.jwtService = jwtService;
 		this.mailNotifier = mailNotifier;
 		this.loginAttemptService = loginAttemptService;
-		this.demoAccounts = Map.of(
-				"doctor", doctorEmail,
-				"lawyer", lawyerEmail,
-				"admin", adminEmail);
 	}
 
-	/** Modo 1: login por email + password (con protección de fuerza bruta, 429). */
+	/** Login por email + password (con protección de fuerza bruta, 429). */
 	public LoginResponse login(String email, String password) {
 		if (email == null || email.isBlank() || password == null || password.isBlank()) {
 			throw new BadRequestException("Email y contraseña son requeridos");
@@ -107,24 +90,6 @@ public class AuthService {
 		}
 
 		loginAttemptService.reset(email);
-		return new LoginResponse(UserDto.from(profile), jwtService.generateToken(profile));
-	}
-
-	/** Modo 2: login por rol demo (doctor/lawyer/admin). */
-	public LoginResponse loginByRole(String role) {
-		String demoEmail = demoAccounts.get(role);
-		if (demoEmail == null) {
-			throw new BadRequestException("Rol no válido");
-		}
-
-		Profile profile = profileRepository.findByEmail(demoEmail)
-				.orElseThrow(() -> new ServiceUnavailableException(
-						"Cuenta demo \"" + role + "\" no disponible. Ejecuta el seed de la base de datos."));
-
-		if (!profile.isActive()) {
-			throw new ForbiddenException("Tu cuenta ha sido desactivada");
-		}
-
 		return new LoginResponse(UserDto.from(profile), jwtService.generateToken(profile));
 	}
 
