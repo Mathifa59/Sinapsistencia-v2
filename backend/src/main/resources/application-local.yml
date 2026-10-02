@@ -1,0 +1,6 @@
+# Perfil de desarrollo local: SPRING_PROFILES_ACTIVE=local
+# Permite arrancar sin RESEND_API_KEY; en ese caso el token de recuperacion de
+# contrasena se imprime en el log del servidor (nunca en la respuesta HTTP).
+app:
+  auth:
+    log-reset-token: true

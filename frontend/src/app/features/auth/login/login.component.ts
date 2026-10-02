@@ -7,12 +7,6 @@ import { BtnDirective } from '../../../shared/ui/button.directive';
 import { InputDirective, LabelDirective } from '../../../shared/ui/field.directives';
 import { ROLE_DASHBOARD, type UserRole } from '../../../shared/constants';
 
-const DEMO_ROLES: { role: UserRole; label: string; color: string }[] = [
-  { role: 'doctor', label: 'Médico', color: 'bg-blue-600 hover:bg-blue-700 text-white' },
-  { role: 'lawyer', label: 'Abogado', color: 'bg-emerald-600 hover:bg-emerald-700 text-white' },
-  { role: 'admin', label: 'Administrador', color: 'bg-slate-700 hover:bg-slate-800 text-white' },
-];
-
 /** Réplica de app/login/page.tsx (Reactive Forms en lugar de react-hook-form+zod). */
 @Component({
   selector: 'app-login',
@@ -81,30 +75,6 @@ const DEMO_ROLES: { role: UserRole; label: string; color: string }[] = [
           ¿No tienes cuenta?
           <a routerLink="/register" class="text-blue-600 hover:underline font-medium">Crear cuenta</a>
         </p>
-
-        <!-- Acceso rápido demo -->
-        <div class="mt-6">
-          <div class="flex items-center gap-2 mb-3">
-            <div class="flex-1 h-px bg-slate-200"></div>
-            <span class="flex items-center gap-1 text-xs text-slate-400 font-medium">
-              <lucide-icon name="zap" class="h-3 w-3" />
-              Acceso rápido (demo)
-            </span>
-            <div class="flex-1 h-px bg-slate-200"></div>
-          </div>
-          <div class="flex gap-2">
-            @for (demo of demoRoles; track demo.role) {
-              <button
-                type="button"
-                (click)="handleDemoLogin(demo.role)"
-                [disabled]="auth.isLoading() || demoLoading() !== null"
-                class="flex-1 py-2 px-2 rounded-lg text-xs font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed {{ demo.color }}"
-              >
-                {{ demoLoading() === demo.role ? '...' : demo.label }}
-              </button>
-            }
-          </div>
-        </div>
       </div>
     </div>
   `,
@@ -115,10 +85,8 @@ export class LoginComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly fb = inject(FormBuilder);
 
-  protected readonly demoRoles = DEMO_ROLES;
   protected readonly showPassword = signal(false);
   protected readonly error = signal<string | null>(null);
-  protected readonly demoLoading = signal<UserRole | null>(null);
 
   protected readonly form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
@@ -137,19 +105,6 @@ export class LoginComponent {
       this.redirectAfterLogin(user.role);
     } catch {
       this.error.set('Credenciales incorrectas. Verifica tu correo y contraseña.');
-    }
-  }
-
-  protected async handleDemoLogin(role: UserRole): Promise<void> {
-    this.error.set(null);
-    this.demoLoading.set(role);
-    try {
-      const user = await this.auth.loginByRole(role);
-      this.redirectAfterLogin(user.role);
-    } catch {
-      this.error.set(`No se pudo ingresar como ${role} demo. Verifica que la cuenta exista.`);
-    } finally {
-      this.demoLoading.set(null);
     }
   }
 

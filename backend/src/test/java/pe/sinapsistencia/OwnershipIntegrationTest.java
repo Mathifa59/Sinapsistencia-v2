@@ -13,8 +13,10 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -36,6 +38,9 @@ class OwnershipIntegrationTest {
 
 	@Autowired
 	private MockMvc mockMvc;
+
+	@Autowired
+	private ApplicationContext context;
 
 	private String doctorAToken;   // demo seedeado
 	private String doctorBToken;   // registrado en el test
@@ -59,6 +64,25 @@ class OwnershipIntegrationTest {
 
 		doctorAId = whoAmI(doctorAToken);
 		lawyer1Id = whoAmI(lawyer1Token);
+	}
+
+	// ── Login ───────────────────────────────────────────────────────────────
+
+	@Test
+	@DisplayName("El login por rol sin contraseña ya no existe: ningún rol devuelve token")
+	void roleOnlyLoginIsRejected() throws Exception {
+		for (String role : new String[] { "doctor", "lawyer", "admin" }) {
+			mockMvc.perform(post("/api/auth/login")
+					.contentType(MediaType.APPLICATION_JSON)
+					.content("{\"role\":\"" + role + "\"}"))
+					.andExpect(status().isBadRequest());
+		}
+	}
+
+	@Test
+	@DisplayName("No existe el usuario en memoria con contraseña generada (la app autentica solo con JWT)")
+	void noHayUsuarioEnMemoriaConPasswordGenerada() {
+		org.assertj.core.api.Assertions.assertThat(context.getBeanNamesForType(UserDetailsService.class)).isEmpty();
 	}
 
 	// ── Consultas ───────────────────────────────────────────────────────────
@@ -215,7 +239,7 @@ class OwnershipIntegrationTest {
 	private String loginDemo(String role) throws Exception {
 		MvcResult result = mockMvc.perform(post("/api/auth/login")
 				.contentType(MediaType.APPLICATION_JSON)
-				.content("{\"role\":\"" + role + "\"}"))
+				.content("{\"email\":\"" + role + ".demo@sinapsistencia.pe\",\"password\":\"Demo123!\"}"))
 				.andExpect(status().isOk())
 				.andReturn();
 		return JsonPath.read(result.getResponse().getContentAsString(), "$.data.token");

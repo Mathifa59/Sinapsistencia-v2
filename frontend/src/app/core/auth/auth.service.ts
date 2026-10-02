@@ -63,18 +63,6 @@ export class AuthService {
     }
   }
 
-  async loginByRole(role: UserRole): Promise<AuthUser> {
-    this._isLoading.set(true);
-    try {
-      const result = await this.api.post<LoginResponse>('/api/auth/login', { role });
-      this._user.set(result.user);
-      this._hydrated.set(true);
-      return result.user;
-    } finally {
-      this._isLoading.set(false);
-    }
-  }
-
   async register(payload: RegisterPayload): Promise<void> {
     this._isLoading.set(true);
     try {
@@ -113,8 +101,8 @@ export class AuthService {
     }
   }
 
-  async forgotPassword(email: string): Promise<{ message: string; resetToken?: string | null }> {
-    return this.api.post<{ message: string; resetToken?: string | null }>('/api/auth/forgot-password', { email });
+  async forgotPassword(email: string): Promise<{ message: string }> {
+    return this.api.post<{ message: string }>('/api/auth/forgot-password', { email });
   }
 
   async resetPassword(email: string, token: string, newPassword: string): Promise<void> {

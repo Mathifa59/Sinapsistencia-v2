@@ -4,9 +4,10 @@ import java.security.SecureRandom;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.HexFormat;
-import java.util.Map;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -33,7 +34,6 @@ import pe.sinapsistencia.shared.exception.BadRequestException;
 import pe.sinapsistencia.shared.exception.ConflictException;
 import pe.sinapsistencia.shared.exception.ForbiddenException;
 import pe.sinapsistencia.shared.exception.NotFoundException;
-import pe.sinapsistencia.shared.exception.ServiceUnavailableException;
 import pe.sinapsistencia.shared.exception.UnauthorizedException;
 
 /**
@@ -43,12 +43,7 @@ import pe.sinapsistencia.shared.exception.UnauthorizedException;
 @Service
 public class AuthService {
 
-	/**
-	 * Correos de las cuentas demo (login por rol). Se toman de la configuración
-	 * para que coincidan con los correos reales que aplica DemoAccountEmailConfigurer
-	 * en producción; por defecto son los del seed (V3__seed_demo.sql).
-	 */
-	private final Map<String, String> demoAccounts;
+	private static final Logger log = LoggerFactory.getLogger(AuthService.class);
 
 	private final ProfileRepository profileRepository;
 	private final DoctorProfileRepository doctorProfileRepository;
@@ -59,6 +54,7 @@ public class AuthService {
 	private final JwtService jwtService;
 	private final MailNotifier mailNotifier;
 	private final LoginAttemptService loginAttemptService;
+	private final boolean logResetToken;
 	private final SecureRandom secureRandom = new SecureRandom();
 
 	public AuthService(ProfileRepository profileRepository,
@@ -70,9 +66,7 @@ public class AuthService {
 			JwtService jwtService,
 			MailNotifier mailNotifier,
 			LoginAttemptService loginAttemptService,
-			@Value("${app.demo.doctor-email:doctor.demo@sinapsistencia.pe}") String doctorEmail,
-			@Value("${app.demo.lawyer-email:lawyer.demo@sinapsistencia.pe}") String lawyerEmail,
-			@Value("${app.demo.admin-email:admin.demo@sinapsistencia.pe}") String adminEmail) {
+			@Value("${app.auth.log-reset-token:false}") boolean logResetToken) {
 		this.profileRepository = profileRepository;
 		this.doctorProfileRepository = doctorProfileRepository;
 		this.lawyerProfileRepository = lawyerProfileRepository;
@@ -82,13 +76,10 @@ public class AuthService {
 		this.jwtService = jwtService;
 		this.mailNotifier = mailNotifier;
 		this.loginAttemptService = loginAttemptService;
-		this.demoAccounts = Map.of(
-				"doctor", doctorEmail,
-				"lawyer", lawyerEmail,
-				"admin", adminEmail);
+		this.logResetToken = logResetToken;
 	}
 
-	/** Modo 1: login por email + password (con protección de fuerza bruta, 429). */
+	/** Login por email + password (con protección de fuerza bruta, 429). */
 	public LoginResponse login(String email, String password) {
 		if (email == null || email.isBlank() || password == null || password.isBlank()) {
 			throw new BadRequestException("Email y contraseña son requeridos");
@@ -107,24 +98,6 @@ public class AuthService {
 		}
 
 		loginAttemptService.reset(email);
-		return new LoginResponse(UserDto.from(profile), jwtService.generateToken(profile));
-	}
-
-	/** Modo 2: login por rol demo (doctor/lawyer/admin). */
-	public LoginResponse loginByRole(String role) {
-		String demoEmail = demoAccounts.get(role);
-		if (demoEmail == null) {
-			throw new BadRequestException("Rol no válido");
-		}
-
-		Profile profile = profileRepository.findByEmail(demoEmail)
-				.orElseThrow(() -> new ServiceUnavailableException(
-						"Cuenta demo \"" + role + "\" no disponible. Ejecuta el seed de la base de datos."));
-
-		if (!profile.isActive()) {
-			throw new ForbiddenException("Tu cuenta ha sido desactivada");
-		}
-
 		return new LoginResponse(UserDto.from(profile), jwtService.generateToken(profile));
 	}
 
@@ -203,7 +176,11 @@ public class AuthService {
 				role == UserRole.DOCTOR ? "Médico" : "Abogado");
 	}
 
-	/** HU-04: solicitud de restablecimiento (en prototipo devuelve token para demo). */
+	/**
+	 * HU-04: solicitud de restablecimiento. El token nunca viaja en la respuesta
+	 * HTTP: va por correo; solo con {@code app.auth.log-reset-token} (perfil
+	 * {@code local}) se imprime en el log del servidor.
+	 */
 	@Transactional
 	public ForgotPasswordResponse forgotPassword(String email) {
 		if (email == null || email.isBlank()) {
@@ -213,7 +190,7 @@ public class AuthService {
 		String message = "Si el correo está registrado, recibirás instrucciones para restablecer tu contraseña.";
 		Profile profile = profileRepository.findByEmail(email.trim()).orElse(null);
 		if (profile == null || !profile.isActive()) {
-			return new ForgotPasswordResponse(message, null);
+			return new ForgotPasswordResponse(message);
 		}
 
 		byte[] bytes = new byte[24];
@@ -226,16 +203,17 @@ public class AuthService {
 				Instant.now().plus(1, ChronoUnit.HOURS));
 		passwordResetTokenRepository.save(resetToken);
 
-		// Con Resend configurado el token viaja por correo y NO se expone en la respuesta.
-		// Sin Resend (dev local) se devuelve como fallback para no romper el flujo.
 		if (mailNotifier.isConfigured()) {
 			mailNotifier.sendPasswordReset(profile.getEmail(), profile.getName(), token);
-			return new ForgotPasswordResponse(message, null);
+		} else if (logResetToken) {
+			// Solo perfil local: sin Resend el desarrollador toma el token del log del servidor.
+			log.warn("[auth][local] Sin RESEND_API_KEY -- token de recuperación de {}: {}", profile.getEmail(), token);
+		} else {
+			// Alcanzable solo en el perfil de pruebas: fuera de local/test la app no arranca sin Resend.
+			log.warn("[auth] Sin RESEND_API_KEY -- no se envió el token de recuperación de {}", profile.getEmail());
 		}
 
-		return new ForgotPasswordResponse(
-				message + " (prototipo: usa el token mostrado para continuar)",
-				token);
+		return new ForgotPasswordResponse(message);
 	}
 
 	@Transactional

@@ -11,6 +11,7 @@ Para probar resiliencia, basta matarlo: el backend debe seguir operando
 (health → offline, risk → 503, matching → fallback por especialidad).
 
 Resend (correo) no tiene mock local: es un servicio SaaS fijo (`api.resend.com`), no
-autohospedable como n8n. Para probar el fallback de correo basta con dejar
-`RESEND_API_KEY` vacío (comportamiento por defecto en dev) — los envíos se omiten con
-`log.warn` y forgot-password devuelve el token en la respuesta.
+autohospedable como n8n. Para trabajar sin correo, arranca el backend con el perfil `local`
+(`SPRING_PROFILES_ACTIVE=local`) y deja `RESEND_API_KEY` vacío — los envíos se omiten con
+`log.warn` y el token de forgot-password se imprime en el log del servidor (nunca en la
+respuesta). En cualquier otro perfil, sin la llave la app no arranca.
