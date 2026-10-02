@@ -77,8 +77,8 @@ verificar.
 | Abogado | `lawyer.demo@sinapsistencia.pe` | `Demo123!` |
 | Administrador | `admin.demo@sinapsistencia.pe` | `Demo123!` |
 
-También hay botones de "Acceso rápido (demo)" en `/login` para entrar directo con
-estos 3 roles sin escribir credenciales.
+Los botones de "Acceso rápido (demo)" de `/login` fueron eliminados: el ingreso es
+siempre con correo y contraseña.
 
 ### Cuentas creadas durante esta verificación (vía `/register`)
 

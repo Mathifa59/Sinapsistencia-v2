@@ -15,7 +15,7 @@
    abogado: CAB + especialidades legales + áreas médicas de interés, mínimo 1 de cada).
    `POST /api/auth/register` → `201 Created` → redirige a login. El admin no se autorregistra.
 2. **Login** — [login.component.ts:108](../frontend/src/app/features/auth/login/login.component.ts)
-   Por email+password o botones de "acceso rápido demo" por rol. `POST /api/auth/login`,
+   Por email+password. `POST /api/auth/login`,
    setea cookie httpOnly con JWT, redirige al dashboard de su rol.
 3. **Logout** — `POST /api/auth/logout`, expira la cookie.
 4. **Mi Perfil** (los 3 roles, contenido distinto) — `GET/PATCH /api/profile`,

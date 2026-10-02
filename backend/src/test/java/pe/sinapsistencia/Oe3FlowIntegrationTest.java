@@ -145,7 +145,7 @@ class Oe3FlowIntegrationTest {
 	private String loginDemo(String role) throws Exception {
 		MvcResult result = mockMvc.perform(post("/api/auth/login")
 				.contentType(MediaType.APPLICATION_JSON)
-				.content("{\"role\":\"" + role + "\"}"))
+				.content("{\"email\":\"" + role + ".demo@sinapsistencia.pe\",\"password\":\"Demo123!\"}"))
 				.andExpect(status().isOk())
 				.andReturn();
 		return JsonPath.read(result.getResponse().getContentAsString(), "$.data.token");

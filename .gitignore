@@ -36,3 +36,7 @@ NPDB*.csv
 NPDB*.DAT
 NPDB*.POR
 ml-service/evaluation/calibration/data/
+
+# Credenciales de cuentas demo: nunca se versionan, aunque sean contraseñas de prueba.
+CREDENCIALES_DEMO.md
+docs/cuentas-demo.md

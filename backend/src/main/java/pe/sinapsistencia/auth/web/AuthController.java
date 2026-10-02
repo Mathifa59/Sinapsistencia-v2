@@ -32,7 +32,7 @@ import pe.sinapsistencia.shared.api.ApiResponse;
 import pe.sinapsistencia.shared.exception.UnauthorizedException;
 
 /**
- * Espeja /api/auth/* del BFF legacy: login (email+password y modo demo por rol),
+ * Espeja /api/auth/* del BFF legacy: login (email+password),
  * logout, me y register. El JWT viaja en cookie httpOnly `access_token` y
  * también en el body (igual que el token de Supabase en el legacy).
  */
@@ -54,9 +54,7 @@ public class AuthController {
 	@PostMapping("/login")
 	@Auditable(action = "login", resource = "auth")
 	public ResponseEntity<ApiResponse<LoginResponse>> login(@RequestBody LoginRequest request) {
-		LoginResponse result = request.role() != null
-				? authService.loginByRole(request.role())
-				: authService.login(request.email(), request.password());
+		LoginResponse result = authService.login(request.email(), request.password());
 
 		return ResponseEntity.ok()
 				.header(HttpHeaders.SET_COOKIE, buildAccessTokenCookie(result.token()).toString())

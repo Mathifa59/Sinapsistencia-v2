@@ -38,7 +38,7 @@ class RecommendationRunIntegrationTest {
 	void setUp() throws Exception {
 		MvcResult login = mockMvc.perform(post("/api/auth/login")
 				.contentType(MediaType.APPLICATION_JSON)
-				.content("{\"role\":\"doctor\"}"))
+				.content("{\"email\":\"doctor.demo@sinapsistencia.pe\",\"password\":\"Demo123!\"}"))
 				.andExpect(status().isOk())
 				.andReturn();
 		doctorToken = JsonPath.read(login.getResponse().getContentAsString(), "$.data.token");
@@ -88,7 +88,9 @@ class RecommendationRunIntegrationTest {
 				.header("Authorization", "Bearer " + doctorToken)
 				.param("doctorId", doctorId)
 				.param("caseId", caseId))
-				.andExpect(status().isOk());
+				.andExpect(status().isOk())
+				.andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers
+						.jsonPath("$.data.modelInfo.createdAt").isNotEmpty());
 
 		mockMvc.perform(get("/api/matching/recommendation-runs")
 				.header("Authorization", "Bearer " + doctorToken)
