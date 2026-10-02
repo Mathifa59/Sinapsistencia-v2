@@ -140,8 +140,12 @@ class MatchingModel:
 
     def recommend(self, profile: DoctorProfile, top_k: int = 10,
                   lawyers: list[dict] | None = None) -> list[LawyerRecommendation]:
-        # Corpus VIVO si el backend lo envia; si no, fallback al estatico.
-        if lawyers:
+        # Corpus VIVO si el backend lo envia (aunque venga vacio); None = no lo
+        # envio -> fallback al estatico. Una lista vacia es 0 candidatos reales,
+        # nunca se recicla el corpus estatico de perfiles ajenos a la BD.
+        if lawyers is not None:
+            if not lawyers:
+                return []
             corpus = lawyers
             vectorizer, matrix = self._fit(lawyers)
         else:

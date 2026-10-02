@@ -56,44 +56,13 @@ public class MailNotifier {
 				MailTemplates.welcome(name, roleLabel, frontendUrl + "/"));
 	}
 
-	/**
-	 * Aviso al abogado de que recibió una nueva solicitud de contacto. Reply-To
-	 * apunta al correo real del médico solicitante: si el abogado responde desde su
-	 * cliente de correo, le llega directo a él, no al admin de la plataforma.
-	 */
-	@Async
-	public void sendContactRequestReceived(String toLawyerEmail, String lawyerName, String doctorName,
-			String caseTitle, String message, String doctorEmail) {
-		dispatch("contact_request_received", toLawyerEmail,
-				"Nueva solicitud de contacto — Sinapsistencia",
-				MailTemplates.contactRequestReceived(lawyerName, doctorName, caseTitle, message,
-						frontendUrl + "/lawyer/requests"),
-				doctorEmail);
-	}
-
-	/**
-	 * Aviso al médico de que su solicitud fue aceptada o rechazada. Reply-To apunta
-	 * al correo real del abogado que respondió, por la misma razón.
-	 */
-	@Async
-	public void sendContactRequestAnswered(String toDoctorEmail, String doctorName, String lawyerName,
-			String caseTitle, boolean accepted, String responseMessage, String lawyerEmail) {
-		String subject = accepted
-				? "Tu solicitud de contacto fue aceptada — Sinapsistencia"
-				: "Respuesta a tu solicitud de contacto — Sinapsistencia";
-		dispatch("contact_request_answered", toDoctorEmail, subject,
-				MailTemplates.contactRequestAnswered(doctorName, lawyerName, caseTitle, accepted,
-						responseMessage, frontendUrl + "/doctor/cases"),
-				lawyerEmail);
-	}
+	// H-06: sendContactRequestReceived/sendContactRequestAnswered se eliminaron de
+	// aquí -- ContactRequestService encola esos dos avisos en NotificationService
+	// (outbox), no corren en paralelo con un envío @Async directo.
 
 	// ── Envío ──────────────────────────────────────────────────────────────────
 
 	private void dispatch(String type, String to, String subject, String html) {
-		dispatch(type, to, subject, html, null);
-	}
-
-	private void dispatch(String type, String to, String subject, String html, String replyTo) {
 		if (!isConfigured()) {
 			log.warn("[mail] RESEND_API_KEY no configurada — correo '{}' a {} omitido", type, to);
 			return;
@@ -103,7 +72,7 @@ public class MailNotifier {
 			return;
 		}
 		try {
-			resendClient.send(to, subject, html, replyTo);
+			resendClient.send(to, subject, html, null);
 			log.info("[mail] Correo '{}' enviado a {}", type, to);
 		} catch (Exception ex) {
 			log.error("[mail] Error al enviar correo '{}' a {}: {}", type, to, ex.getMessage());

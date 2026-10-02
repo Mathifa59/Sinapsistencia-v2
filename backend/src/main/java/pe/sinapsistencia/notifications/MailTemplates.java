@@ -72,7 +72,7 @@ public final class MailTemplates {
 
 	// ── Solicitud de contacto recibida (→ abogado) ─────────────────────────────
 
-	static String contactRequestReceived(String lawyerName, String doctorName, String caseTitle,
+	public static String contactRequestReceived(String lawyerName, String doctorName, String caseTitle,
 			String message, String panelLink) {
 		String caseRow = caseTitle == null || caseTitle.isBlank() ? ""
 				: infoRow("Consulta", esc(caseTitle));
@@ -101,7 +101,7 @@ public final class MailTemplates {
 
 	// ── Solicitud respondida (→ médico) ────────────────────────────────────────
 
-	static String contactRequestAnswered(String doctorName, String lawyerName, String caseTitle,
+	public static String contactRequestAnswered(String doctorName, String lawyerName, String caseTitle,
 			boolean accepted, String responseMessage, String panelLink) {
 		String verb = accepted ? "aceptó" : "no pudo aceptar";
 		String badge = accepted
@@ -160,7 +160,7 @@ public final class MailTemplates {
 				""".formatted(
 				esc(riskLevel), badge, BORDER,
 				infoRow("Caso", esc(String.valueOf(alert.get("caseId"))))
-						+ infoRow("Score de riesgo", String.format(Locale.ROOT, "%.0f%%", riskScore * 100))
+						+ infoRow("Score de riesgo", String.format(Locale.ROOT, "%.2f%%", riskScore * 100))
 						+ infoRow("Especialidad", esc(String.valueOf(alert.get("specialty"))))
 						+ infoRow("Médico", esc(alert.get("doctorName") + " · " + alert.get("doctorEmail")))
 						+ infoRow("Documentación completa", boolLabel(alert.get("documentationComplete")))

@@ -6,7 +6,7 @@ import { injectMutation, injectQuery, injectQueryClient } from '@tanstack/angula
 import { LucideAngularModule } from 'lucide-angular';
 import { map } from 'rxjs';
 import { AuthService } from '../../../core/auth/auth.service';
-import { CasesApi, type CaseReportDto } from '../../../core/api/cases.api';
+import { CasesApi, type CaseReportDto, type NotificationOutboxDto } from '../../../core/api/cases.api';
 import { BtnDirective } from '../../ui/button.directive';
 import { ReasonModalComponent } from '../../ui/reason-modal.component';
 import { InputDirective, LabelDirective, TextareaDirective, SelectDirective } from '../../ui/field.directives';
@@ -17,7 +17,8 @@ import {
   ModalDescriptionDirective,
   ModalFooterDirective,
 } from '../../ui/modal.component';
-import { formatDate, formatDateTime, getInitials } from '../../utils/cn';
+import { cn, formatDate, formatDateTime, getInitials } from '../../utils/cn';
+import { formatMlScore } from '../../utils/ml-score.util';
 import {
   CASE_STATUS_LABELS,
   CASE_PRIORITY_LABELS,
@@ -214,10 +215,60 @@ const PRIORITY_DOTS: Record<CasePriority, string> = {
                     </span>
                     Clasificación del modelo
                   </h2>
-                  @if (cls.modelVersion) {
-                    <span class="rounded-full bg-slate-100 px-2.5 py-0.5 font-mono text-[11px] text-slate-500">IA · v{{ cls.modelVersion }}</span>
-                  }
+                  <div class="flex items-center gap-2">
+                    @if (cls.modelVersion) {
+                      <span class="rounded-full bg-slate-100 px-2.5 py-0.5 font-mono text-[11px] text-slate-500">IA · v{{ cls.modelVersion }}</span>
+                    }
+                    <button type="button" class="text-[11px] font-medium text-blue-600 hover:underline"
+                      (click)="classificationHistoryOpen.set(!classificationHistoryOpen())">
+                      {{ classificationHistoryOpen() ? 'Ocultar historial' : 'Ver historial' }}
+                    </button>
+                  </div>
                 </div>
+
+                @if (detail.isStale === true) {
+                  <div class="mb-3 flex items-start gap-2 rounded-lg bg-amber-50 px-3.5 py-2.5 ring-1 ring-inset ring-amber-200">
+                    <lucide-icon name="alert-triangle" class="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+                    <p class="text-xs leading-relaxed text-amber-800">
+                      Las entradas del caso cambiaron desde esta evaluación de riesgo.
+                      @if (canEditCase() && isDoctor()) {
+                        <button type="button" class="font-semibold underline" (click)="reclassifyMutation.mutate()" [disabled]="reclassifyMutation.isPending()">
+                          Reevaluar riesgo
+                        </button>
+                      }
+                    </p>
+                  </div>
+                } @else if (canEditCase() && isDoctor()) {
+                  <div class="mb-3">
+                    <button appBtn type="button" variant="outline" size="sm" class="gap-1.5 text-xs" (click)="reclassifyMutation.mutate()" [disabled]="reclassifyMutation.isPending()">
+                      @if (reclassifyMutation.isPending()) {
+                        <lucide-icon name="loader-2" class="h-3.5 w-3.5 animate-spin" />
+                      }
+                      Reevaluar riesgo
+                    </button>
+                  </div>
+                }
+
+                @if (classificationHistoryOpen()) {
+                  <div class="mb-4 rounded-lg border border-slate-100 bg-slate-50 p-3">
+                    <p class="mb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Historial de clasificaciones</p>
+                    @if (classificationHistoryQuery.isLoading()) {
+                      <p class="text-xs text-slate-400">Cargando…</p>
+                    } @else {
+                      <ul class="space-y-1.5">
+                        @for (h of classificationHistoryQuery.data() ?? []; track h.id) {
+                          <li class="flex flex-wrap items-center justify-between gap-2 text-xs">
+                            <span class="text-slate-500">{{ formatDateTime(h.createdAt ?? '') }}</span>
+                            <span class="font-medium text-slate-700">
+                              {{ formatMlScore(h.riskScore) ?? '—' }} · {{ h.riskLevel ?? '—' }}
+                              <span class="text-slate-400">({{ h.modelVersion ?? '—' }})</span>
+                            </span>
+                          </li>
+                        }
+                      </ul>
+                    }
+                  </div>
+                }
                 <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
                   @if (cls.caseType) {
                     <div class="rounded-lg border border-slate-100 bg-slate-50 px-3 py-2.5">
@@ -249,7 +300,7 @@ const PRIORITY_DOTS: Record<CasePriority, string> = {
                     <div class="mb-1.5 flex items-center justify-between text-xs">
                       <span class="font-medium text-slate-500">Score de riesgo (Random Forest)</span>
                       <span class="font-bold text-slate-800">
-                        {{ Math.round((cls.riskScore ?? 0) * 100) }}%
+                        {{ formatMlScore(cls.riskScore) ?? '—' }}
                         @if (cls.riskLevel) {
                           <span class="font-normal capitalize text-slate-400">· nivel {{ cls.riskLevel }}</span>
                         }
@@ -473,6 +524,28 @@ const PRIORITY_DOTS: Record<CasePriority, string> = {
               }
             </div>
 
+            <!-- H-06: avisos del outbox (solicitud recibida/contestada, alerta de riesgo) -->
+            @if ((notificationsQuery.data() ?? []).length > 0) {
+              <div class="rounded-xl border border-slate-200 bg-white p-5">
+                <h3 class="mb-3 flex items-center gap-2.5 font-semibold text-slate-900">
+                  <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
+                    <lucide-icon name="mail" class="h-4 w-4" />
+                  </span>
+                  Avisos
+                </h3>
+                <ul class="space-y-2">
+                  @for (n of notificationsQuery.data() ?? []; track n.id) {
+                    <li class="flex items-center justify-between gap-2 text-xs">
+                      <span class="text-slate-500">{{ notificationTypeLabel(n.type) }}</span>
+                      <span [class]="cn('rounded-full px-2 py-0.5 font-medium ring-1 ring-inset', notificationStatusStyle(n.status))">
+                        {{ notificationStatusLabel(n.status) }}
+                      </span>
+                    </li>
+                  }
+                </ul>
+              </div>
+            }
+
             <!-- Línea de tiempo -->
             <div class="rounded-xl border border-slate-200 bg-white p-5">
               <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
@@ -577,6 +650,30 @@ const PRIORITY_DOTS: Record<CasePriority, string> = {
           </div>
         </div>
         <div class="space-y-1.5">
+          <label appLabel>Complejidad del procedimiento *</label>
+          <select appSelect formControlName="procedureComplexity">
+            <option value="" disabled>Selecciona...</option>
+            <option value="baja">Baja</option>
+            <option value="media">Media</option>
+            <option value="alta">Alta</option>
+          </select>
+          <p class="text-[11px] text-slate-400">Características del procedimiento (no la urgencia temporal).</p>
+        </div>
+        <div class="space-y-2">
+          <label class="flex items-center gap-2 text-sm text-slate-700">
+            <input type="checkbox" formControlName="documentationComplete" class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
+            Documentación clínica completa
+          </label>
+          <label class="flex items-center gap-2 text-sm text-slate-700">
+            <input type="checkbox" formControlName="informedConsent" class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
+            Consentimiento informado firmado
+          </label>
+          <label class="flex items-center gap-2 text-sm text-slate-700">
+            <input type="checkbox" formControlName="hasPriorComplaints" class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
+            Existen quejas previas
+          </label>
+        </div>
+        <div class="space-y-1.5">
           <label appLabel>Notas</label>
           <textarea appTextarea rows="2" formControlName="notes"></textarea>
         </div>
@@ -639,6 +736,7 @@ export class CaseDetailComponent {
 
   protected readonly specialties = MEDICAL_SPECIALTIES;
   protected readonly Math = Math;
+  protected readonly formatMlScore = formatMlScore;
   protected readonly formatDate = formatDate;
   protected readonly formatDateTime = formatDateTime;
   protected readonly getInitials = getInitials;
@@ -681,6 +779,44 @@ export class CaseDetailComponent {
     queryFn: () => this.casesApi.getDetail(this.caseId()),
     enabled: !!this.caseId(),
   }));
+
+  /** H-06: estado de los avisos del caso -- lectura pura, nunca dispara un reenvío. */
+  protected readonly notificationsQuery = injectQuery(() => ({
+    queryKey: ['cases', 'notifications', this.caseId()],
+    queryFn: () => this.casesApi.notifications(this.caseId()),
+    enabled: !!this.caseId(),
+  }));
+
+  protected readonly cn = cn;
+
+  protected notificationTypeLabel(type?: string): string {
+    switch (type) {
+      case 'contact_request_received': return 'Solicitud de contacto';
+      case 'contact_request_answered': return 'Respuesta a la solicitud';
+      case 'risk_alert': return 'Alerta de riesgo';
+      default: return type ?? 'Aviso';
+    }
+  }
+
+  protected notificationStatusLabel(status?: string): string {
+    switch (status) {
+      case 'pending': return 'Pendiente';
+      case 'processing': return 'En proceso';
+      case 'accepted_by_provider': return 'Aceptado por el proveedor';
+      case 'failed': return 'Fallido';
+      case 'skipped': return 'Omitido';
+      default: return status ?? '—';
+    }
+  }
+
+  protected notificationStatusStyle(status?: string): string {
+    switch (status) {
+      case 'accepted_by_provider': return 'bg-emerald-50 text-emerald-700 ring-emerald-200';
+      case 'failed': return 'bg-red-50 text-red-700 ring-red-200';
+      case 'skipped': return 'bg-slate-100 text-slate-500 ring-slate-200';
+      default: return 'bg-amber-50 text-amber-700 ring-amber-200';
+    }
+  }
 
   protected readonly caseData = computed(() => this.detailQuery.data()?.caseData);
 
@@ -740,6 +876,11 @@ export class CaseDetailComponent {
     description: ['', [Validators.required, Validators.minLength(10)]],
     priority: ['media', Validators.required],
     medicalSpecialty: [''],
+    // H-05: complejidad editada aquí siempre queda como 'reported' (ver edit() en backend).
+    procedureComplexity: ['', Validators.required],
+    documentationComplete: [true],
+    informedConsent: [true],
+    hasPriorComplaints: [false],
     notes: [''],
   });
 
@@ -763,6 +904,10 @@ export class CaseDetailComponent {
         description: v.description.trim(),
         priority: v.priority,
         medicalSpecialty: v.medicalSpecialty || undefined,
+        procedureComplexity: v.procedureComplexity,
+        documentationComplete: v.documentationComplete,
+        informedConsent: v.informedConsent,
+        hasPriorComplaints: v.hasPriorComplaints,
         notes: v.notes.trim() || undefined,
       });
     },
@@ -772,6 +917,23 @@ export class CaseDetailComponent {
       this.editError.set(null);
     },
     onError: () => this.editError.set('No se pudo guardar el caso.'),
+  }));
+
+  /** H-05: reevaluación explícita a pedido del médico -- nunca automática. */
+  protected readonly reclassifyMutation = injectMutation(() => ({
+    mutationFn: () => this.casesApi.reclassify(this.caseId()),
+    onSuccess: () => {
+      this.queryClient.invalidateQueries({ queryKey: ['cases', 'detail', this.caseId()] });
+      this.queryClient.invalidateQueries({ queryKey: ['cases', 'classifications', this.caseId()] });
+    },
+  }));
+
+  protected readonly classificationHistoryOpen = signal(false);
+
+  protected readonly classificationHistoryQuery = injectQuery(() => ({
+    queryKey: ['cases', 'classifications', this.caseId()],
+    queryFn: () => this.casesApi.classifications(this.caseId()),
+    enabled: !!this.caseId() && this.classificationHistoryOpen(),
   }));
 
   protected readonly eventMutation = injectMutation(() => ({
@@ -827,6 +989,10 @@ export class CaseDetailComponent {
       description: c.description ?? '',
       priority: c.priority ?? 'media',
       medicalSpecialty: c.medicalSpecialty ?? '',
+      procedureComplexity: c.procedureComplexity ?? '',
+      documentationComplete: c.documentationComplete ?? true,
+      informedConsent: c.informedConsent ?? true,
+      hasPriorComplaints: c.hasPriorComplaints ?? false,
       notes: c.notes ?? '',
     });
     this.editError.set(null);

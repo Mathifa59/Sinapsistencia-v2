@@ -29,5 +29,10 @@ export interface CaseResponse {
     notes?: string;
     createdAt?: string;
     updatedAt?: string;
+    procedureComplexity?: string;
+    complexitySource?: string;
+    documentationComplete?: boolean;
+    informedConsent?: boolean;
+    hasPriorComplaints?: boolean;
 }
 

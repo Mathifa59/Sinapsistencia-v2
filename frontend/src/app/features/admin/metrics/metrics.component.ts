@@ -50,7 +50,14 @@ const BAR_COLORS: Record<string, string> = {
         <app-stat-card title="Consultas totales" [value]="casesQuery.data()?.total ?? 0" icon="activity" color="emerald" description="Flujo de 6 estados" />
         <app-stat-card title="Documentos totales" [value]="documentsQuery.data()?.total ?? 0" icon="folder-open" color="blue" description="Clínicos y legales" />
         <app-stat-card title="Casos críticos" [value]="criticalCases()" icon="alert-triangle" color="red" description="Prioridad crítica" />
-        <app-stat-card title="Servicio ML" [value]="mlStatusLabel()" [icon]="mlStatusIcon()" [color]="mlStatusColor()" description="Estado de salud" />
+        <div class="flex flex-col gap-1.5">
+          <app-stat-card title="Servicio ML" [value]="mlStatus().label" [icon]="mlStatus().icon" [color]="mlStatus().color" description="Estado de salud" />
+          @if (mlStatus().showRetry) {
+            <button type="button" class="self-start text-xs text-blue-600 hover:underline" (click)="mlHealthQuery.refetch()">
+              Reintentar
+            </button>
+          }
+        </div>
       </div>
 
       <div class="grid lg:grid-cols-3 gap-6">
@@ -222,15 +229,44 @@ export class AdminMetricsComponent {
     return `${Math.round(value * 1000) / 10}%`;
   }
 
-  protected readonly mlStatusLabel = computed(() => {
-    if (this.mlHealthQuery.isLoading()) return '...';
-    if (this.mlHealthQuery.isError()) return 'Inactivo';
-    const status = this.mlHealthQuery.data()?.['status'];
-    return status === 'ok' || status === 'healthy' ? 'Activo' : 'Inactivo';
-  });
+  /**
+   * H-01: un solo computed centraliza label/icon/color/reintento en vez de tres
+   * calculos separados que comparaban contra 'ok'/'healthy' (el backend nunca
+   * devuelve esos valores -- devuelve 'online'/'offline', asi que el indicador
+   * mostraba "Inactivo" aunque el servicio estuviera activo).
+   * Orden: loading -> error de query -> offline -> online (con readiness) -> desconocido.
+   */
+  protected readonly mlStatus = computed<{
+    label: string;
+    icon: string;
+    color: 'blue' | 'emerald' | 'amber' | 'red' | 'slate';
+    showRetry: boolean;
+  }>(() => {
+    if (this.mlHealthQuery.isLoading()) {
+      return { label: 'Comprobando…', icon: 'loader-2', color: 'slate', showRetry: false };
+    }
+    if (this.mlHealthQuery.isError()) {
+      return { label: 'No se pudo comprobar', icon: 'help-circle', color: 'slate', showRetry: true };
+    }
 
-  protected readonly mlStatusIcon = computed(() => (this.mlStatusLabel() === 'Activo' ? 'check-circle' : 'x-circle'));
-  protected readonly mlStatusColor = computed(() => (this.mlStatusLabel() === 'Activo' ? 'emerald' : 'red'));
+    const data = this.mlHealthQuery.data();
+    const status = data?.['status'];
+
+    if (status === 'offline') {
+      return { label: 'Inactivo', icon: 'x-circle', color: 'red', showRetry: true };
+    }
+    if (status === 'online') {
+      const model = data?.['model'] as Record<string, unknown> | undefined;
+      const modelReadyRaw = data?.['modelReady'];
+      const modelReady = typeof modelReadyRaw === 'boolean' ? modelReadyRaw : model?.['status'] === 'loaded';
+      return modelReady
+        ? { label: 'Activo', icon: 'check-circle', color: 'emerald', showRetry: false }
+        : { label: 'Degradado', icon: 'alert-triangle', color: 'amber', showRetry: false };
+    }
+    // Estado no reconocido: no afirmamos que el modelo este caido por un contrato
+    // inesperado (RF-01.2).
+    return { label: 'No se pudo comprobar', icon: 'help-circle', color: 'slate', showRetry: true };
+  });
 
   protected readonly criticalCases = computed(
     () => (this.casesQuery.data()?.data ?? []).filter((c) => c.priority === 'critica').length,

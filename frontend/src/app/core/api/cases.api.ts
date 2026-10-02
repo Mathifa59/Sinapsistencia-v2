@@ -7,6 +7,27 @@ import type { ListResponseCaseResponse } from './generated/model/listResponseCas
 import type { ContextPayload } from './generated/model/contextPayload';
 import type { RecommendationsResponse } from './generated/model/recommendationsResponse';
 
+/**
+ * H-06: estado público de un aviso del outbox. Nunca trae destinatario/HTML/payload
+ * (privados) -- providerMessageId/providerHttpStatus solo vienen si el usuario es admin.
+ */
+export interface NotificationOutboxDto {
+  id?: string;
+  type?: string;
+  resourceType?: string;
+  resourceId?: string;
+  status?: 'pending' | 'processing' | 'accepted_by_provider' | 'failed' | 'skipped' | string;
+  attemptCount?: number;
+  retryable?: boolean;
+  lastErrorCode?: string | null;
+  lastErrorMessage?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+  acceptedAt?: string | null;
+  providerMessageId?: string | null;
+  providerHttpStatus?: number | null;
+}
+
 export interface CaseListParams {
   status?: string;
   priority?: string;
@@ -19,6 +40,23 @@ export interface CaseListParams {
   [key: string]: string | number | boolean | undefined;
 }
 
+/** H-05: fotografía de las 7 entradas evaluadas por el RF + metadata de contexto. */
+export interface MlInputSnapshot {
+  inputs?: {
+    specialty?: string;
+    procedure_complexity?: string;
+    priority?: string;
+    documentation_complete?: boolean;
+    informed_consent?: boolean;
+    has_prior_complaints?: boolean;
+    time_since_incident_days?: number;
+  };
+  complexitySource?: string;
+  evaluatedAt?: string;
+  eventDate?: string | null;
+  timeZone?: string;
+}
+
 export interface MlClassificationDto {
   id?: string;
   caseType?: string;
@@ -28,6 +66,9 @@ export interface MlClassificationDto {
   confidence?: number;
   modelVersion?: string;
   responseTimeMs?: number;
+  // H-05: null en clasificaciones anteriores a este flujo -- nunca se reconstruye en el cliente.
+  inputSnapshot?: MlInputSnapshot | null;
+  pipelineVersion?: string | null;
   createdAt?: string;
 }
 
@@ -69,6 +110,8 @@ export type MlClassificationExtended = MlClassificationDto & {
 export interface CaseDetailDto {
   caseData: CaseResponse;
   classification?: MlClassificationExtended | null;
+  // H-05: null = desconocido (fotografía legacy ausente), nunca una coincidencia fabricada.
+  isStale?: boolean | null;
   responses?: LegalResponseDto[];
   events?: CaseEventDto[];
   timeline?: TimelineEntryDto[];
@@ -78,7 +121,9 @@ export interface CaseDetailDto {
 
 export interface CaseReportDto {
   caseData: CaseResponse;
-  classification?: MlClassificationDto | null;
+  // H-04: usaba MlClassificationDto (base), que no trae riskScore/riskLevel --
+  // el reporte perdia esos campos aunque el backend si los envia en el JSON.
+  classification?: MlClassificationExtended | null;
   responses?: LegalResponseDto[];
   timeline?: TimelineEntryDto[];
   documentTitles?: string[];
@@ -93,6 +138,11 @@ export interface EditCaseBody {
   medicalSpecialty?: string;
   eventType?: string;
   perceivedUrgency?: string;
+  // H-05: omitir un campo significa CONSERVAR su valor actual, nunca resetearlo.
+  procedureComplexity?: string;
+  documentationComplete?: boolean;
+  informedConsent?: boolean;
+  hasPriorComplaints?: boolean;
   notes?: string;
   context?: ContextPayload;
 }
@@ -134,6 +184,21 @@ export class CasesApi {
 
   getReport(id: string): Promise<CaseReportDto> {
     return this.api.get<CaseReportDto>(`/api/legal-cases/${id}/report`);
+  }
+
+  /** H-05: historial completo de clasificaciones -- lectura pura, no reclasifica. */
+  classifications(id: string): Promise<MlClassificationExtended[]> {
+    return this.api.get<MlClassificationExtended[]>(`/api/legal-cases/${id}/classifications`);
+  }
+
+  /** H-05: reevaluación explícita del riesgo con las entradas actuales del caso. */
+  reclassify(id: string): Promise<CaseDetailDto> {
+    return this.api.post<CaseDetailDto>(`/api/legal-cases/${id}/reclassify`, {});
+  }
+
+  /** H-06: estado de los avisos del caso (solicitud recibida/contestada, alerta de riesgo). */
+  notifications(id: string): Promise<NotificationOutboxDto[]> {
+    return this.api.get<NotificationOutboxDto[]>(`/api/legal-cases/${id}/notifications`);
   }
 
   create(body: CreateCaseRequest): Promise<CaseResponse> {

@@ -1,11 +1,14 @@
 package pe.sinapsistencia.matching.application;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -21,9 +24,14 @@ import pe.sinapsistencia.cases.infrastructure.CaseEventRepository;
 import pe.sinapsistencia.cases.infrastructure.LegalCaseRepository;
 import pe.sinapsistencia.matching.domain.ContactRequest;
 import pe.sinapsistencia.matching.domain.ContactRequestStatus;
+import pe.sinapsistencia.matching.domain.MatchRecommendation;
+import pe.sinapsistencia.matching.domain.RecommendationRun;
+import pe.sinapsistencia.matching.domain.RecommendationRunStatus;
 import pe.sinapsistencia.matching.infrastructure.ContactRequestRepository;
+import pe.sinapsistencia.matching.infrastructure.MatchRecommendationRepository;
 import pe.sinapsistencia.matching.web.dto.ContactRequestResponse;
-import pe.sinapsistencia.notifications.MailNotifier;
+import pe.sinapsistencia.notifications.MailTemplates;
+import pe.sinapsistencia.notifications.NotificationService;
 import pe.sinapsistencia.profile.domain.DoctorProfile;
 import pe.sinapsistencia.profile.domain.LawyerProfile;
 import pe.sinapsistencia.profile.infrastructure.DoctorProfileRepository;
@@ -43,7 +51,9 @@ public class ContactRequestService {
 	private final CaseEventRepository eventRepository;
 	private final DoctorProfileRepository doctorProfileRepository;
 	private final LawyerProfileRepository lawyerProfileRepository;
-	private final MailNotifier mailNotifier;
+	private final MatchRecommendationRepository matchRecommendationRepository;
+	private final NotificationService notificationService;
+	private final String frontendUrl;
 
 	public ContactRequestService(ContactRequestRepository contactRequestRepository,
 			ProfileRepository profileRepository,
@@ -51,14 +61,18 @@ public class ContactRequestService {
 			CaseEventRepository eventRepository,
 			DoctorProfileRepository doctorProfileRepository,
 			LawyerProfileRepository lawyerProfileRepository,
-			MailNotifier mailNotifier) {
+			MatchRecommendationRepository matchRecommendationRepository,
+			NotificationService notificationService,
+			@Value("${app.frontend.url:http://localhost:4200}") String frontendUrl) {
 		this.contactRequestRepository = contactRequestRepository;
 		this.profileRepository = profileRepository;
 		this.caseRepository = caseRepository;
 		this.eventRepository = eventRepository;
 		this.doctorProfileRepository = doctorProfileRepository;
 		this.lawyerProfileRepository = lawyerProfileRepository;
-		this.mailNotifier = mailNotifier;
+		this.matchRecommendationRepository = matchRecommendationRepository;
+		this.notificationService = notificationService;
+		this.frontendUrl = frontendUrl.endsWith("/") ? frontendUrl.substring(0, frontendUrl.length() - 1) : frontendUrl;
 	}
 
 	@Transactional(readOnly = true)
@@ -95,7 +109,7 @@ public class ContactRequestService {
 
 	@Transactional
 	public ContactRequestResponse createContactRequest(AuthenticatedUser user, String toLawyerIdParam,
-			String message, String caseIdParam) {
+			String message, String caseIdParam, String recommendationIdParam, String selectionSourceParam) {
 		if (user.role() != UserRole.DOCTOR) {
 			throw new ForbiddenException("Solo un médico puede enviar solicitudes de contacto");
 		}
@@ -143,14 +157,86 @@ public class ContactRequestService {
 			}
 		}
 
+		// H-02: vincula la solicitud a la recomendación concreta que el médico vio
+		// al elegir -- la puntuación se COPIA del registro del servidor, nunca se
+		// acepta una cifra enviada por el cliente (RF-02.4, el frontend no envía mlScore).
+		applySelection(request, user, toLawyerId, lawyer, recommendationIdParam, selectionSourceParam);
+
 		request = contactRequestRepository.save(request);
 
-		// Aviso al abogado destinatario (fire-and-forget vía Resend). Reply-To =
-		// correo del médico, para que puedan corresponder directo por correo.
-		mailNotifier.sendContactRequestReceived(lawyer.getEmail(), lawyer.getName(),
-				doctor.getName(), request.getCaseTitle(), message, doctor.getEmail());
+		// H-06: encolado en la transacción de negocio, tras obtener el ID del
+		// recurso -- NotificationWorker despacha DESPUÉS del commit. Reply-To =
+		// correo real del médico, para que médico y abogado se correspondan
+		// directo por correo (antes era un envío directo @Async; ya no corre en
+		// paralelo con el outbox).
+		notificationService.enqueue(
+				"contact_request_received:" + request.getId(),
+				"contact_request_received",
+				request.getLegalCase() == null ? null : request.getLegalCase().getId(),
+				"contact_request", request.getId(),
+				lawyer.getEmail(), doctor.getEmail(),
+				"Nueva solicitud de contacto — Sinapsistencia",
+				MailTemplates.contactRequestReceived(lawyer.getName(), doctor.getName(), request.getCaseTitle(),
+						message, frontendUrl + "/lawyer/requests"));
 
 		return enrich(List.of(request)).get(0);
+	}
+
+	/**
+	 * H-02: resuelve el origen de la selección y, si viene del ranking, valida la
+	 * relación completa (ejecución completada, médico/caso/abogado coinciden,
+	 * abogado sigue disponible y activo -- RF-02.6) antes de copiar su score al
+	 * FK/{@code mlScore}. Bodies legacy sin estos campos quedan {@code legacy_untracked}.
+	 */
+	private void applySelection(ContactRequest request, AuthenticatedUser user, UUID toLawyerId,
+			pe.sinapsistencia.auth.domain.Profile lawyer, String recommendationIdParam, String selectionSourceParam) {
+		if (recommendationIdParam != null && !recommendationIdParam.isBlank()) {
+			if (selectionSourceParam != null && !"recommendation".equals(selectionSourceParam)) {
+				throw new BadRequestException(
+						"selectionSource debe ser 'recommendation' cuando se envía recommendationId");
+			}
+			MatchRecommendation recommendation = matchRecommendationRepository
+					.findById(UUID.fromString(recommendationIdParam))
+					.orElseThrow(() -> new NotFoundException("Recomendación no encontrada"));
+
+			RecommendationRun run = recommendation.getRun();
+			if (run == null || run.getStatus() != RecommendationRunStatus.COMPLETED) {
+				throw new BadRequestException("La recomendación indicada no pertenece a una ejecución completada");
+			}
+			if (!run.getDoctor().getId().equals(user.id())) {
+				throw new ForbiddenException("La recomendación no pertenece a tu ejecución");
+			}
+			if (request.getLegalCase() == null || !run.getLegalCase().getId().equals(request.getLegalCase().getId())) {
+				throw new BadRequestException("La recomendación no corresponde a la consulta indicada");
+			}
+			if (!recommendation.getLawyer().getId().equals(toLawyerId)) {
+				throw new BadRequestException("La recomendación no corresponde al abogado indicado");
+			}
+
+			LawyerProfile lawyerProfile = lawyerProfileRepository.findByUserId(toLawyerId).orElse(null);
+			if (lawyerProfile == null || !lawyerProfile.isAvailable() || !lawyer.isActive()) {
+				throw new ConflictException(
+						"El abogado ya no está disponible; genera un nuevo ranking para elegir otro.");
+			}
+
+			request.setRecommendation(recommendation);
+			request.setSelectionSource("recommendation");
+			if (recommendation.getScoreRaw() != null) {
+				request.setMlScore(recommendation.getScoreRaw().multiply(BigDecimal.valueOf(100))
+						.setScale(2, RoundingMode.HALF_UP));
+			}
+			return;
+		}
+
+		if ("directory".equals(selectionSourceParam)) {
+			request.setSelectionSource("directory");
+			return;
+		}
+		if (selectionSourceParam != null && !selectionSourceParam.isBlank()) {
+			throw new BadRequestException("selectionSource inválido: " + selectionSourceParam);
+		}
+		// Body legacy (cliente anterior a H-02): origen desconocido, nunca se finge ML.
+		request.setSelectionSource("legacy_untracked");
 	}
 
 	@Transactional
@@ -189,13 +275,19 @@ public class ContactRequestService {
 					"asignacion", "Abogado asignado tras aceptar la solicitud de contacto");
 		}
 
-		// Aviso al médico solicitante del resultado (fire-and-forget vía Resend).
-		// Reply-To = correo del abogado, para que puedan corresponder directo por correo.
-		mailNotifier.sendContactRequestAnswered(
-				request.getFromDoctor().getEmail(), request.getFromDoctor().getName(),
-				request.getToLawyer().getName(), request.getCaseTitle(),
-				request.getStatus() == ContactRequestStatus.ACEPTADO, responseMessage,
-				request.getToLawyer().getEmail());
+		// H-06: encolado tras el save -- Reply-To = correo real del abogado que
+		// respondió, misma razón que al recibir la solicitud.
+		boolean accepted = request.getStatus() == ContactRequestStatus.ACEPTADO;
+		notificationService.enqueue(
+				"contact_request_answered:" + request.getId() + ":" + request.getStatus().getValue(),
+				"contact_request_answered",
+				request.getLegalCase() == null ? null : request.getLegalCase().getId(),
+				"contact_request", request.getId(),
+				request.getFromDoctor().getEmail(), request.getToLawyer().getEmail(),
+				accepted ? "Tu solicitud de contacto fue aceptada — Sinapsistencia"
+						: "Respuesta a tu solicitud de contacto — Sinapsistencia",
+				MailTemplates.contactRequestAnswered(request.getFromDoctor().getName(), request.getToLawyer().getName(),
+						request.getCaseTitle(), accepted, responseMessage, frontendUrl + "/doctor/cases"));
 
 		return enrich(List.of(request)).get(0);
 	}

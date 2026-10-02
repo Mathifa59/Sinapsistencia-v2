@@ -1,7 +1,5 @@
 package pe.sinapsistencia.ml.web;
 
-import java.time.Instant;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -16,27 +14,30 @@ import org.springframework.web.bind.annotation.RestController;
 import pe.sinapsistencia.auth.security.AuthenticatedUser;
 import pe.sinapsistencia.ml.application.MlProxyService;
 import pe.sinapsistencia.ml.application.ModelMetricService;
-import pe.sinapsistencia.ml.application.RiskAlertNotifier;
 import pe.sinapsistencia.ml.web.dto.ModelMetricDto;
 import pe.sinapsistencia.shared.api.ApiResponse;
 
 /**
- * Proxy ML — mismos paths que el legacy. POST /risk dispara la alerta de riesgo SOLO si
- * riskLevel ∈ {alto, critico} (fire-and-forget). GET /health es público
- * (igual que el indicador de disponibilidad del legacy).
+ * Proxy ML — mismos paths que el legacy. GET /health es público (igual que el
+ * indicador de disponibilidad del legacy).
+ *
+ * <p>H-06: POST /risk ya NO dispara la alerta de riesgo -- ese disparo vivía
+ * aquí en paralelo al de {@code CaseClassificationService} (que SÍ persiste la
+ * clasificación), duplicando el aviso sin un {@code classificationId} real
+ * para el outbox nuevo. Este endpoint no tiene ningún consumidor en el
+ * frontend (el flujo real de creación de casos clasifica server-side desde
+ * {@code LegalCaseService}); queda como proxy puro sin el efecto secundario
+ * que no correspondía a este path.
  */
 @RestController
 @RequestMapping("/api/ml")
 public class MlController {
 
 	private final MlProxyService mlProxyService;
-	private final RiskAlertNotifier riskAlertNotifier;
 	private final ModelMetricService modelMetricService;
 
-	public MlController(MlProxyService mlProxyService, RiskAlertNotifier riskAlertNotifier,
-			ModelMetricService modelMetricService) {
+	public MlController(MlProxyService mlProxyService, ModelMetricService modelMetricService) {
 		this.mlProxyService = mlProxyService;
-		this.riskAlertNotifier = riskAlertNotifier;
 		this.modelMetricService = modelMetricService;
 	}
 
@@ -44,27 +45,7 @@ public class MlController {
 	public ApiResponse<Map<String, Object>> risk(
 			@AuthenticationPrincipal AuthenticatedUser user,
 			@RequestBody Map<String, Object> body) {
-
-		Map<String, Object> result = mlProxyService.riskAssessment(body);
-
-		String riskLevel = (String) result.get("riskLevel");
-		if ("alto".equals(riskLevel) || "critico".equals(riskLevel)) {
-			Map<String, Object> alert = new LinkedHashMap<>();
-			alert.put("caseId", result.get("caseId"));
-			alert.put("riskScore", result.get("riskScore"));
-			alert.put("riskLevel", riskLevel);
-			alert.put("riskFactors", result.get("riskFactors"));
-			alert.put("recommendations", result.get("recommendations"));
-			alert.put("specialty", body.getOrDefault("specialty", "No especificada"));
-			alert.put("doctorName", user != null ? user.name() : "No identificado");
-			alert.put("doctorEmail", user != null ? user.email() : "");
-			alert.put("documentationComplete", body.getOrDefault("documentation_complete", false));
-			alert.put("informedConsent", body.getOrDefault("informed_consent", false));
-			alert.put("evaluatedAt", Instant.now().toString());
-			riskAlertNotifier.triggerRiskAlert(alert);
-		}
-
-		return ApiResponse.ok(result);
+		return ApiResponse.ok(mlProxyService.riskAssessment(body));
 	}
 
 	@GetMapping("/health")

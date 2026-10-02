@@ -23,6 +23,10 @@ public record ContactRequestResponse(
 		String message,
 		String responseMessage,
 		Double mlScore,
+		// H-02: recomendación concreta que originó la solicitud (si vino del ranking) y su ejecución.
+		String recommendationId,
+		String recommendationRunId,
+		String selectionSource,
 		Instant createdAt,
 		Instant respondedAt) {
 
@@ -71,6 +75,10 @@ public record ContactRequestResponse(
 				r.getMessage(),
 				r.getResponseMessage(),
 				r.getMlScore() == null ? null : r.getMlScore().doubleValue(),
+				r.getRecommendation() == null ? null : r.getRecommendation().getId().toString(),
+				r.getRecommendation() == null || r.getRecommendation().getRun() == null
+						? null : r.getRecommendation().getRun().getId().toString(),
+				r.getSelectionSource(),
 				r.getCreatedAt(),
 				// updatedAt puede ser null justo tras el INSERT (antes del flush)
 				r.getUpdatedAt() == null || r.getUpdatedAt().equals(r.getCreatedAt())

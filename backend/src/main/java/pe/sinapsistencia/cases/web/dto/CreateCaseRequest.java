@@ -14,6 +14,10 @@ public record CreateCaseRequest(
 		String medicalSpecialty,
 		String eventType,
 		String perceivedUrgency,
+		// H-05: entrada independiente de perceivedUrgency. Opcional por compatibilidad
+		// con bodies legacy -- si se omite, LegalCaseService la deriva de la urgencia
+		// y marca complexitySource='inferred_from_urgency_legacy'.
+		String procedureComplexity,
 		String notes,
 		Boolean documentationComplete,
 		Boolean informedConsent,
