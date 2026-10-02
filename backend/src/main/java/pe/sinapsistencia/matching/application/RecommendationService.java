@@ -161,6 +161,7 @@ public class RecommendationService {
 		modelInfo.put("caseId", run.getLegalCase().getId().toString());
 		modelInfo.put("status", run.getStatus().getValue());
 		modelInfo.put("origin", run.getOrigin());
+		modelInfo.put("createdAt", run.getCreatedAt().toString());
 		modelInfo.put("weights", toMap(run.getWeights()));
 		return new RecommendationsResponse(recs, modelInfo, RecommendationsResponse.ADVISORY_NOTE);
 	}
