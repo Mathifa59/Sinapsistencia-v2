@@ -101,8 +101,8 @@ export class AuthService {
     }
   }
 
-  async forgotPassword(email: string): Promise<{ message: string; resetToken?: string | null }> {
-    return this.api.post<{ message: string; resetToken?: string | null }>('/api/auth/forgot-password', { email });
+  async forgotPassword(email: string): Promise<{ message: string }> {
+    return this.api.post<{ message: string }>('/api/auth/forgot-password', { email });
   }
 
   async resetPassword(email: string, token: string, newPassword: string): Promise<void> {

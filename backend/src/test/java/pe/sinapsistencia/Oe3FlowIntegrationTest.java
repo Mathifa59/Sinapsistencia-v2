@@ -16,6 +16,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -33,6 +34,9 @@ class Oe3FlowIntegrationTest {
 
 	@Autowired
 	private MockMvc mockMvc;
+
+	@Autowired
+	private JdbcTemplate jdbc;
 
 	private String doctorToken;
 	private String lawyerToken;
@@ -121,14 +125,17 @@ class Oe3FlowIntegrationTest {
 	@Test
 	@DisplayName("HU-04: recuperación de contraseña")
 	void passwordResetFlow() throws Exception {
-		MvcResult forgot = mockMvc.perform(post("/api/auth/forgot-password")
+		mockMvc.perform(post("/api/auth/forgot-password")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content("{\"email\":\"doctor.demo@sinapsistencia.pe\"}"))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.data.resetToken").exists())
-				.andReturn();
+				.andExpect(jsonPath("$.data.resetToken").doesNotExist());
 
-		String token = JsonPath.read(forgot.getResponse().getContentAsString(), "$.data.resetToken");
+		// El token solo llega por correo; en el test se lee de la tabla en lugar de la bandeja.
+		String token = jdbc.queryForObject(
+				"select token from password_reset_tokens where email = ? and used = false "
+						+ "order by expires_at desc limit 1",
+				String.class, "doctor.demo@sinapsistencia.pe");
 
 		mockMvc.perform(post("/api/auth/reset-password")
 				.contentType(MediaType.APPLICATION_JSON)

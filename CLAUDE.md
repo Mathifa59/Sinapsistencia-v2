@@ -87,11 +87,15 @@ Los modelos de matching se versionan aparte: `match-v1`, `match-v2`, etc.
 
 ### 4.3 Degradación con fallback declarado
 
-El backend nunca bloquea si ML o Resend están caídos (o sin API key):
+El backend nunca bloquea si ML o Resend están caídos:
 
 - Clasificación → reglas `rules-v1`
 - Matching → score determinístico por coincidencia de área + rating + casos
-- Correo → omitido con `log.warn`
+- Correo → el outbox reintenta con backoff y deja el estado consultable (H-06)
+
+Excepción deliberada: **sin `RESEND_API_KEY` la app no arranca**, salvo con el perfil `local`
+(`SPRING_PROFILES_ACTIVE=local`) o `test`. Un entorno sin proveedor de correo no puede entregar
+el token de recuperación de contraseña, y el token nunca viaja en la respuesta HTTP.
 
 **Los fallbacks deben seguir funcionando.** Son parte de la defensa de arquitectura.
 

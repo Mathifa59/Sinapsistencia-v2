@@ -26,11 +26,6 @@ import { InputDirective, LabelDirective } from '../../../shared/ui/field.directi
             <div class="text-center space-y-3">
               <lucide-icon name="mail-check" class="h-10 w-10 text-emerald-500 mx-auto" />
               <p class="text-sm text-slate-700">{{ successMessage() }}</p>
-              @if (resetToken()) {
-                <p class="text-xs text-slate-500 bg-slate-50 border border-slate-100 rounded-md px-3 py-2">
-                  Token de demo: <code class="font-mono text-slate-800">{{ resetToken() }}</code>
-                </p>
-              }
               <a routerLink="/reset-password" [queryParams]="{ email: form.controls.email.value }" class="inline-block text-blue-600 text-sm hover:underline font-medium">
                 Ir a restablecer contraseña
               </a>
@@ -71,7 +66,6 @@ export class ForgotPasswordComponent {
   protected readonly error = signal<string | null>(null);
   protected readonly sent = signal(false);
   protected readonly successMessage = signal('');
-  protected readonly resetToken = signal<string | null>(null);
 
   protected readonly form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
@@ -87,7 +81,6 @@ export class ForgotPasswordComponent {
     try {
       const result = await this.auth.forgotPassword(this.form.controls.email.value);
       this.successMessage.set(result.message ?? 'Revisa tu correo para continuar.');
-      this.resetToken.set(result.resetToken ?? null);
       this.sent.set(true);
     } catch {
       this.error.set('No se pudo procesar la solicitud. Verifica el correo e intenta de nuevo.');

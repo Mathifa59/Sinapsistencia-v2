@@ -1,5 +1,5 @@
 package pe.sinapsistencia.auth.web.dto;
 
-/** Respuesta de recuperación — incluye token para entorno académico sin SMTP. */
-public record ForgotPasswordResponse(String message, String resetToken) {
+/** Respuesta de recuperación: solo el mensaje; el token viaja únicamente por correo. */
+public record ForgotPasswordResponse(String message) {
 }
