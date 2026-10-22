@@ -142,9 +142,9 @@ public class CaseClassificationService {
 		// ── Intento con el Random Forest real ──────────────────────────────────
 		Map<String, Object> risk = null;
 		try {
+			// Solo las 7 variables del RF + el id: el texto libre del caso no se envía (Ley 29733).
 			Map<String, Object> payload = new LinkedHashMap<>(mlInputs);
 			payload.put("case_id", legalCase.getId().toString());
-			payload.put("description", legalCase.getDescription() == null ? "" : legalCase.getDescription());
 			risk = mlProxyService.riskAssessment(payload);
 		} catch (Exception ex) {
 			log.info("ML no disponible para clasificar el caso {} ({}); fallback por reglas",
