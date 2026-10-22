@@ -9,20 +9,17 @@ import { BtnDirective } from '../../../shared/ui/button.directive';
 import { InputDirective, LabelDirective, TextareaDirective, SelectDirective } from '../../../shared/ui/field.directives';
 import { MEDICAL_SPECIALTIES } from '../../../shared/constants';
 import { formatMlScore } from '../../../shared/utils/ml-score.util';
-
-interface RiskFactor {
-  name: string;
-  weight: number;
-  value: number;
-  contribution: number;
-  description: string;
-}
+import {
+  RISK_FACTOR_LABELS,
+  RISK_MEANING_LABEL,
+  RiskExplanationComponent,
+} from '../../../shared/ui/risk-explanation.component';
 
 interface RiskResult {
   riskScore: number;
   riskLevel: 'bajo' | 'moderado' | 'alto' | 'critico';
-  riskFactors: RiskFactor[];
-  recommendations: string[];
+  /** `risk_factors` tal como lo persiste el backend; lo interpreta RiskExplanationComponent. */
+  riskFactorsJson: string | null;
   modelVersion: string;
 }
 
@@ -51,16 +48,6 @@ function detectPii(text: string): string[] {
   return PII_PATTERNS.filter((p) => p.regex.test(text)).map((p) => p.label);
 }
 
-const FACTOR_LABELS: Record<string, string> = {
-  specialty_risk: 'Riesgo por especialidad',
-  procedure_complexity: 'Complejidad del procedimiento',
-  documentation: 'Estado de la documentación',
-  informed_consent: 'Consentimiento informado',
-  prior_complaints: 'Historial de quejas',
-  time_factor: 'Tiempo desde el incidente',
-  priority: 'Prioridad del caso',
-};
-
 /**
  * Crear caso + análisis de riesgo automático: al registrar, el modal pasa a una
  * fase de "pipeline" que visualiza el análisis real — variables extraídas del
@@ -82,6 +69,7 @@ const FACTOR_LABELS: Record<string, string> = {
     LabelDirective,
     TextareaDirective,
     SelectDirective,
+    RiskExplanationComponent,
   ],
   template: `
     <app-modal [open]="opened()" (close)="handleClose()" class="max-w-xl">
@@ -291,7 +279,7 @@ const FACTOR_LABELS: Record<string, string> = {
                   <div class="mt-2.5 ml-10 flex flex-wrap gap-1.5">
                     <span class="rounded-full bg-white/10 px-2.5 py-0.5 text-[11px] text-slate-200 ring-1 ring-inset ring-white/10">{{ vars.specialty }}</span>
                     <span class="rounded-full bg-white/10 px-2.5 py-0.5 text-[11px] text-slate-200 ring-1 ring-inset ring-white/10">Complejidad {{ vars.complexity }}</span>
-                    <span class="rounded-full bg-white/10 px-2.5 py-0.5 text-[11px] text-slate-200 ring-1 ring-inset ring-white/10">Prioridad {{ vars.priority }}</span>
+                    <span class="rounded-full bg-white/10 px-2.5 py-0.5 text-[11px] text-slate-200 ring-1 ring-inset ring-white/10">Urgencia percibida {{ vars.priority }}</span>
                     <span class="rounded-full px-2.5 py-0.5 text-[11px] ring-1 ring-inset"
                       [class]="vars.documentation ? 'bg-emerald-400/10 text-emerald-300 ring-emerald-400/20' : 'bg-red-400/10 text-red-300 ring-red-400/20'">
                       Documentación {{ vars.documentation ? 'completa' : 'incompleta' }}
@@ -356,29 +344,16 @@ const FACTOR_LABELS: Record<string, string> = {
                       [class]="levels[r.riskLevel].bar"
                       [style.width.%]="Math.round(r.riskScore * 100)"></div>
                   </div>
+                  <p class="mt-2 text-[11px] text-slate-400">{{ riskMeaningLabel }}</p>
                   <p class="mt-2 text-[11px] text-slate-400">
                     Prioridad del caso sugerida por el modelo:
                     <span class="font-semibold capitalize text-slate-200">{{ createdPriority() }}</span>
                     · puedes ajustarla editando el caso (revisión humana).
                   </p>
 
-                  @if (topFactors(r).length > 0) {
-                    <p class="mb-2 mt-4 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Factores que más pesaron</p>
-                    <div class="space-y-2">
-                      @for (f of topFactors(r); track f.name) {
-                        <div>
-                          <div class="flex items-center justify-between text-xs">
-                            <span class="text-slate-300">{{ factorLabels[f.name] ?? f.name }}</span>
-                            <span class="font-semibold text-slate-200">{{ Math.round(f.value * 100) }}% <span class="font-normal text-slate-500">(peso {{ Math.round(f.weight * 100) }}%)</span></span>
-                          </div>
-                          <div class="mt-1 h-1.5 overflow-hidden rounded-full bg-white/10">
-                            <div class="h-full rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 transition-all duration-700"
-                              [style.width.%]="Math.round(f.value * 100)"></div>
-                          </div>
-                        </div>
-                      }
-                    </div>
-                  }
+                  <div class="mt-4">
+                    <app-risk-explanation variant="dark" [riskFactorsJson]="r.riskFactorsJson" />
+                  </div>
 
                   @if (r.riskLevel === 'alto' || r.riskLevel === 'critico') {
                     <div class="mt-4 flex items-start gap-2 rounded-lg bg-amber-400/10 px-3.5 py-2.5 ring-1 ring-inset ring-amber-400/25">
@@ -432,8 +407,8 @@ export class CaseFormModalComponent {
   protected readonly Math = Math;
   protected readonly formatMlScore = formatMlScore;
   protected readonly levels = RISK_LEVELS;
-  protected readonly factorLabels = FACTOR_LABELS;
-  protected readonly factorCount = Object.keys(FACTOR_LABELS).length;
+  protected readonly riskMeaningLabel = RISK_MEANING_LABEL;
+  protected readonly factorCount = Object.keys(RISK_FACTOR_LABELS).length;
 
   /** Nota ética HU-43. */
   protected readonly advisoryNote =
@@ -575,17 +550,10 @@ export class CaseFormModalComponent {
 
         const cls = detail.classification;
         if (cls?.riskScore != null && cls.riskLevel) {
-          let factors: RiskFactor[] = [];
-          try {
-            factors = JSON.parse(cls.riskFactorsJson ?? '[]');
-          } catch {
-            factors = [];
-          }
           finish({
             riskScore: Number(cls.riskScore),
             riskLevel: cls.riskLevel as RiskResult['riskLevel'],
-            riskFactors: factors,
-            recommendations: [],
+            riskFactorsJson: cls.riskFactorsJson ?? null,
             modelVersion: cls.modelVersion ?? 'rf',
           });
         } else {
@@ -593,10 +561,6 @@ export class CaseFormModalComponent {
         }
       })
       .catch(() => finish(null));
-  }
-
-  protected topFactors(r: RiskResult): RiskFactor[] {
-    return [...(r.riskFactors ?? [])].sort((a, b) => b.contribution - a.contribution).slice(0, 4);
   }
 
   protected goToCase(): void {

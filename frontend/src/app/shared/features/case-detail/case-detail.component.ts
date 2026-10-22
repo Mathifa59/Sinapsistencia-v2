@@ -9,6 +9,7 @@ import { AuthService } from '../../../core/auth/auth.service';
 import { CasesApi, type CaseReportDto, type NotificationOutboxDto } from '../../../core/api/cases.api';
 import { BtnDirective } from '../../ui/button.directive';
 import { ReasonModalComponent } from '../../ui/reason-modal.component';
+import { RISK_MEANING_LABEL, RiskExplanationComponent } from '../../ui/risk-explanation.component';
 import { InputDirective, LabelDirective, TextareaDirective, SelectDirective } from '../../ui/field.directives';
 import {
   ModalComponent,
@@ -63,6 +64,7 @@ const PRIORITY_DOTS: Record<CasePriority, string> = {
     ModalTitleDirective,
     ModalDescriptionDirective,
     ModalFooterDirective,
+    RiskExplanationComponent,
   ],
   template: `
     @if (detailQuery.isLoading()) {
@@ -312,6 +314,10 @@ const PRIORITY_DOTS: Record<CasePriority, string> = {
                         [style.width.%]="Math.round((cls.riskScore ?? 0) * 100)"
                       ></div>
                     </div>
+                    <p class="mt-1.5 text-[11px] text-slate-400">{{ riskMeaningLabel }}</p>
+                  </div>
+                  <div class="mt-4 rounded-lg border border-slate-100 bg-slate-50/60 p-3.5">
+                    <app-risk-explanation [riskFactorsJson]="cls.riskFactorsJson" />
                   </div>
                 }
                 @if (cls.confidence != null) {
@@ -747,6 +753,8 @@ export class CaseDetailComponent {
   protected readonly priorityDots = PRIORITY_DOTS;
   protected readonly statusLabels = CASE_STATUS_LABELS;
   protected readonly priorityLabels = CASE_PRIORITY_LABELS;
+
+  protected readonly riskMeaningLabel = RISK_MEANING_LABEL;
 
   /** Nota ética HU-43 — vive al pie de la tarjeta de clasificación ML. */
   protected readonly advisoryNote =
