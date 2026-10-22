@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { injectMutation, injectQueryClient } from '@tanstack/angular-query-experimental';
 import { LucideAngularModule } from 'lucide-angular';
-import { CasesApi } from '../../../core/api/cases.api';
+import { CasesApi, type MlInputSnapshot } from '../../../core/api/cases.api';
 import { ModalComponent, ModalHeaderDirective, ModalTitleDirective, ModalDescriptionDirective, ModalFooterDirective } from '../../../shared/ui/modal.component';
 import { BtnDirective } from '../../../shared/ui/button.directive';
 import { InputDirective, LabelDirective, TextareaDirective, SelectDirective } from '../../../shared/ui/field.directives';
@@ -20,6 +20,8 @@ interface RiskResult {
   riskLevel: 'bajo' | 'moderado' | 'alto' | 'critico';
   /** `risk_factors` tal como lo persiste el backend; lo interpreta RiskExplanationComponent. */
   riskFactorsJson: string | null;
+  /** Entradas que el backend realmente evaluó (null en clasificaciones anteriores a esta fotografía). */
+  inputSnapshot: MlInputSnapshot | null;
   modelVersion: string;
 }
 
@@ -293,6 +295,8 @@ function detectPii(text: string): string[] {
                     }
                     @if (vars.daysSince != null) {
                       <span class="rounded-full bg-white/10 px-2.5 py-0.5 text-[11px] text-slate-200 ring-1 ring-inset ring-white/10">{{ vars.daysSince }} días desde el evento</span>
+                    } @else {
+                      <span class="rounded-full bg-white/10 px-2.5 py-0.5 text-[11px] text-slate-200 ring-1 ring-inset ring-white/10">Sin fecha de evento · se asumió 0 días</span>
                     }
                   </div>
                 } @else if (inputsUnavailable()) {
@@ -352,7 +356,7 @@ function detectPii(text: string): string[] {
                   </p>
 
                   <div class="mt-4">
-                    <app-risk-explanation variant="dark" [riskFactorsJson]="r.riskFactorsJson" />
+                    <app-risk-explanation variant="dark" [riskFactorsJson]="r.riskFactorsJson" [inputSnapshot]="r.inputSnapshot" />
                   </div>
 
                   @if (r.riskLevel === 'alto' || r.riskLevel === 'critico') {
@@ -554,6 +558,7 @@ export class CaseFormModalComponent {
             riskScore: Number(cls.riskScore),
             riskLevel: cls.riskLevel as RiskResult['riskLevel'],
             riskFactorsJson: cls.riskFactorsJson ?? null,
+            inputSnapshot: cls.inputSnapshot ?? null,
             modelVersion: cls.modelVersion ?? 'rf',
           });
         } else {

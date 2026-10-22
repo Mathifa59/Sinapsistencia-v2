@@ -317,7 +317,7 @@ const PRIORITY_DOTS: Record<CasePriority, string> = {
                     <p class="mt-1.5 text-[11px] text-slate-400">{{ riskMeaningLabel }}</p>
                   </div>
                   <div class="mt-4 rounded-lg border border-slate-100 bg-slate-50/60 p-3.5">
-                    <app-risk-explanation [riskFactorsJson]="cls.riskFactorsJson" />
+                    <app-risk-explanation [riskFactorsJson]="cls.riskFactorsJson" [inputSnapshot]="cls.inputSnapshot" />
                   </div>
                 }
                 @if (cls.confidence != null) {

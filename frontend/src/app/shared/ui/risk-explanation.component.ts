@@ -1,5 +1,6 @@
 import { Component, computed, input } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
+import type { MlInputSnapshot } from '../../core/api/cases.api';
 
 /** Qué mide el porcentaje de riesgo (etiqueta corta junto al número). */
 export const RISK_MEANING_LABEL = 'Estimación de prioridad legal según el modelo, no gravedad clínica.';
@@ -46,7 +47,11 @@ interface FactorRow {
   weight: number;
   contribution: number;
   hint: string;
+  /** Sin fecha de evento: el valor 0 es un supuesto del modelo, no una medición. */
+  noDate: boolean;
 }
+
+const NO_EVENT_DATE_HINT = 'El modelo asumió 0 días por defecto.';
 
 const NUMBER_2 = new Intl.NumberFormat('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
@@ -58,6 +63,7 @@ const THEMES = {
     muted: 'text-slate-400',
     track: 'bg-slate-100',
     border: 'border-slate-100',
+    pill: 'border-slate-200 bg-slate-100 text-slate-500',
   },
   dark: {
     title: 'text-slate-400',
@@ -66,6 +72,7 @@ const THEMES = {
     muted: 'text-slate-500',
     track: 'bg-white/10',
     border: 'border-white/10',
+    pill: 'border-white/10 bg-white/10 text-slate-300',
   },
 } as const;
 
@@ -106,19 +113,23 @@ function isFinitePositiveOrZero(n: unknown): n is number {
               <div>
                 <div class="flex items-baseline justify-between gap-3 text-xs">
                   <span class="{{ t().label }}">{{ r.label }}</span>
-                  @if (r.present) {
-                    <span class="font-semibold {{ t().value }}">{{ pct(r.value) }}</span>
-                  } @else {
+                  @if (!r.present) {
                     <span class="italic {{ t().muted }}">Sin dato en la respuesta del modelo</span>
+                  } @else if (r.noDate) {
+                    <span class="rounded-full border px-2 text-[11px] font-medium {{ t().pill }}">Sin fecha</span>
+                  } @else {
+                    <span class="font-semibold {{ t().value }}">{{ pct(r.value) }}</span>
                   }
                 </div>
                 @if (r.present) {
-                  <div class="mt-1 h-1.5 overflow-hidden rounded-full {{ t().track }}">
-                    <div class="h-full rounded-full bg-gradient-to-r from-blue-500 to-cyan-400"
-                      [style.width.%]="r.value * 100"></div>
-                  </div>
+                  @if (!r.noDate) {
+                    <div class="mt-1 h-1.5 overflow-hidden rounded-full {{ t().track }}">
+                      <div class="h-full rounded-full bg-gradient-to-r from-blue-500 to-cyan-400"
+                        [style.width.%]="r.value * 100"></div>
+                    </div>
+                  }
                   <div class="mt-1 flex flex-wrap items-baseline justify-between gap-x-3 text-[11px] {{ t().muted }}">
-                    <span>{{ r.hint }}</span>
+                    <span>{{ r.noDate ? noEventDateHint : r.hint }}</span>
                     <span>peso {{ pct(r.weight) }} × valor {{ pct(r.value) }} ≈ {{ num2(r.contribution) }}</span>
                   </div>
                 }
@@ -140,8 +151,16 @@ export class RiskExplanationComponent {
   readonly riskFactorsJson = input<string | null | undefined>(null);
   readonly variant = input<'light' | 'dark'>('light');
   readonly open = input(true);
+  /** Fotografía de las entradas evaluadas: permite distinguir "sin fecha de evento" de un 0% medido. */
+  readonly inputSnapshot = input<MlInputSnapshot | null | undefined>(null);
 
   protected readonly inputsNote = RISK_INPUTS_NOTE;
+  protected readonly noEventDateHint = NO_EVENT_DATE_HINT;
+  /** Solo se afirma "sin fecha" si la fotografía existe y no trae `time_since_incident_days`. */
+  private readonly noEventDate = computed(() => {
+    const inputs = this.inputSnapshot()?.inputs;
+    return !!inputs && inputs.time_since_incident_days == null;
+  });
   protected readonly t = computed(() => THEMES[this.variant()]);
 
   protected readonly rows = computed<FactorRow[]>(() => {
@@ -166,6 +185,7 @@ export class RiskExplanationComponent {
         weight: 0,
         contribution: 0,
         hint: '',
+        noDate: false,
       }));
     return [...present, ...missing];
   });
@@ -187,6 +207,7 @@ export class RiskExplanationComponent {
       weight: f.weight,
       contribution: f.contribution,
       hint: HINT_OVERRIDES[name] ?? f.description,
+      noDate: name === 'time_factor' && this.noEventDate(),
     };
   }
 
