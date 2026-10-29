@@ -630,10 +630,12 @@ const PRIORITY_DOTS: Record<CasePriority, string> = {
         <div class="space-y-1.5">
           <label appLabel>Título *</label>
           <input appInput formControlName="title" />
+          <p class="text-[11px] text-slate-400">Describe el evento, no al paciente: sin nombres ni datos que lo identifiquen (Ley 29733).</p>
         </div>
         <div class="space-y-1.5">
           <label appLabel>Descripción *</label>
           <textarea appTextarea rows="3" formControlName="description"></textarea>
+          <p class="text-[11px] text-slate-400">De 3 a 6 líneas: qué ocurrió y qué aspecto legal consultas. Mínimo 10 caracteres.</p>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div class="space-y-1.5">
@@ -653,6 +655,7 @@ const PRIORITY_DOTS: Record<CasePriority, string> = {
                 <option [value]="s">{{ s }}</option>
               }
             </select>
+            <p class="text-[11px] text-slate-400">Área clínica del caso (donde ocurrió el evento), aunque no sea la tuya.</p>
           </div>
         </div>
         <div class="space-y-1.5">
