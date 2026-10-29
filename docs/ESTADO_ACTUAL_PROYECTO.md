@@ -208,6 +208,8 @@ Disponibilidad es **filtro duro** previo (no pondera). Fallback determinístico
 2. RF ≈ regresión logística en este dataset — la estructura es mayormente aditiva.
 3. Clase "moderado" débil por diseño (zona de mayor ruido).
 4. Sin features de texto todavía en el clasificador de riesgo (sí en el matching).
+5. **`time_since_incident_days` en clasificaciones anteriores al 2026-10-01 puede diferir en
+   ±1 día** (limitación fechada y acotada, no se corrige) — ver §10.1.
 
 ### 6.5 Investigación en curso — datasets reales
 
@@ -340,3 +342,49 @@ Listas completas: [`backend/.env.example`](../backend/.env.example) ·
 4. **Validación con usuarios reales** hasta agosto — validación de aceptación/UX, distinta
    de un reentrenamiento del modelo.
 5. Smoke tests automatizados y regeneración del cliente OpenAPI si cambian DTOs.
+
+6. **[ALTA] Clic en el fondo oscuro del modal borra el formulario sin confirmación.**
+   `modal.component.ts:12` emite `close` y `case-form-modal.component.ts` ejecuta `resetAll()`
+   (`form.reset`); no hay autoguardado ni borrador. Reproducido el 2026-10-29. Hipótesis
+   principal del formulario vaciado en la sesión E4 del informe de validación (no confirmada;
+   falta cruzar `audit_logs`). **Registrado, no corregido todavía.** Relacionados, de menor
+   prioridad: la lista de casos no tiene estado de error (una primera carga fallida se ve como
+   "0 casos") y no hay manejo de 401 (se muestra "No se pudo conectar con el servidor").
+
+---
+
+## 10. Informe de validación con médicos reales — correcciones (2026-10-29)
+
+### 10.1 Limitación declarada: días desde el evento antes del 2026-10-01
+
+**Hallazgo.** Hasta el commit `1468616` (2026-10-01) `time_since_incident_days` se calculaba con
+`LocalDate.now()` (zona del servidor) y no con el reloj de negocio `America/Lima`.
+
+**Mecanismo.** Si el servidor corría en UTC, un caso clasificado entre las 19:00 y las 24:00 de
+Lima pudo recibir un día de más. La fecha del evento guardada no se ve afectada (`LocalDate` →
+columna `DATE` desde el commit inicial, 2026-06-12; el formulario nunca la convirtió con `Date`).
+
+**Alcance.** Solo clasificaciones anteriores al 2026-10-01 creadas en esa franja horaria;
+desviación máxima de 1 día sobre un valor que varía en cientos. La zona horaria del servidor de
+entonces **no se verificó**, y esas clasificaciones no guardaron la zona (el snapshot de V15 es
+posterior), por lo que no se puede reconstruir qué casos entraron en la franja.
+
+**Decisión.** No se corrige ni se reclasifica: se declara. Desde 1468616 el snapshot guarda
+`timeZone` y el cálculo usa `America/Lima`. (Nota aparte, vigente: una fecha de evento futura se
+fuerza a 0 días.)
+
+### 10.2 Corrección del desfase de fecha en pantalla
+
+`formatDate` interpretaba `YYYY-MM-DD` como medianoche UTC y mostraba el día anterior en Lima
+(bug presente desde el commit inicial). Corregido en `cn.ts` (commit `30769c6`, con
+`cn.spec.ts`). Solo afectaba a la visualización; el modelo recibía los días correctos.
+
+### 10.3 Desviación respecto de lo pedido (aprobada)
+
+Se pidió aclarar los campos "Título" y "Especialidad" del formulario del caso. **Desviación:**
+se mantuvieron las etiquetas originales ("Título del caso *", "Especialidad médica") y se
+añadió texto de ayuda debajo de cada campo (y de "Descripción"), en lugar de renombrarlas.
+**Razón:** la ayuda aclara sin alterar el vocabulario que ya usan los médicos, el manual y la
+documentación; renombrar habría obligado a tocar etiquetas en varios formularios. Aprobada por
+el usuario el 2026-10-29. Los textos se aplicaron también al formulario de edición (commit
+`ae7c954`).
