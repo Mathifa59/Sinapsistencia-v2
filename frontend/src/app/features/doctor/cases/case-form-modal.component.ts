@@ -85,6 +85,7 @@ function detectPii(text: string): string[] {
           <div class="space-y-1.5">
             <label appLabel for="case-title">Título del caso *</label>
             <input appInput id="case-title" placeholder="Ej: Revisión de consentimiento informado — Cirugía" formControlName="title" />
+            <p class="text-[11px] text-slate-400">Describe el evento, no al paciente: sin nombres ni datos que lo identifiquen (Ley 29733).</p>
             @if (form.controls.title.invalid && form.controls.title.touched) {
               <p class="text-xs text-red-500">El título debe tener al menos 3 caracteres</p>
             }
@@ -93,6 +94,7 @@ function detectPii(text: string): string[] {
           <div class="space-y-1.5">
             <label appLabel for="case-description">Descripción *</label>
             <textarea appTextarea id="case-description" rows="3" placeholder="Describe el contexto clínico y los aspectos legales relevantes..." formControlName="description"></textarea>
+            <p class="text-[11px] text-slate-400">De 3 a 6 líneas: qué ocurrió y qué aspecto legal consultas. Mínimo 10 caracteres.</p>
             @if (form.controls.description.invalid && form.controls.description.touched) {
               <p class="text-xs text-red-500">La descripción debe tener al menos 10 caracteres</p>
             }
@@ -118,6 +120,7 @@ function detectPii(text: string): string[] {
                   <option [value]="s">{{ s }}</option>
                 }
               </select>
+              <p class="text-[11px] text-slate-400">Área clínica del caso (donde ocurrió el evento), aunque no sea la tuya.</p>
             </div>
           </div>
 
