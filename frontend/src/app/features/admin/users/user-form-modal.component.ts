@@ -5,7 +5,8 @@ import { LucideAngularModule } from 'lucide-angular';
 import { UsersApi } from '../../../core/api/users.api';
 import { ModalComponent, ModalHeaderDirective, ModalTitleDirective, ModalDescriptionDirective, ModalFooterDirective } from '../../../shared/ui/modal.component';
 import { BtnDirective } from '../../../shared/ui/button.directive';
-import { InputDirective, LabelDirective, SelectDirective } from '../../../shared/ui/field.directives';
+import { InputDirective, LabelDirective } from '../../../shared/ui/field.directives';
+import { ComboboxComponent } from '../../../shared/ui/combobox.component';
 import { ROLE_LABELS, type UserRole } from '../../../shared/constants';
 
 const ROLES: UserRole[] = ['doctor', 'lawyer', 'admin'];
@@ -13,7 +14,7 @@ const ROLES: UserRole[] = ['doctor', 'lawyer', 'admin'];
 /** Modal de creación de usuario, adaptación de UserFormModal.tsx. */
 @Component({
   selector: 'app-user-form-modal',
-  imports: [ReactiveFormsModule, LucideAngularModule, ModalComponent, ModalHeaderDirective, ModalTitleDirective, ModalDescriptionDirective, ModalFooterDirective, BtnDirective, InputDirective, LabelDirective, SelectDirective],
+  imports: [ReactiveFormsModule, LucideAngularModule, ModalComponent, ModalHeaderDirective, ModalTitleDirective, ModalDescriptionDirective, ModalFooterDirective, BtnDirective, InputDirective, LabelDirective, ComboboxComponent],
   template: `
     <app-modal [open]="opened()" (close)="handleClose()">
       <div appModalHeader>
@@ -41,11 +42,7 @@ const ROLES: UserRole[] = ['doctor', 'lawyer', 'admin'];
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div class="space-y-1.5">
             <label appLabel>Rol *</label>
-            <select appSelect formControlName="role">
-              @for (role of roles; track role) {
-                <option [value]="role">{{ roleLabels[role] }}</option>
-              }
-            </select>
+            <app-combobox formControlName="role" [options]="roleOptions" />
           </div>
 
           <div class="space-y-1.5">
@@ -86,6 +83,7 @@ export class UserFormModalComponent {
 
   protected readonly roles = ROLES;
   protected readonly roleLabels = ROLE_LABELS;
+  protected readonly roleOptions = ROLES.map((r) => ({ value: r, label: ROLE_LABELS[r] }));
   protected readonly serverError = signal<string | null>(null);
 
   protected readonly form = this.fb.nonNullable.group({

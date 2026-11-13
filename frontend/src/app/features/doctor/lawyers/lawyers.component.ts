@@ -9,7 +9,8 @@ import { AuthService } from '../../../core/auth/auth.service';
 import { CasesApi } from '../../../core/api/cases.api';
 import { MatchingApi } from '../../../core/api/matching.api';
 import { BtnDirective } from '../../../shared/ui/button.directive';
-import { InputDirective, SelectDirective } from '../../../shared/ui/field.directives';
+import { InputDirective } from '../../../shared/ui/field.directives';
+import { ComboboxComponent } from '../../../shared/ui/combobox.component';
 import { BadgeDirective } from '../../../shared/ui/badge.directive';
 import { CasePriorityBadgeComponent } from '../../../shared/ui/status-badges.component';
 import { MlAdvisoryNoteComponent } from '../../../shared/ui/ml-advisory-note.component';
@@ -51,7 +52,7 @@ const MATCH_STEP_MS = 900;
     LucideAngularModule,
     BtnDirective,
     InputDirective,
-    SelectDirective,
+    ComboboxComponent,
     BadgeDirective,
     CasePriorityBadgeComponent,
     MlAdvisoryNoteComponent,
@@ -79,16 +80,13 @@ const MATCH_STEP_MS = 900;
             antes de buscar abogado.
           </div>
         } @else {
-          <select
-            appSelect
+          <app-combobox
             class="w-full"
+            placeholder="Selecciona un caso"
+            [options]="caseOptions()"
             [ngModel]="selectedCaseId()"
             (ngModelChange)="onCaseSelected($event)"
-          >
-            @for (c of openCases(); track c.id) {
-              <option [value]="c.id">{{ c.title }} — {{ c.context?.contextCode ?? 'sin código' }}</option>
-            }
-          </select>
+          />
 
           @if (selectedCase(); as selected) {
             <div class="flex flex-wrap items-center gap-2 text-sm text-slate-600">
@@ -408,6 +406,13 @@ export class DoctorLawyersComponent {
         !c.lawyerId &&
         (c.status === 'pendiente' || c.status === 'clasificada'),
     ),
+  );
+
+  protected readonly caseOptions = computed(() =>
+    this.openCases().map((c) => ({
+      value: c.id ?? '',
+      label: `${c.title} — ${c.context?.contextCode ?? 'sin código'}`,
+    })),
   );
 
   protected readonly selectedCase = computed(() =>

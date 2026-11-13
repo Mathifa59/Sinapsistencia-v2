@@ -320,12 +320,9 @@ Listas completas: [`backend/.env.example`](../backend/.env.example) ·
 | [seguridad-y-cumplimiento.md](seguridad-y-cumplimiento.md) | Medidas de seguridad + mapeo Ley 29733 |
 | [n8n-correos-setup.md](n8n-correos-setup.md) | Setup n8n + Gmail paso a paso |
 | [automatizacion-n8n-y-cicd.md](automatizacion-n8n-y-cicd.md) | n8n + CI/CD, panorama general |
-| [cuentas-demo.md](cuentas-demo.md) | Guía de cuentas demo y env vars relacionadas |
 | [funcionalidades-y-flujos.md](funcionalidades-y-flujos.md) | Catálogo de funcionalidades y flujos |
 | [FLUJOS_USUARIO.md](FLUJOS_USUARIO.md) | Flujos de usuario (histórico, fase de migración) |
 | [API_ENDPOINTS.md](API_ENDPOINTS.md) | Referencia de endpoints |
-| [MIGRATION_BLUEPRINT_Sinapsistencia.md](MIGRATION_BLUEPRINT_Sinapsistencia.md) | Plan original de migración Next.js→Angular/Spring (histórico) |
-| [ESTADO_VERIFICACION.md](ESTADO_VERIFICACION.md) | Log de pruebas manuales (histórico, 2026-06-12) |
 
 > Los marcados **histórico** describen decisiones/estado de la fase de migración, no el
 > estado actual — se conservan por trazabilidad, no como referencia viva.

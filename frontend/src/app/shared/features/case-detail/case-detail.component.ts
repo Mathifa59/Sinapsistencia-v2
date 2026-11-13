@@ -1,5 +1,5 @@
 import { Component, computed, inject, Injector, signal, viewChild } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { injectMutation, injectQuery, injectQueryClient } from '@tanstack/angular-query-experimental';
@@ -10,7 +10,8 @@ import { CasesApi, type CaseReportDto, type NotificationOutboxDto } from '../../
 import { BtnDirective } from '../../ui/button.directive';
 import { ReasonModalComponent } from '../../ui/reason-modal.component';
 import { RISK_MEANING_LABEL, RiskExplanationComponent } from '../../ui/risk-explanation.component';
-import { InputDirective, LabelDirective, TextareaDirective, SelectDirective } from '../../ui/field.directives';
+import { InputDirective, LabelDirective, TextareaDirective } from '../../ui/field.directives';
+import { ComboboxComponent, toOptions, URGENCY_OPTIONS, COMPLEXITY_OPTIONS } from '../../ui/combobox.component';
 import {
   ModalComponent,
   ModalHeaderDirective,
@@ -51,6 +52,7 @@ const PRIORITY_DOTS: Record<CasePriority, string> = {
   selector: 'app-case-detail',
   imports: [
     ReactiveFormsModule,
+    FormsModule,
     RouterLink,
     LucideAngularModule,
     BtnDirective,
@@ -58,7 +60,7 @@ const PRIORITY_DOTS: Record<CasePriority, string> = {
     InputDirective,
     LabelDirective,
     TextareaDirective,
-    SelectDirective,
+    ComboboxComponent,
     ModalComponent,
     ModalHeaderDirective,
     ModalTitleDirective,
@@ -562,14 +564,7 @@ const PRIORITY_DOTS: Record<CasePriority, string> = {
                   Línea de tiempo
                 </h3>
                 @if (timelineKinds().length > 0) {
-                  <select appSelect class="h-auto w-auto min-w-[130px] rounded-lg py-1 text-xs"
-                    [value]="timelineFilter()"
-                    (change)="timelineFilter.set($any($event.target).value)">
-                    <option value="">Todos los eventos</option>
-                    @for (kind of timelineKinds(); track kind) {
-                      <option [value]="kind">{{ kind }}</option>
-                    }
-                  </select>
+                  <app-combobox class="min-w-[150px]" triggerClass="h-auto rounded-lg py-1 text-xs" [options]="timelineOptions()" [ngModel]="timelineFilter()" (ngModelChange)="timelineFilter.set($event)" />
                 }
               </div>
               @if ((detail.timeline ?? []).length === 0) {
@@ -640,32 +635,17 @@ const PRIORITY_DOTS: Record<CasePriority, string> = {
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div class="space-y-1.5">
             <label appLabel>Prioridad</label>
-            <select appSelect formControlName="priority">
-              <option value="baja">Baja</option>
-              <option value="media">Media</option>
-              <option value="alta">Alta</option>
-              <option value="critica">Crítica</option>
-            </select>
+            <app-combobox formControlName="priority" [options]="urgencyOptions" />
           </div>
           <div class="space-y-1.5">
             <label appLabel>Especialidad</label>
-            <select appSelect formControlName="medicalSpecialty">
-              <option value="">Sin especificar</option>
-              @for (s of specialties; track s) {
-                <option [value]="s">{{ s }}</option>
-              }
-            </select>
+            <app-combobox formControlName="medicalSpecialty" [options]="specialtyOptions" />
             <p class="text-[11px] text-slate-400">Área clínica del caso (donde ocurrió el evento), aunque no sea la tuya.</p>
           </div>
         </div>
         <div class="space-y-1.5">
           <label appLabel>Complejidad del procedimiento *</label>
-          <select appSelect formControlName="procedureComplexity">
-            <option value="" disabled>Selecciona...</option>
-            <option value="baja">Baja</option>
-            <option value="media">Media</option>
-            <option value="alta">Alta</option>
-          </select>
+          <app-combobox formControlName="procedureComplexity" [options]="complexityOptions" placeholder="Selecciona..." />
           <p class="text-[11px] text-slate-400">Características del procedimiento (no la urgencia temporal).</p>
         </div>
         <div class="space-y-2">
@@ -744,6 +724,9 @@ export class CaseDetailComponent {
   private readonly injector = inject(Injector);
 
   protected readonly specialties = MEDICAL_SPECIALTIES;
+  protected readonly specialtyOptions = [{ value: '', label: 'Sin especificar' }, ...toOptions(MEDICAL_SPECIALTIES)];
+  protected readonly urgencyOptions = URGENCY_OPTIONS;
+  protected readonly complexityOptions = COMPLEXITY_OPTIONS;
   protected readonly Math = Math;
   protected readonly formatMlScore = formatMlScore;
   protected readonly formatDate = formatDate;
@@ -835,6 +818,11 @@ export class CaseDetailComponent {
     const entries = this.detailQuery.data()?.timeline ?? [];
     return [...new Set(entries.map((e) => e.kind).filter((k): k is string => !!k))];
   });
+
+  protected readonly timelineOptions = computed(() => [
+    { value: '', label: 'Todos los eventos' },
+    ...this.timelineKinds().map((k) => ({ value: k, label: k })),
+  ]);
 
   protected readonly filteredTimeline = computed(() => {
     const entries = this.detailQuery.data()?.timeline ?? [];

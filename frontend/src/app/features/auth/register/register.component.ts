@@ -4,7 +4,8 @@ import { Router, RouterLink } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { AuthService } from '../../../core/auth/auth.service';
 import { BtnDirective } from '../../../shared/ui/button.directive';
-import { InputDirective, LabelDirective, SelectDirective } from '../../../shared/ui/field.directives';
+import { InputDirective, LabelDirective } from '../../../shared/ui/field.directives';
+import { ComboboxComponent, toOptions } from '../../../shared/ui/combobox.component';
 import { cn } from '../../../shared/utils/cn';
 import { LEGAL_SPECIALTIES, MEDICAL_SPECIALTIES } from '../../../shared/constants';
 
@@ -13,7 +14,7 @@ type RegisterRole = 'doctor' | 'lawyer';
 /** Página de registro público (médicos y abogados) — POST /api/auth/register. */
 @Component({
   selector: 'app-register',
-  imports: [ReactiveFormsModule, RouterLink, LucideAngularModule, BtnDirective, InputDirective, LabelDirective, SelectDirective],
+  imports: [ReactiveFormsModule, RouterLink, LucideAngularModule, BtnDirective, InputDirective, LabelDirective, ComboboxComponent],
   template: `
     <div class="min-h-screen bg-slate-50 flex items-center justify-center p-4">
       <div class="w-full max-w-lg">
@@ -86,12 +87,7 @@ type RegisterRole = 'doctor' | 'lawyer';
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div class="space-y-1.5">
                   <label appLabel for="specialty">Especialidad médica</label>
-                  <select appSelect id="specialty" formControlName="specialty">
-                    <option value="">Selecciona una especialidad</option>
-                    @for (s of medicalSpecialties; track s) {
-                      <option [value]="s">{{ s }}</option>
-                    }
-                  </select>
+                  <app-combobox inputId="specialty" formControlName="specialty" [options]="specialtyOptions" placeholder="Selecciona una especialidad" />
                   @if (form.controls.specialty.invalid && form.controls.specialty.touched) {
                     <p class="text-xs text-red-600">La especialidad es requerida</p>
                   }
@@ -201,6 +197,7 @@ export class RegisterComponent {
   protected readonly cn = cn;
   protected readonly legalSpecialties = LEGAL_SPECIALTIES;
   protected readonly medicalSpecialties = MEDICAL_SPECIALTIES;
+  protected readonly specialtyOptions = toOptions(MEDICAL_SPECIALTIES);
 
   protected readonly error = signal<string | null>(null);
   protected readonly success = signal<string | null>(null);
