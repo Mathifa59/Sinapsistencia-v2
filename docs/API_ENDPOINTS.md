@@ -87,7 +87,7 @@
 
 > Nota: este endpoint es admin-only. El dashboard de médico llamaba a este
 > endpoint y producía `403 Forbidden`; el bug fue corregido eliminando esa
-> llamada (ver [ESTADO_VERIFICACION.md](ESTADO_VERIFICACION.md)).
+> llamada.
 
 ## Endpoints auditados automáticamente (`@Auditable`)
 

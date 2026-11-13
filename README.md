@@ -116,8 +116,7 @@ Ver `backend/.env.example` y `frontend/.env.example`. En producción se configur
 > las 44 HUs, el modelo de ML en detalle, infraestructura y pendientes. Este README
 > se mantiene como punto de entrada rápido; para el estado real, ese documento manda.
 
-La migración descrita originalmente en
-`docs/CLAUDE_CODE_PROMPT_Migracion_Sinapsistencia.md` **se completó**: las 8 fases
+La migración inicial desde Next.js + Supabase **se completó**: las 8 fases
 (scaffold, base de datos, núcleo backend, auth, dominio, matching/ML/n8n, frontend base,
 features por portal) están cerradas, con **44/44 Historias de Usuario implementadas** y
 desplegadas en producción (Angular → Vercel, Spring Boot + FastAPI ML → Railway,
