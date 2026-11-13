@@ -5,7 +5,8 @@ import { LucideAngularModule } from 'lucide-angular';
 import { AuthService } from '../../../core/auth/auth.service';
 import { ProfileApi } from '../../../core/api/profile.api';
 import { BtnDirective } from '../../../shared/ui/button.directive';
-import { InputDirective, LabelDirective, TextareaDirective, SelectDirective } from '../../../shared/ui/field.directives';
+import { InputDirective, LabelDirective, TextareaDirective } from '../../../shared/ui/field.directives';
+import { ComboboxComponent, toOptions } from '../../../shared/ui/combobox.component';
 import { BadgeDirective } from '../../../shared/ui/badge.directive';
 import { AvatarComponent } from '../../../shared/ui/avatar.component';
 import { ChangePasswordComponent } from '../../../shared/features/change-password/change-password.component';
@@ -15,7 +16,7 @@ import { MEDICAL_SPECIALTIES } from '../../../shared/constants';
 /** Réplica de app/doctor/profile/page.tsx (ProfileHeader + form profesional + avatar). */
 @Component({
   selector: 'app-doctor-profile',
-  imports: [ReactiveFormsModule, LucideAngularModule, BtnDirective, InputDirective, LabelDirective, TextareaDirective, SelectDirective, BadgeDirective, AvatarComponent, ChangePasswordComponent],
+  imports: [ReactiveFormsModule, LucideAngularModule, BtnDirective, InputDirective, LabelDirective, TextareaDirective, ComboboxComponent, BadgeDirective, AvatarComponent, ChangePasswordComponent],
   template: `
     <div class="max-w-3xl mx-auto space-y-6">
       <div>
@@ -110,12 +111,7 @@ import { MEDICAL_SPECIALTIES } from '../../../shared/constants';
 
               <div class="space-y-1.5">
                 <label appLabel>Especialidad médica *</label>
-                <select appSelect formControlName="specialty">
-                  <option value="">Selecciona</option>
-                  @for (s of specialties; track s) {
-                    <option [value]="s">{{ s }}</option>
-                  }
-                </select>
+                <app-combobox formControlName="specialty" [options]="specialtyOptions" placeholder="Selecciona" />
                 @if (form.controls.specialty.invalid && form.controls.specialty.touched) {
                   <p class="text-xs text-red-600">La especialidad es requerida</p>
                 }
@@ -193,6 +189,7 @@ export class DoctorProfileComponent {
   private readonly queryClient = injectQueryClient();
 
   protected readonly specialties = MEDICAL_SPECIALTIES;
+  protected readonly specialtyOptions = toOptions(MEDICAL_SPECIALTIES);
   protected readonly getInitials = getInitials;
   protected readonly authUser = this.auth.user;
 

@@ -5,6 +5,7 @@
 @import "@fontsource-variable/geist";
 @import "@fontsource-variable/geist-mono";
 @import "tailwindcss";
+@import "@angular/cdk/overlay-prebuilt.css";
 
 @theme inline {
   --color-background: var(--background);

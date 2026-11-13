@@ -5,7 +5,8 @@ import { injectQuery } from '@tanstack/angular-query-experimental';
 import { LucideAngularModule } from 'lucide-angular';
 import { AuthService } from '../../../core/auth/auth.service';
 import { CasesApi } from '../../../core/api/cases.api';
-import { InputDirective, SelectDirective } from '../../../shared/ui/field.directives';
+import { InputDirective } from '../../../shared/ui/field.directives';
+import { ComboboxComponent } from '../../../shared/ui/combobox.component';
 import { CaseStatusBadgeComponent, CasePriorityBadgeComponent } from '../../../shared/ui/status-badges.component';
 import { formatDate } from '../../../shared/utils/cn';
 import {
@@ -25,7 +26,7 @@ const PRIORITY_ORDER: Record<string, number> = { critica: 0, alta: 1, media: 2, 
     RouterLink,
     LucideAngularModule,
     InputDirective,
-    SelectDirective,
+    ComboboxComponent,
     CaseStatusBadgeComponent,
     CasePriorityBadgeComponent,
   ],
@@ -41,18 +42,8 @@ const PRIORITY_ORDER: Record<string, number> = { critica: 0, alta: 1, media: 2, 
           <lucide-icon name="search" class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
           <input appInput placeholder="Buscar por título..." class="pl-9" [(ngModel)]="search" />
         </div>
-        <select appSelect class="w-40" [(ngModel)]="statusFilter">
-          <option value="">Todos los estados</option>
-          @for (s of statusOptions; track s) {
-            <option [value]="s">{{ statusLabels[s] }}</option>
-          }
-        </select>
-        <select appSelect class="w-40" [(ngModel)]="priorityFilter">
-          <option value="">Todas las prioridades</option>
-          @for (p of priorityOptions; track p) {
-            <option [value]="p">{{ priorityLabels[p] }}</option>
-          }
-        </select>
+        <app-combobox class="w-44" [options]="statusSelectOptions" [(ngModel)]="statusFilter" />
+        <app-combobox class="w-44" [options]="prioritySelectOptions" [(ngModel)]="priorityFilter" />
       </div>
 
       <div class="bg-white rounded-lg border border-slate-200 overflow-hidden">
@@ -106,7 +97,15 @@ export class LawyerCasesComponent {
   protected readonly statusOptions: CaseStatus[] = ['pendiente', 'clasificada', 'asignada', 'en_revision', 'respondida', 'cerrada'];
   protected readonly priorityOptions: CasePriority[] = ['critica', 'alta', 'media', 'baja'];
   protected readonly statusLabels = CASE_STATUS_LABELS;
+  protected readonly statusSelectOptions = [
+    { value: '', label: 'Todos los estados' },
+    ...this.statusOptions.map((s) => ({ value: s, label: CASE_STATUS_LABELS[s] })),
+  ];
   protected readonly priorityLabels = CASE_PRIORITY_LABELS;
+  protected readonly prioritySelectOptions = [
+    { value: '', label: 'Todas las prioridades' },
+    ...this.priorityOptions.map((p) => ({ value: p, label: CASE_PRIORITY_LABELS[p] })),
+  ];
   protected readonly search = signal('');
   protected readonly statusFilter = signal('');
   protected readonly priorityFilter = signal('');

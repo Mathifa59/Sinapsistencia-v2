@@ -6,7 +6,8 @@ import { LucideAngularModule } from 'lucide-angular';
 import { CasesApi, type MlInputSnapshot } from '../../../core/api/cases.api';
 import { ModalComponent, ModalHeaderDirective, ModalTitleDirective, ModalDescriptionDirective, ModalFooterDirective } from '../../../shared/ui/modal.component';
 import { BtnDirective } from '../../../shared/ui/button.directive';
-import { InputDirective, LabelDirective, TextareaDirective, SelectDirective } from '../../../shared/ui/field.directives';
+import { InputDirective, LabelDirective, TextareaDirective } from '../../../shared/ui/field.directives';
+import { ComboboxComponent, toOptions, URGENCY_OPTIONS, COMPLEXITY_OPTIONS } from '../../../shared/ui/combobox.component';
 import { MEDICAL_SPECIALTIES } from '../../../shared/constants';
 import { formatMlScore } from '../../../shared/utils/ml-score.util';
 import {
@@ -70,7 +71,7 @@ function detectPii(text: string): string[] {
     InputDirective,
     LabelDirective,
     TextareaDirective,
-    SelectDirective,
+    ComboboxComponent,
     RiskExplanationComponent,
   ],
   template: `
@@ -103,35 +104,20 @@ function detectPii(text: string): string[] {
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div class="space-y-1.5">
               <label appLabel>Urgencia percibida *</label>
-              <select appSelect formControlName="perceivedUrgency">
-                <option value="baja">Baja</option>
-                <option value="media">Media</option>
-                <option value="alta">Alta</option>
-                <option value="critica">Crítica</option>
-              </select>
+              <app-combobox formControlName="perceivedUrgency" [options]="urgencyOptions" />
               <p class="text-[11px] text-slate-400">La prioridad final la sugiere el modelo según el riesgo.</p>
             </div>
 
             <div class="space-y-1.5">
               <label appLabel>Especialidad médica</label>
-              <select appSelect formControlName="medicalSpecialty">
-                <option value="">Sin especificar</option>
-                @for (s of specialties; track s) {
-                  <option [value]="s">{{ s }}</option>
-                }
-              </select>
+              <app-combobox formControlName="medicalSpecialty" [options]="specialtyOptions" />
               <p class="text-[11px] text-slate-400">Área clínica del caso (donde ocurrió el evento), aunque no sea la tuya.</p>
             </div>
           </div>
 
           <div class="space-y-1.5">
             <label appLabel>Complejidad del procedimiento *</label>
-            <select appSelect formControlName="procedureComplexity">
-              <option value="" disabled>Selecciona...</option>
-              <option value="baja">Baja</option>
-              <option value="media">Media</option>
-              <option value="alta">Alta</option>
-            </select>
+            <app-combobox formControlName="procedureComplexity" [options]="complexityOptions" placeholder="Selecciona..." />
             <p class="text-[11px] text-slate-400">Características del procedimiento (no la urgencia temporal percibida).</p>
             @if (form.controls.procedureComplexity.invalid && form.controls.procedureComplexity.touched) {
               <p class="text-xs text-red-500">Selecciona la complejidad del procedimiento</p>
@@ -410,6 +396,9 @@ export class CaseFormModalComponent {
   readonly closed = output<void>();
 
   protected readonly specialties = MEDICAL_SPECIALTIES;
+  protected readonly specialtyOptions = [{ value: '', label: 'Sin especificar' }, ...toOptions(MEDICAL_SPECIALTIES)];
+  protected readonly urgencyOptions = URGENCY_OPTIONS;
+  protected readonly complexityOptions = COMPLEXITY_OPTIONS;
   protected readonly serverError = signal<string | null>(null);
   protected readonly Math = Math;
   protected readonly formatMlScore = formatMlScore;
