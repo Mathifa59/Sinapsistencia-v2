@@ -40,3 +40,8 @@ ml-service/evaluation/calibration/data/
 # Credenciales de cuentas demo: nunca se versionan, aunque sean contraseñas de prueba.
 CREDENCIALES_DEMO.md
 docs/cuentas-demo.md
+/output/pdf/CREDENCIALES_ABOGADOS.pdf
+
+# Documentos internos (instrucciones, prompts, planes y notas de trabajo): quedan en disco, no se versionan.
+/_interno/
+/CLAUDE.md

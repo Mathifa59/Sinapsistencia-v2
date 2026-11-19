@@ -50,7 +50,8 @@ export class ApiService {
     try {
       envelope = await promise;
     } catch (err) {
-      if (err instanceof HttpErrorResponse && err.error && typeof err.error === 'object') {
+      // status 0 = sin conexión: el navegador entrega un ProgressEvent como `error`, no un sobre del backend.
+      if (err instanceof HttpErrorResponse && err.status !== 0 && err.error && typeof err.error === 'object') {
         const body = err.error as ApiEnvelope<unknown>;
         throw new Error(body.error ?? `Error ${err.status}`);
       }

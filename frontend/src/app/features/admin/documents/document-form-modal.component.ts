@@ -6,7 +6,8 @@ import { CasesApi } from '../../../core/api/cases.api';
 import { DocumentsApi } from '../../../core/api/documents.api';
 import { ModalComponent, ModalHeaderDirective, ModalTitleDirective, ModalDescriptionDirective, ModalFooterDirective } from '../../../shared/ui/modal.component';
 import { BtnDirective } from '../../../shared/ui/button.directive';
-import { InputDirective, LabelDirective, TextareaDirective, SelectDirective } from '../../../shared/ui/field.directives';
+import { InputDirective, LabelDirective, TextareaDirective } from '../../../shared/ui/field.directives';
+import { ComboboxComponent } from '../../../shared/ui/combobox.component';
 import { DOCUMENT_TYPE_LABELS, type DocumentType } from '../../../shared/constants';
 import type { DocumentResponse } from '../../../core/api/generated/model/documentResponse';
 
@@ -30,7 +31,7 @@ const DOCUMENT_TYPES: DocumentType[] = [
     InputDirective,
     LabelDirective,
     TextareaDirective,
-    SelectDirective,
+    ComboboxComponent,
   ],
   template: `
     <app-modal [open]="opened()" (close)="handleClose()">
@@ -51,21 +52,12 @@ const DOCUMENT_TYPES: DocumentType[] = [
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div class="space-y-1.5">
             <label appLabel>Tipo de documento *</label>
-            <select appSelect formControlName="type">
-              @for (docType of documentTypes; track docType) {
-                <option [value]="docType">{{ documentTypeLabels[docType] }}</option>
-              }
-            </select>
+            <app-combobox formControlName="type" [options]="typeOptions" />
           </div>
 
           <div class="space-y-1.5">
             <label appLabel>Caso asociado</label>
-            <select appSelect formControlName="caseId">
-              <option value="">Sin caso</option>
-              @for (c of casesQuery.data()?.data ?? []; track c.id) {
-                <option [value]="c.id">{{ c.context?.contextCode ? c.context?.contextCode + " — " : "" }}{{ c.title }}</option>
-              }
-            </select>
+            <app-combobox formControlName="caseId" [options]="caseOptions()" placeholder="Sin caso" />
           </div>
         </div>
 
@@ -122,6 +114,7 @@ export class AdminDocumentFormModalComponent {
 
   protected readonly documentTypes = DOCUMENT_TYPES;
   protected readonly documentTypeLabels = DOCUMENT_TYPE_LABELS;
+  protected readonly typeOptions = DOCUMENT_TYPES.map((t) => ({ value: t, label: DOCUMENT_TYPE_LABELS[t] }));
   protected readonly serverError = signal<string | null>(null);
   protected readonly selectedFile = signal<File | null>(null);
 
@@ -129,6 +122,14 @@ export class AdminDocumentFormModalComponent {
     queryKey: ['cases', { pageSize: 100 }],
     queryFn: () => this.casesApi.list({ pageSize: 100 }),
   }));
+
+  protected readonly caseOptions = computed(() => [
+    { value: '', label: 'Sin caso' },
+    ...(this.casesQuery.data()?.data ?? []).map((c) => ({
+      value: c.id ?? '',
+      label: (c.context?.contextCode ? c.context.contextCode + ' — ' : '') + (c.title ?? ''),
+    })),
+  ]);
 
   protected readonly form = this.fb.nonNullable.group({
     title: ['', [Validators.required, Validators.minLength(3)]],

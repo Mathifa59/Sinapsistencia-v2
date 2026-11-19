@@ -6,7 +6,7 @@ import { ROLE_DASHBOARD, type UserRole } from '../../shared/constants';
 /**
  * Replican el ruteo del proxy.ts legacy:
  *  - sin sesión → /login?redirect=<url original>
- *  - prefijo de ruta ≠ rol → dashboard del rol propio
+ *  - prefijo de ruta ≠ rol → /acceso-denegado (con botón al dashboard del rol propio)
  */
 export const authGuard: CanActivateFn = async (_route, state) => {
   const auth = inject(AuthService);
@@ -30,7 +30,7 @@ export function roleGuard(expectedRole: UserRole): CanActivateFn {
       return router.createUrlTree(['/login'], { queryParams: { redirect: state.url } });
     }
     if (user.role !== expectedRole) {
-      return router.createUrlTree([ROLE_DASHBOARD[user.role]]);
+      return router.createUrlTree(['/acceso-denegado']);
     }
     return true;
   };

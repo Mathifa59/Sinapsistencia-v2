@@ -166,5 +166,12 @@ export const routes: Routes = [
       { path: '**', redirectTo: 'dashboard' },
     ],
   },
+  {
+    // Solo con sesión: sin sesión, authGuard manda a /login.
+    path: 'acceso-denegado',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/auth/access-denied/access-denied.component').then((m) => m.AccessDeniedComponent),
+  },
   { path: '**', redirectTo: 'login' },
 ];
