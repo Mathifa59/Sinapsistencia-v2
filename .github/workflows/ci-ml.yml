@@ -40,5 +40,6 @@ jobs:
       - name: Validar sintaxis del codigo
         run: python -m compileall app
 
-      - name: Ejecutar pruebas
-        run: pytest -v
+      - name: Ejecutar pruebas con cobertura
+        # Cobertura de sentencias de app/ (no de ramas). El umbral evita que baje sin que alguien lo note.
+        run: pytest -v --cov=app --cov-report=term-missing --cov-fail-under=90

@@ -1,6 +1,6 @@
 name: CI Frontend
 
-# Instala dependencias y compila el frontend (Angular).
+# Instala dependencias, ejecuta las pruebas unitarias (Vitest) y compila el frontend (Angular).
 # El build de produccion valida TypeScript, plantillas y presupuestos de bundle.
 
 on:
@@ -35,6 +35,10 @@ jobs:
 
       - name: Instalar dependencias
         run: npm ci
+
+      - name: Pruebas unitarias con cobertura
+        # La cobertura se mide sobre todo src/app (no solo sobre los archivos que alguna prueba toca).
+        run: npm run test:ci
 
       - name: Compilar (produccion)
         run: npm run build

@@ -38,3 +38,8 @@ jobs:
         run: |
           chmod +x ./mvnw
           ./mvnw -B --no-transfer-progress verify
+
+      - name: Resumen de cobertura (JaCoCo)
+        # Instrucciones y ramas del codigo de src/main ejecutado por las pruebas (unitarias + integracion).
+        run: |
+          awk -F, 'NR>1 {im+=$4; ic+=$5; bm+=$6; bc+=$7} END {printf "Cobertura de instrucciones: %.1f %% (%d de %d)\n", 100*ic/(im+ic), ic, im+ic; printf "Cobertura de ramas: %.1f %% (%d de %d)\n", 100*bc/(bm+bc), bc, bm+bc}' target/site/jacoco/jacoco.csv | tee -a "$GITHUB_STEP_SUMMARY"

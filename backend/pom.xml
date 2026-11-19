@@ -144,6 +144,31 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
 			<!--
+				Cobertura de pruebas (JaCoCo). El informe se genera en la fase verify:
+				target/site/jacoco/index.html y jacoco.csv. Mide instrucciones y ramas del
+				codigo de src/main ejecutado por surefire (unitarias + integracion).
+			-->
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.12</version>
+				<executions>
+					<execution>
+						<id>prepare-agent</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>report</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<!--
 				Permite `./mvnw flyway:migrate` contra el Postgres de dev (docker-compose,
 				puerto 5433). En producción las migraciones corren al arrancar la app
 				(spring.flyway), así que esta config es solo para desarrollo local.
