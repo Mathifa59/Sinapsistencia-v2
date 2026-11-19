@@ -18,7 +18,6 @@ class RiskAssessmentRequest(BaseModel):
     informed_consent: bool = True
     has_prior_complaints: bool = False
     time_since_incident_days: Optional[int] = None
-    description: Optional[str] = ""
 
 
 class RiskFactor(BaseModel):

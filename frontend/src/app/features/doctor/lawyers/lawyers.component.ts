@@ -16,6 +16,32 @@ import { MlAdvisoryNoteComponent } from '../../../shared/ui/ml-advisory-note.com
 import { cn, getInitials, formatDateTime } from '../../../shared/utils/cn';
 import type { CasePriority } from '../../../shared/constants';
 
+/**
+ * Etapas reales del score compuesto del matching (ml-service/app/matching/model.py):
+ * filtro duro de disponibilidad -> similitud TF-IDF/coseno (70%) -> desempeño (30%) -> ranking.
+ */
+const MATCH_STEPS: { title: string; detail: string }[] = [
+  {
+    title: 'Filtro de disponibilidad',
+    detail: 'Solo los abogados disponibles y activos entran al ranking',
+  },
+  {
+    title: 'Similitud de contenido (70%)',
+    detail: 'El texto del caso se compara con las especialidades, áreas médicas y bio de cada abogado (TF-IDF + coseno)',
+  },
+  {
+    title: 'Desempeño profesional (30%)',
+    detail: 'Rating (50%), casos resueltos (30%) y años de experiencia (20%)',
+  },
+  {
+    title: 'Ranking final',
+    detail: 'score = 0.70 × contenido + 0.30 × desempeño; se ordenan de mayor a menor',
+  },
+];
+
+/** Duración mínima de cada paso, independiente de la latencia real del API. */
+const MATCH_STEP_MS = 900;
+
 /** Abogados sugeridos: el médico elige la consulta a vincular antes de solicitar contacto. */
 @Component({
   selector: 'app-doctor-lawyers',
@@ -93,7 +119,7 @@ import type { CasePriority } from '../../../shared/constants';
       }
 
       <!-- ── Pipeline de matching (TF-IDF + similitud coseno) -- solo mientras genera ── -->
-      @if (generateMutation.isPending() || matchStage() > 0 && matchStage() < 4) {
+      @if (animating()) {
         <div class="relative overflow-hidden rounded-2xl bg-slate-900 p-5 text-white lg:p-6">
           <div class="pointer-events-none absolute -top-20 -right-16 h-56 w-56 rounded-full bg-blue-600/25 blur-3xl"></div>
           <div class="pointer-events-none absolute -bottom-24 -left-10 h-56 w-56 rounded-full bg-cyan-500/15 blur-3xl"></div>
@@ -119,51 +145,27 @@ import type { CasePriority } from '../../../shared/constants';
             }
 
             <div class="space-y-3">
-              <div class="flex items-start gap-3">
-                @if (matchStage() > 1) {
-                  <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-400/15 text-emerald-300 ring-1 ring-inset ring-emerald-400/30"><lucide-icon name="check-circle-2" class="h-3.5 w-3.5" /></span>
-                } @else {
-                  <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-400/15 text-blue-300 ring-1 ring-inset ring-blue-400/30"><lucide-icon name="loader-2" class="h-3.5 w-3.5 animate-spin" /></span>
-                }
-                <div [class]="matchStage() >= 1 ? 'opacity-100' : 'opacity-40'">
-                  <p class="text-sm font-medium">Vectorización TF-IDF del caso</p>
-                  <p class="text-[11px] text-slate-400">Los términos del caso se convierten en un vector ponderado por frecuencia</p>
+              @for (step of matchSteps; track step.title; let i = $index) {
+                <div class="flex items-start gap-3">
+                  @if (matchStage() > i + 1) {
+                    <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-400/15 text-emerald-300 ring-1 ring-inset ring-emerald-400/30"><lucide-icon name="check-circle-2" class="h-3.5 w-3.5" /></span>
+                  } @else if (matchStage() === i + 1) {
+                    <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-400/15 text-blue-300 ring-1 ring-inset ring-blue-400/30"><lucide-icon name="loader-2" class="h-3.5 w-3.5 animate-spin" /></span>
+                  } @else {
+                    <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/5 text-slate-500 ring-1 ring-inset ring-white/10"><lucide-icon name="circle" class="h-3 w-3" /></span>
+                  }
+                  <div class="transition-opacity duration-300" [class]="matchStage() >= i + 1 ? 'opacity-100' : 'opacity-40'">
+                    <p class="text-sm font-medium">{{ step.title }}</p>
+                    <p class="text-[11px] text-slate-400">{{ step.detail }}</p>
+                  </div>
                 </div>
-              </div>
-
-              <div class="flex items-start gap-3">
-                @if (matchStage() > 2) {
-                  <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-400/15 text-emerald-300 ring-1 ring-inset ring-emerald-400/30"><lucide-icon name="check-circle-2" class="h-3.5 w-3.5" /></span>
-                } @else if (matchStage() === 2) {
-                  <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-400/15 text-blue-300 ring-1 ring-inset ring-blue-400/30"><lucide-icon name="loader-2" class="h-3.5 w-3.5 animate-spin" /></span>
-                } @else {
-                  <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/5 text-slate-500 ring-1 ring-inset ring-white/10"><lucide-icon name="circle" class="h-3 w-3" /></span>
-                }
-                <div [class]="matchStage() >= 2 ? 'opacity-100' : 'opacity-40'">
-                  <p class="text-sm font-medium">Similitud coseno contra {{ (lawyersQuery.data() ?? []).length }} abogados</p>
-                  <p class="text-[11px] text-slate-400">El vector del caso se compara con las especialidades y áreas de cada perfil</p>
-                </div>
-              </div>
-
-              <div class="flex items-start gap-3">
-                @if (matchStage() > 3) {
-                  <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-400/15 text-emerald-300 ring-1 ring-inset ring-emerald-400/30"><lucide-icon name="check-circle-2" class="h-3.5 w-3.5" /></span>
-                } @else if (matchStage() === 3) {
-                  <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-400/15 text-blue-300 ring-1 ring-inset ring-blue-400/30"><lucide-icon name="loader-2" class="h-3.5 w-3.5 animate-spin" /></span>
-                } @else {
-                  <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/5 text-slate-500 ring-1 ring-inset ring-white/10"><lucide-icon name="circle" class="h-3 w-3" /></span>
-                }
-                <div [class]="matchStage() >= 3 ? 'opacity-100' : 'opacity-40'">
-                  <p class="text-sm font-medium">Ranking por score compuesto</p>
-                  <p class="text-[11px] text-slate-400">Similitud (70%) + desempeño verificable: rating, casos resueltos y experiencia (30%)</p>
-                </div>
-              </div>
+              }
             </div>
           </div>
         </div>
       }
 
-      @if (selectedCaseId() && !generateMutation.isPending() && !latestRunQuery.isLoading()) {
+      @if (selectedCaseId() && !generateMutation.isPending() && !animating() && !latestRunQuery.isLoading()) {
         <div class="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white px-4 py-3">
           <div class="text-sm text-slate-600">
             @if (hasRun()) {
@@ -368,12 +370,19 @@ export class DoctorLawyersComponent {
   protected readonly contactError = signal<string | null>(null);
   protected readonly runHistoryOpen = signal(false);
 
-  /** Etapa de la animación del matching (solo mientras genera): 1 vectorización · 2 coseno · 3 ranking · 4 listo. */
+  protected readonly matchSteps = MATCH_STEPS;
+  /**
+   * Etapa de la animación del matching: 0 inactiva · 1..4 paso en curso · 5 todos completos · 6 terminada.
+   * Los resultados no se muestran hasta que la secuencia mínima se completó Y el API respondió.
+   */
   protected readonly matchStage = signal(0);
+  protected readonly animating = computed(() => this.matchStage() >= 1 && this.matchStage() <= 5);
   protected readonly showLawyerCards = computed(
-    () => !!this.selectedCaseId() && this.hasRun() && !this.generateMutation.isPending(),
+    () => !!this.selectedCaseId() && this.hasRun() && !this.generateMutation.isPending() && !this.animating(),
   );
   private matchTimers: ReturnType<typeof setTimeout>[] = [];
+  private matchMinElapsed = false;
+  private matchSettled = false;
   protected readonly getInitials = getInitials;
   protected readonly formatDateTime = formatDateTime;
   protected readonly cn = cn;
@@ -563,24 +572,56 @@ export class DoctorLawyersComponent {
         caseId: this.selectedCaseId(),
         idempotencyKey: crypto.randomUUID(),
       }),
-    onSuccess: () => {
-      this.queryClient.invalidateQueries({ queryKey: ['matching', 'recommendations', this.userId(), this.selectedCaseId()] });
-      this.queryClient.invalidateQueries({ queryKey: ['matching', 'recommendation-runs', this.selectedCaseId()] });
-    },
+    // Se devuelve la promesa: la mutación sigue "pendiente" hasta que el ranking nuevo se recargó,
+    // así nunca se muestra el ranking anterior al terminar la animación.
+    onSuccess: () =>
+      Promise.all([
+        this.queryClient.invalidateQueries({ queryKey: ['matching', 'recommendations', this.userId(), this.selectedCaseId()] }),
+        this.queryClient.invalidateQueries({ queryKey: ['matching', 'recommendation-runs', this.selectedCaseId()] }),
+      ]),
   }));
 
+  /**
+   * Cada paso dura al menos MATCH_STEP_MS aunque el API responda antes; si tarda más, la secuencia se
+   * queda en el último paso hasta que haya respuesta. Un error del API corta la animación de inmediato.
+   */
   protected generate(): void {
-    this.matchTimers.forEach(clearTimeout);
-    this.matchTimers = [];
+    this.clearMatchTimers();
+    this.matchMinElapsed = false;
+    this.matchSettled = false;
     this.matchStage.set(1);
-    this.matchTimers.push(setTimeout(() => this.matchStage.set(2), 1000));
-    this.matchTimers.push(setTimeout(() => this.matchStage.set(3), 2100));
+    for (let step = 2; step <= MATCH_STEPS.length; step++) {
+      this.matchTimers.push(setTimeout(() => this.matchStage.set(step), (step - 1) * MATCH_STEP_MS));
+    }
+    this.matchTimers.push(
+      setTimeout(() => {
+        this.matchMinElapsed = true;
+        this.finishMatchAnimation();
+      }, MATCH_STEPS.length * MATCH_STEP_MS),
+    );
     this.generateMutation.mutate(undefined, {
+      onError: () => {
+        this.clearMatchTimers();
+        this.matchStage.set(0);
+      },
       onSettled: () => {
-        this.matchTimers.forEach(clearTimeout);
-        this.matchStage.set(4);
+        this.matchSettled = true;
+        this.finishMatchAnimation();
       },
     });
+  }
+
+  private finishMatchAnimation(): void {
+    if (!this.matchMinElapsed || !this.matchSettled) {
+      return;
+    }
+    this.matchStage.set(5);
+    this.matchTimers.push(setTimeout(() => this.matchStage.set(6), 500));
+  }
+
+  private clearMatchTimers(): void {
+    this.matchTimers.forEach(clearTimeout);
+    this.matchTimers = [];
   }
 
   protected readonly contactMutation = injectMutation(() => ({
