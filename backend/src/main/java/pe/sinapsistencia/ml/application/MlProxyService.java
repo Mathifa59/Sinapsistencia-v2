@@ -13,15 +13,24 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.annotation.PreDestroy;
 import pe.sinapsistencia.shared.exception.ApiException;
+import pe.sinapsistencia.shared.exception.BadRequestException;
 import pe.sinapsistencia.shared.exception.ServiceUnavailableException;
 
 import org.springframework.http.HttpStatus;
@@ -39,8 +48,17 @@ public class MlProxyService {
 	/** Presupuesto total del chequeo de salud concurrente (H-01): /health + /api/v1/model/info. */
 	private static final Duration HEALTH_TOTAL_BUDGET = Duration.ofSeconds(4);
 
+	private static final ObjectMapper JSON = new ObjectMapper();
+
+	static final String EXTRACTION_UNAVAILABLE =
+			"La lectura automática de informes no está disponible. Completa el formulario manualmente.";
+
+	/** El OCR tarda varios segundos (la primera llamada carga el modelo): límite propio, más holgado. */
+	private static final Duration EXTRACTION_READ_TIMEOUT = Duration.ofSeconds(40);
+
 	private final RestClient restClient;
 	private final RestClient healthRestClient;
+	private final RestClient extractionRestClient;
 	private final ExecutorService healthExecutor;
 
 	public MlProxyService(@Value("${app.ml.service-url}") String mlServiceUrl) {
@@ -61,6 +79,14 @@ public class MlProxyService {
 		this.healthRestClient = RestClient.builder()
 				.baseUrl(mlServiceUrl)
 				.requestFactory(healthFactory)
+				.build();
+
+		SimpleClientHttpRequestFactory extractionFactory = new SimpleClientHttpRequestFactory();
+		extractionFactory.setConnectTimeout(Duration.ofSeconds(5));
+		extractionFactory.setReadTimeout(EXTRACTION_READ_TIMEOUT);
+		this.extractionRestClient = RestClient.builder()
+				.baseUrl(mlServiceUrl)
+				.requestFactory(extractionFactory)
 				.build();
 
 		this.healthExecutor = Executors.newFixedThreadPool(2, runnable -> {
@@ -120,6 +146,61 @@ public class MlProxyService {
 		result.put("recommendations", recommendations);
 		result.put("specialtyRiskBaseline", number(data, "specialty_risk_baseline"));
 		result.put("modelVersion", text(data, "model_version"));
+		return result;
+	}
+
+	/**
+	 * POST /api/v1/extract-case-report — OCR local de la imagen de un informe y propuesta de
+	 * campos del formulario. La imagen solo viaja al servicio ML propio (nunca a terceros) y no
+	 * se guarda. Degradación: si el ML no responde, el formulario sigue siendo manual.
+	 */
+	public Map<String, Object> extractCaseReport(byte[] content, String filename, String contentType) {
+		HttpHeaders partHeaders = new HttpHeaders();
+		partHeaders.setContentType(MediaType.parseMediaType(
+				contentType == null || contentType.isBlank() ? "application/octet-stream" : contentType));
+		ByteArrayResource resource = new ByteArrayResource(content) {
+			@Override
+			public String getFilename() {
+				return filename == null || filename.isBlank() ? "informe" : filename;
+			}
+		};
+		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
+		parts.add("file", new HttpEntity<>(resource, partHeaders));
+
+		JsonNode data;
+		try {
+			data = extractionRestClient.post()
+					.uri("/api/v1/extract-case-report")
+					.contentType(MediaType.MULTIPART_FORM_DATA)
+					.body(parts)
+					.retrieve()
+					.body(JsonNode.class);
+		} catch (RestClientResponseException ex) {
+			int status = ex.getStatusCode().value();
+			String detail = extractDetail(ex, "No se pudo leer el informe");
+			if (status == 400 || status == 422) {
+				throw new BadRequestException(detail);
+			}
+			log.warn("ML extract-case-report respondió {}", status);
+			throw new ServiceUnavailableException(EXTRACTION_UNAVAILABLE);
+		} catch (Exception ex) {
+			log.warn("ML service no disponible para la extracción: {}", ex.getMessage());
+			throw new ServiceUnavailableException(EXTRACTION_UNAVAILABLE);
+		}
+
+		Map<String, Object> result = new LinkedHashMap<>();
+		result.put("extractorVersion", text(data, "extractor_version"));
+		result.put("fields", JSON.convertValue(data.get("fields"), new TypeReference<Map<String, Object>>() {
+		}));
+		result.put("piiRedacted", JSON.convertValue(data.get("pii_redacted"), new TypeReference<List<String>>() {
+		}));
+		JsonNode ocr = data.get("ocr");
+		Map<String, Object> ocrInfo = new LinkedHashMap<>();
+		ocrInfo.put("engine", text(ocr, "engine"));
+		ocrInfo.put("lines", number(ocr, "lines"));
+		ocrInfo.put("meanLineConfidence", number(ocr, "mean_line_confidence"));
+		result.put("ocr", ocrInfo);
+		result.put("advisory", text(data, "advisory"));
 		return result;
 	}
 
@@ -213,13 +294,17 @@ public class MlProxyService {
 	}
 
 	private static String extractDetail(RestClientResponseException ex) {
+		return extractDetail(ex, "Error en la evaluación de riesgo");
+	}
+
+	private static String extractDetail(RestClientResponseException ex, String fallback) {
 		try {
-			JsonNode error = new com.fasterxml.jackson.databind.ObjectMapper()
-					.readTree(ex.getResponseBodyAsString());
-			return error.hasNonNull("detail") ? error.get("detail").asText()
-					: "Error en la evaluación de riesgo";
+			JsonNode error = JSON.readTree(ex.getResponseBodyAsString());
+			return error.hasNonNull("detail") && error.get("detail").isTextual()
+					? error.get("detail").asText()
+					: fallback;
 		} catch (Exception parseEx) {
-			return "Error en la evaluación de riesgo";
+			return fallback;
 		}
 	}
 

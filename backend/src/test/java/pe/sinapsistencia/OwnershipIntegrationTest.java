@@ -16,6 +16,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -38,6 +39,9 @@ class OwnershipIntegrationTest {
 
 	@Autowired
 	private MockMvc mockMvc;
+
+	@Autowired
+	private JdbcTemplate jdbc;
 
 	@Autowired
 	private ApplicationContext context;
@@ -234,6 +238,9 @@ class OwnershipIntegrationTest {
 		mockMvc.perform(post("/api/auth/register")
 				.contentType(MediaType.APPLICATION_JSON).content(body))
 				.andExpect(status().isCreated());
+		// V18: el correo debe confirmarse para iniciar sesión. Aquí no se prueba el flujo del
+		// enlace (ver EmailVerificationIntegrationTest): se marca confirmado como si se hubiera usado.
+		jdbc.update("update profiles set email_verified_at = now() where email = ?", email);
 	}
 
 	private String loginDemo(String role) throws Exception {

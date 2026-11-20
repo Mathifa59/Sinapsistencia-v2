@@ -30,6 +30,10 @@ public class PasswordResetToken {
 	@Column(nullable = false)
 	private boolean used;
 
+	/** Perfil (con correo confirmado) que solicitó el token; null en tokens anteriores a V18. */
+	@Column(name = "profile_id")
+	private UUID profileId;
+
 	protected PasswordResetToken() {
 	}
 
@@ -37,6 +41,15 @@ public class PasswordResetToken {
 		this.email = email;
 		this.token = token;
 		this.expiresAt = expiresAt;
+	}
+
+	public PasswordResetToken(UUID profileId, String email, String token, Instant expiresAt) {
+		this(email, token, expiresAt);
+		this.profileId = profileId;
+	}
+
+	public UUID getProfileId() {
+		return profileId;
 	}
 
 	public UUID getId() {

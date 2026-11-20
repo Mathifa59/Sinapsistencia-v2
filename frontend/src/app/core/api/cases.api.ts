@@ -28,6 +28,37 @@ export interface NotificationOutboxDto {
   providerHttpStatus?: number | null;
 }
 
+/** Origen de cada campo propuesto desde el informe: explícito, deducido o ausente. */
+export type ExtractedFieldSource = 'detected' | 'inferred' | 'missing';
+
+export interface ExtractedField<T = unknown> {
+  value: T | null;
+  source: ExtractedFieldSource;
+}
+
+/** Respuesta de POST /api/legal-cases/extract-from-report (extract-v1). */
+export interface CaseReportExtraction {
+  extractorVersion: string;
+  fields: {
+    title?: ExtractedField<string>;
+    description?: ExtractedField<string>;
+    medicalSpecialty?: ExtractedField<string>;
+    eventType?: ExtractedField<string>;
+    procedureComplexity?: ExtractedField<'baja' | 'media' | 'alta'>;
+    eventDate?: ExtractedField<string>;
+    ageReference?: ExtractedField<number>;
+    documentationComplete?: ExtractedField<boolean>;
+    informedConsent?: ExtractedField<boolean>;
+    hasPriorComplaints?: ExtractedField<boolean>;
+    notes?: ExtractedField<string>;
+    relevantFactors?: ExtractedField<string[]>;
+  };
+  /** Tipos de dato personal omitidos del texto (p. ej. "DNI"); nunca sus valores. */
+  piiRedacted: string[];
+  ocr: { engine?: string; lines?: number; meanLineConfidence?: number };
+  advisory?: string;
+}
+
 export interface CaseListParams {
   status?: string;
   priority?: string;
@@ -203,6 +234,16 @@ export class CasesApi {
 
   create(body: CreateCaseRequest): Promise<CaseResponse> {
     return this.api.post<CaseResponse>('/api/legal-cases', body);
+  }
+
+  /**
+   * Propone los campos del caso a partir de la foto de un informe (OCR local en el servicio ML).
+   * No crea el caso ni guarda la imagen: el médico revisa la propuesta en el formulario.
+   */
+  extractFromReport(file: File): Promise<CaseReportExtraction> {
+    const form = new FormData();
+    form.append('file', file);
+    return this.api.postForm<CaseReportExtraction>('/api/legal-cases/extract-from-report', form);
   }
 
   update(id: string, body: UpdateCaseRequest): Promise<CaseResponse> {

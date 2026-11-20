@@ -174,12 +174,18 @@ type RegisterRole = 'doctor' | 'lawyer';
               </p>
             }
             @if (success()) {
-              <p class="text-xs text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-md px-3 py-2">
-                {{ success() }}
-              </p>
+              <div class="space-y-2 text-xs text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-md px-3 py-2">
+                <p>{{ success() }}</p>
+                <p>¿No llegó? Revisa spam o
+                  <button type="button" class="font-medium underline" (click)="resendVerification()">reenvía el enlace</button>.
+                </p>
+                @if (resendMessage()) {
+                  <p class="text-emerald-800">{{ resendMessage() }}</p>
+                }
+              </div>
             }
 
-            <button appBtn type="submit" variant="primary" class="w-full" [disabled]="auth.isLoading()">
+            <button appBtn type="submit" variant="primary" class="w-full" [disabled]="auth.isLoading() || !!registeredEmail()">
               {{ auth.isLoading() ? 'Creando cuenta...' : 'Crear cuenta' }}
             </button>
           </form>
@@ -204,6 +210,9 @@ export class RegisterComponent {
 
   protected readonly error = signal<string | null>(null);
   protected readonly success = signal<string | null>(null);
+  /** Correo recién registrado: habilita el reenvío del enlace de confirmación. */
+  protected readonly registeredEmail = signal<string | null>(null);
+  protected readonly resendMessage = signal<string | null>(null);
   protected readonly touchedLawyerLists = signal(false);
   protected readonly selectedLegalSpecialties = signal<string[]>([]);
   protected readonly selectedMedicalAreas = signal<string[]>([]);
@@ -246,6 +255,18 @@ export class RegisterComponent {
     );
   }
 
+  protected async resendVerification(): Promise<void> {
+    const email = this.registeredEmail();
+    if (!email) return;
+    this.resendMessage.set(null);
+    try {
+      const res = await this.auth.resendVerification(email);
+      this.resendMessage.set(res.message);
+    } catch (err) {
+      this.resendMessage.set(err instanceof Error ? err.message : 'No se pudo reenviar el enlace');
+    }
+  }
+
   protected async onSubmit(): Promise<void> {
     this.error.set(null);
     this.success.set(null);
@@ -273,8 +294,10 @@ export class RegisterComponent {
           ? { specialty, cmp: cmp || undefined, hospital: hospital || undefined }
           : { cab: cab || undefined, legalSpecialties: this.selectedLegalSpecialties(), medicalAreas: this.selectedMedicalAreas() }),
       });
-      this.success.set('Cuenta creada exitosamente. Ya puedes iniciar sesión.');
-      setTimeout(() => this.router.navigate(['/login']), 1500);
+      this.registeredEmail.set(email);
+      this.success.set(
+        `Cuenta creada. Te enviamos un enlace a ${email} para confirmar tu correo; al confirmarlo podrás iniciar sesión.`,
+      );
     } catch (err) {
       this.error.set(err instanceof Error ? err.message : 'No se pudo crear la cuenta');
     }

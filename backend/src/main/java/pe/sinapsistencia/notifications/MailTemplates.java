@@ -51,6 +51,33 @@ public final class MailTemplates {
 		return shell("Restablece tu contraseña", body);
 	}
 
+	// ── Confirmación de correo ─────────────────────────────────────────────────
+
+	static String emailVerification(String name, String verifyLink) {
+		String body = """
+				<p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#0f172a;">
+				  Hola <strong>%s</strong>, gracias por registrarte en Sinapsistencia.
+				</p>
+				<p style="margin:0 0 24px;font-size:15px;line-height:1.6;color:#0f172a;">
+				  Confirma que este correo es tuyo para activar tu cuenta. Con él también podrás recuperar tu contraseña.
+				  El enlace caduca en <strong>24 horas</strong>.
+				</p>
+				%s
+				<p style="margin:24px 0 8px;font-size:13px;line-height:1.6;color:%s;">
+				  Si el botón no funciona, copia y pega este enlace en tu navegador:
+				</p>
+				<p style="margin:0 0 24px;font-size:13px;line-height:1.6;word-break:break-all;">
+				  <a href="%s" style="color:%s;">%s</a>
+				</p>
+				<p style="margin:0;font-size:13px;line-height:1.6;color:%s;">
+				  Si no creaste esta cuenta, ignora este correo: sin confirmar, la cuenta no se activa.
+				</p>
+				""".formatted(
+				esc(name), button("Confirmar mi correo", verifyLink),
+				MUTED, esc(verifyLink), ACCENT, esc(verifyLink), MUTED);
+		return shell("Confirma tu correo", body);
+	}
+
 	// ── Bienvenida ─────────────────────────────────────────────────────────────
 
 	static String welcome(String name, String roleLabel, String panelLink) {

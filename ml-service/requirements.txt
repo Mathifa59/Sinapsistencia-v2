@@ -6,3 +6,8 @@ numpy==2.1.2
 joblib==1.4.2
 pydantic==2.9.2
 python-dotenv==1.0.1
+
+# Extracción de campos desde la imagen de un informe (OCR local, ONNX)
+rapidocr-onnxruntime==1.4.4
+pillow==13.0.0
+python-multipart==0.0.34

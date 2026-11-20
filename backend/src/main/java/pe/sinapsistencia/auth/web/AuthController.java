@@ -26,8 +26,10 @@ import pe.sinapsistencia.auth.web.dto.LoginRequest;
 import pe.sinapsistencia.auth.web.dto.LoginResponse;
 import pe.sinapsistencia.auth.web.dto.MessageResponse;
 import pe.sinapsistencia.auth.web.dto.RegisterRequest;
+import pe.sinapsistencia.auth.web.dto.ResendVerificationRequest;
 import pe.sinapsistencia.auth.web.dto.ResetPasswordRequest;
 import pe.sinapsistencia.auth.web.dto.UserDto;
+import pe.sinapsistencia.auth.web.dto.VerifyEmailRequest;
 import pe.sinapsistencia.shared.api.ApiResponse;
 import pe.sinapsistencia.shared.exception.UnauthorizedException;
 
@@ -89,7 +91,21 @@ public class AuthController {
 	public ResponseEntity<ApiResponse<MessageResponse>> register(@RequestBody RegisterRequest request) {
 		authService.register(request);
 		return ResponseEntity.status(HttpStatus.CREATED)
-				.body(ApiResponse.ok(new MessageResponse("Cuenta creada exitosamente. Ya puedes iniciar sesión.")));
+				.body(ApiResponse.ok(new MessageResponse(
+						"Cuenta creada. Te enviamos un enlace para confirmar tu correo; al confirmarlo podrás iniciar sesión.")));
+	}
+
+	/** Confirma el correo con el token del enlace recibido. */
+	@PostMapping("/verify-email")
+	public ApiResponse<MessageResponse> verifyEmail(@RequestBody VerifyEmailRequest request) {
+		authService.verifyEmail(request.email(), request.token());
+		return ApiResponse.ok(new MessageResponse("Correo confirmado. Ya puedes iniciar sesión."));
+	}
+
+	/** Reenvía el enlace de confirmación (respuesta idéntica exista o no la cuenta). */
+	@PostMapping("/resend-verification")
+	public ApiResponse<MessageResponse> resendVerification(@RequestBody ResendVerificationRequest request) {
+		return ApiResponse.ok(new MessageResponse(authService.resendVerification(request.email())));
 	}
 
 	@PostMapping("/forgot-password")

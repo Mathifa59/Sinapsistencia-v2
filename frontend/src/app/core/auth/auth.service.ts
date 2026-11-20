@@ -18,6 +18,13 @@ interface LoginResponse {
   token: string;
 }
 
+/**
+ * Texto con el que el backend responde 403 cuando las credenciales son correctas pero el
+ * correo no está confirmado (EmailNotVerifiedException.MESSAGE). Cámbialo en ambos lados a la vez.
+ */
+export const EMAIL_NOT_VERIFIED_MESSAGE =
+  'Debes confirmar tu correo electrónico antes de iniciar sesión. Revisa tu bandeja o solicita un nuevo enlace.';
+
 /** Body de POST /api/auth/register — espeja RegisterRequest del backend. */
 export interface RegisterPayload {
   name: string;
@@ -103,6 +110,16 @@ export class AuthService {
 
   async forgotPassword(email: string): Promise<{ message: string }> {
     return this.api.post<{ message: string }>('/api/auth/forgot-password', { email });
+  }
+
+  /** Confirma el correo con el token del enlace recibido por correo. */
+  async verifyEmail(email: string, token: string): Promise<void> {
+    await this.api.post('/api/auth/verify-email', { email, token });
+  }
+
+  /** Pide un nuevo enlace de confirmación (respuesta idéntica exista o no la cuenta). */
+  async resendVerification(email: string): Promise<{ message: string }> {
+    return this.api.post<{ message: string }>('/api/auth/resend-verification', { email });
   }
 
   async resetPassword(email: string, token: string, newPassword: string): Promise<void> {

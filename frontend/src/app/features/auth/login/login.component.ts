@@ -2,7 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
-import { AuthService } from '../../../core/auth/auth.service';
+import { AuthService, EMAIL_NOT_VERIFIED_MESSAGE } from '../../../core/auth/auth.service';
 import { BtnDirective } from '../../../shared/ui/button.directive';
 import { InputDirective, LabelDirective } from '../../../shared/ui/field.directives';
 import { ROLE_DASHBOARD, type UserRole } from '../../../shared/constants';
@@ -64,6 +64,16 @@ import { ROLE_DASHBOARD, type UserRole } from '../../../shared/constants';
                 {{ error() }}
               </p>
             }
+            @if (emailNotVerified()) {
+              <div class="space-y-1.5 text-xs text-slate-600 bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
+                <button type="button" class="font-medium text-blue-600 hover:underline" (click)="resendVerification()">
+                  Reenviar enlace de confirmación
+                </button>
+                @if (resendMessage()) {
+                  <p>{{ resendMessage() }}</p>
+                }
+              </div>
+            }
 
             <button appBtn type="submit" variant="primary" class="w-full" [disabled]="auth.isLoading()">
               {{ auth.isLoading() ? 'Ingresando...' : 'Ingresar' }}
@@ -87,6 +97,9 @@ export class LoginComponent {
 
   protected readonly showPassword = signal(false);
   protected readonly error = signal<string | null>(null);
+  /** Credenciales correctas pero correo sin confirmar: se ofrece reenviar el enlace. */
+  protected readonly emailNotVerified = signal(false);
+  protected readonly resendMessage = signal<string | null>(null);
 
   protected readonly form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
@@ -95,6 +108,8 @@ export class LoginComponent {
 
   protected async onSubmit(): Promise<void> {
     this.error.set(null);
+    this.emailNotVerified.set(false);
+    this.resendMessage.set(null);
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -103,8 +118,23 @@ export class LoginComponent {
     try {
       const user = await this.auth.login(email, password);
       this.redirectAfterLogin(user.role);
-    } catch {
-      this.error.set('Credenciales incorrectas. Verifica tu correo y contraseña.');
+    } catch (err) {
+      if (err instanceof Error && err.message === EMAIL_NOT_VERIFIED_MESSAGE) {
+        this.emailNotVerified.set(true);
+        this.error.set(err.message);
+      } else {
+        this.error.set('Credenciales incorrectas. Verifica tu correo y contraseña.');
+      }
+    }
+  }
+
+  protected async resendVerification(): Promise<void> {
+    this.resendMessage.set(null);
+    try {
+      const res = await this.auth.resendVerification(this.form.getRawValue().email);
+      this.resendMessage.set(res.message);
+    } catch (err) {
+      this.resendMessage.set(err instanceof Error ? err.message : 'No se pudo reenviar el enlace');
     }
   }
 

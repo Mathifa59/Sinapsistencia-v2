@@ -9,7 +9,7 @@ import {
   Key, LayoutDashboard, Loader2, Lock, LockKeyhole, LogOut, LucideAngularModule, Mail, MailCheck, Menu,
   MessageSquare, Paperclip, Pen, PenLine, Pencil, Phone, Play, Plus,
   RefreshCw, Save, Scale, Search, Send, Settings, Shield, ShieldAlert, ShieldCheck, Star,
-  Stethoscope, Trophy, User, Users, X, XCircle, Zap,
+  Stethoscope, Trophy, Upload, User, Users, X, XCircle, Zap,
 } from 'lucide-angular';
 
 import { routes } from './app.routes';
@@ -39,7 +39,7 @@ export const appConfig: ApplicationConfig = {
         Key, LayoutDashboard, Loader2, Lock, LockKeyhole, LogOut, Mail, MailCheck, Menu,
         MessageSquare, Paperclip, Pen, PenLine, Pencil, Phone, Play, Plus,
         RefreshCw, Save, Scale, Search, Send, Settings, Shield, ShieldAlert, ShieldCheck, Star,
-        Stethoscope, Trophy, User, Users, X, XCircle, Zap,
+        Stethoscope, Trophy, Upload, User, Users, X, XCircle, Zap,
       }),
     ),
   ],

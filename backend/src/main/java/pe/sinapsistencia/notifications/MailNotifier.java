@@ -48,7 +48,16 @@ public class MailNotifier {
 				MailTemplates.passwordReset(name, resetLink, token));
 	}
 
-	/** Correo de bienvenida tras un registro exitoso. */
+	/** Confirmación del correo: enlace de un solo uso que prueba que el titular controla el buzón. */
+	@Async
+	public void sendEmailVerification(String to, String name, String token) {
+		String link = frontendUrl + "/verify-email?email=" + enc(to) + "&token=" + enc(token);
+		dispatch("email_verification", to,
+				"Confirma tu correo — Sinapsistencia",
+				MailTemplates.emailVerification(name, link));
+	}
+
+	/** Correo de bienvenida tras confirmar el correo. */
 	@Async
 	public void sendWelcome(String to, String name, String roleLabel) {
 		dispatch("welcome", to,

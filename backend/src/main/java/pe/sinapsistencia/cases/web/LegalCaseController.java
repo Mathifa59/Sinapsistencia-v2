@@ -1,9 +1,11 @@
 package pe.sinapsistencia.cases.web;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,9 +17,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import pe.sinapsistencia.audit.infrastructure.Auditable;
 import pe.sinapsistencia.auth.security.AuthenticatedUser;
+import pe.sinapsistencia.cases.application.CaseReportExtractionService;
 import pe.sinapsistencia.cases.application.CaseWorkflowService;
 import pe.sinapsistencia.cases.application.LegalCaseService;
 import pe.sinapsistencia.cases.web.dto.CaseDetailResponse;
@@ -43,10 +47,24 @@ public class LegalCaseController {
 
 	private final LegalCaseService caseService;
 	private final CaseWorkflowService workflowService;
+	private final CaseReportExtractionService extractionService;
 
-	public LegalCaseController(LegalCaseService caseService, CaseWorkflowService workflowService) {
+	public LegalCaseController(LegalCaseService caseService, CaseWorkflowService workflowService,
+			CaseReportExtractionService extractionService) {
 		this.caseService = caseService;
 		this.workflowService = workflowService;
+		this.extractionService = extractionService;
+	}
+
+	/**
+	 * Propone los campos del caso a partir de la foto de un informe (OCR local). No crea el
+	 * caso ni guarda la imagen: el médico revisa la propuesta y recién ahí se llama a POST /.
+	 */
+	@PostMapping(value = "/extract-from-report", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public ApiResponse<Map<String, Object>> extractFromReport(
+			@AuthenticationPrincipal AuthenticatedUser user,
+			@RequestParam("file") MultipartFile file) {
+		return ApiResponse.ok(extractionService.extract(user, file));
 	}
 
 	@GetMapping
